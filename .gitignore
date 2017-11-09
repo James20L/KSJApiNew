@@ -12,7 +12,8 @@ doc/
 *.user
 *.opensdf
 
-
+*.o
+*.o.*
 
 x86/
 x64/

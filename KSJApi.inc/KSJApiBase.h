@@ -199,6 +199,11 @@ extern "C"{
 
 	// Get Capture and Show Frame rate when Preview Parallel.
 	KSJ_API  KSJ_PreviewGetFrameRateEx(int nIndex, float *fFrameRateCapture, float *fFrameRateShow);
+#ifdef linux
+
+
+
+#endif
 
 
 #ifdef __cplusplus

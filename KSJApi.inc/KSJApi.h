@@ -13,5 +13,6 @@
 #include "KSJApiMatrix.h"
 #include "KSJApiInternal.h"
 #include "KSJApiUserZone.h"
+#include "KSJApiCustom.h"
 
 #endif
