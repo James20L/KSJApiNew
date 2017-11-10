@@ -49,11 +49,11 @@ extern "C"{
 	KSJ_API  KSJ_WrEEPROM(int nChannel, unsigned short uRomAdress, unsigned char btValue);
 	KSJ_API  KSJ_RdEEPROM(int nChannel, unsigned short uRomAdress, unsigned char *pbtValue);
 
-	KSJ_API  KSJ_WrEEPROMEx(int nChannel, unsigned long ulRomAdress, unsigned char btValue);
-	KSJ_API  KSJ_RdEEPROMEx(int nChannel, unsigned long ulRomAdress, unsigned char *pbtValue);
+	KSJ_API  KSJ_WrEEPROMEx(int nChannel, unsigned int ulRomAdress, unsigned char btValue);
+	KSJ_API  KSJ_RdEEPROMEx(int nChannel, unsigned int ulRomAdress, unsigned char *pbtValue);
 
-	KSJ_API  KSJ_WrEEPROMExEx(int nChannel, unsigned long ulRomAdress, unsigned char *pData, int nBytes);
-	KSJ_API  KSJ_RdEEPROMExEx(int nChannel, unsigned long ulRomAdress, int nBytes, unsigned char *pData);
+	KSJ_API  KSJ_WrEEPROMExEx(int nChannel, unsigned int ulRomAdress, unsigned char *pData, int nBytes);
+	KSJ_API  KSJ_RdEEPROMExEx(int nChannel, unsigned int ulRomAdress, int nBytes, unsigned char *pData);
 
 
 #ifdef __cplusplus
