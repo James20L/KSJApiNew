@@ -53,8 +53,8 @@ enum KSJ_TRIGGERMODE
 };
 
 // Set Trigger Mode
-KSJ_API  KSJ_SetTriggerMode(IN int nIndex, IN  KSJ_TRIGGERMODE TriggerMode);
-KSJ_API  KSJ_GetTriggerMode(IN int nIndex, OUT KSJ_TRIGGERMODE *pTriggerMode);
+KSJ_API  KSJ_TriggerModeSet(IN int nIndex, IN  KSJ_TRIGGERMODE TriggerMode);
+KSJ_API  KSJ_TriggerModeGet(IN int nIndex, OUT KSJ_TRIGGERMODE *pTriggerMode);
 
 enum KSJ_TRIGGERSTATUS
 {
@@ -68,6 +68,49 @@ KSJ_API  KSJ_TriggerStatusGet(int nIndex, KSJ_TRIGGERSTATUS *pTriggerStatus);
 
 // Empty Frame Buffer. Not Support When In KSJ_TRIGGER_SOFTWARE Mode.
 KSJ_API  KSJ_EmptyFrameBuffer(int nIndex);
+
+// Same to call KSJ_EmptyFrameBuffer before KSJ_CaptureRawData. Not Support When In KSJ_TRIGGER_SOFTWARE Mode.
+KSJ_API  KSJ_CaptureRawDataAfterEmptyFrameBuffer(int nIndex, unsigned char *pRawData);
+// Same to call KSJ_EmptyFrameBuffer before KSJ_CaptureRgbData. Not Support When In KSJ_TRIGGER_SOFTWARE Mode.
+KSJ_API  KSJ_CaptureRgbDataAfterEmptyFrameBuffer(int nIndex, unsigned char *pRgbData);
+// Same to call KSJ_EmptyFrameBuffer before KSJ_CaptureRgbDataEx. Not Support When In KSJ_TRIGGER_SOFTWARE Mode.
+KSJ_API  KSJ_CaptureRgbDataExAfterEmptyFrameBuffer(int nIndex, unsigned char *pRgbData, int *pnWidth, int *pnHeight, int *pnBitCount);
+
+
+// Fixed Frame Rate when in KSJ_TRIGGER_FIXFRAMERATE mode. Maybe Return RET_NOTSUPPORT.
+KSJ_API  KSJ_SetFixedFrameRateEx(int nIndex, float fFrameRate);
+KSJ_API  KSJ_GetFixedFrameRateEx(int nIndex, float *pfFrameRate);
+
+enum KSJ_TRIGGERMETHOD
+{
+	KSJ_TRIGGER_FALLINGEDGE,
+	KSJ_TRIGGER_RISINGEDGE,
+	KSJ_TRIGGER_HIGHLEVEL,
+	KSJ_TRIGGER_LOWLEVEL
+};
+// Set Trigger Method when in KSJ_TRIGGER_EXTERNAL mode.
+KSJ_API  KSJ_TriggerMethodSet(int nIndex, KSJ_TRIGGERMETHOD  TriggerMethod);
+KSJ_API  KSJ_TriggerMethodGet(int nIndex, KSJ_TRIGGERMETHOD *pTriggerMethod);
+
+// Set Trigger Delay when in KSJ_TRIGGER_EXTERNAL. May be Return RET_NOTSUPPORT.
+KSJ_API  KSJ_TriggerDelayGetRange(int nIndex, unsigned short *wMin, unsigned short *wMax);
+KSJ_API  KSJ_TriggerDelaySet(int nIndex, unsigned short wDelay);
+KSJ_API  KSJ_TriggerDelayGet(int nIndex, unsigned short *pwDelay);
+
+// Set Read action timeout (ms). Influence capture and preview.
+KSJ_API  KSJ_CaptureSetTimeOut(int nIndex, unsigned int dwTimeOut);
+// Get Read action image timeout (ms).
+KSJ_API  KSJ_CaptureGetTimeOut(int nIndex, unsigned int *pdwTimeOut);
+
+// Set If recover device when Read Fail. It will Influence capture and preview.
+KSJ_API  KSJ_CaptureSetRecover(int nIndex, bool bRecover);
+// Get If recover device when Read Fail.
+KSJ_API  KSJ_CaptureGetRecover(int nIndex, bool *pbRecover);
+
+// Set timeout and recover at the same time
+KSJ_API  KSJ_CaptureSetTimeOutEx(int nIndex, unsigned int dwTimeOut, bool bRecover);
+// Get timeout and recover at the same time
+KSJ_API  KSJ_CaptureGetTimeOutEx(int nIndex, unsigned int *pdwTimeOut, bool *pbRecover);
 
 
 

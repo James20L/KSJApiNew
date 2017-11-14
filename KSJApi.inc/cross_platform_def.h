@@ -268,7 +268,9 @@ DECLARE_HANDLE(HWND);
 #    define _tsplitpath_s   _splitpath_s
 #    define _vstprintf_s    vsprintf_s
 #    define _stprintf_s     sprintf_s
+#ifndef _T
 #    define _T(x)   x
+#endif
 #    define _tcschr         strchr
 #    define _tcsrchr        strrchr
 #    define _vsntprintf_s   _vsnprintf_s
