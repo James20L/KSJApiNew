@@ -145,9 +145,9 @@ typedef unsigned int        *PUINT;
 #define DECLARE_HANDLE(name) struct name##__{int unused;}; typedef struct name##__ *name
 DECLARE_HANDLE(HWND);
 
-#define __T(x)      x
+//#define __T(x)      x
 
-#define _T(x)       __T(x)
+//#define _T(x)       __T(x)
 #define _TEXT(x)    __T(x)
 
 #ifdef  UNICODE 
@@ -268,7 +268,7 @@ DECLARE_HANDLE(HWND);
 #    define _tsplitpath_s   _splitpath_s
 #    define _vstprintf_s    vsprintf_s
 #    define _stprintf_s     sprintf_s
-//#    define _T(x)   x
+#    define _T(x)   x
 #    define _tcschr         strchr
 #    define _tcsrchr        strrchr
 #    define _vsntprintf_s   _vsnprintf_s
