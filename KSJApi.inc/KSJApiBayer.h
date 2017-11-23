@@ -40,8 +40,6 @@
 extern "C"{
 #endif
 
-#include "cross_platform_def.h"
-
 	// Bayer Mode
 	enum KSJ_BAYERMODE
 	{

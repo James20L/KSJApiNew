@@ -49,31 +49,31 @@ extern "C"{
 	// 得到BMP图像的文件头和信息头
 	KSJ_API  KSJ_HelperGetBmpFileHeader(int nWidth, int nHeight, int nBitCount, void *pHeader);
 	// 采集一帧图像到系统剪贴板
-	KSJ_API  KSJ_CaptureRgbDataToClipboard(int nChannel);
+	KSJ_API  KSJ_CaptureRgbDataToClipboard(int nIndex);
 
 	// 设置FFC视场
-	KSJ_API  KSJ_SetFlatFieldCorrectionFieldOfView(int nChannel, int nColStart, int nRowStart, int nColSize, int nRowSize, KSJ_ADDRESSMODE ColAddressMode, KSJ_ADDRESSMODE RowAddressMode, unsigned short wMultiFrameNum);
+	KSJ_API  KSJ_SetFlatFieldCorrectionFieldOfView(int nIndex, int nColStart, int nRowStart, int nColSize, int nRowSize, KSJ_ADDRESSMODE ColAddressMode, KSJ_ADDRESSMODE RowAddressMode, unsigned short wMultiFrameNum);
 
 	// 获取FFC的视场，视场必须相同才可以进行校正。
-	KSJ_API  KSJ_GetFlatFieldCorrectionFieldOfView(int nChannel, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode, unsigned short *pwMultiFrameNum);
+	KSJ_API  KSJ_GetFlatFieldCorrectionFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode, unsigned short *pwMultiFrameNum);
 
 	// 根据采集视场采集nDarkFrames张图像，平均后作为DarkFrame
-	KSJ_API  KSJ_MakeDarkFrame(int nChannel, int nDarkFrames);
+	KSJ_API  KSJ_MakeDarkFrame(int nIndex, int nDarkFrames);
 	// 根据采集视场采集nFlatFieldFrames张图像，平均后作为FlatFieldImage
-	KSJ_API  KSJ_MakeFlatFieldFrame(int nChannel, int nFlatFieldFrames);
+	KSJ_API  KSJ_MakeFlatFieldFrame(int nIndex, int nFlatFieldFrames);
 
 	// 预览时是否使能
-	KSJ_API  KSJ_PreviewSetFlatFieldCorrection(int nChannel, bool bEnable);
+	KSJ_API  KSJ_PreviewSetFlatFieldCorrection(int nIndex, bool bEnable);
 
-	KSJ_API  KSJ_PreviewGetFlatFieldCorrection(int nChannel, bool *pbEnable);
+	KSJ_API  KSJ_PreviewGetFlatFieldCorrection(int nIndex, bool *pbEnable);
 	// 采集时是否使能
-	KSJ_API  KSJ_CaptureSetFlatFieldCorrection(int nChannel, bool bEnable);
+	KSJ_API  KSJ_CaptureSetFlatFieldCorrection(int nIndex, bool bEnable);
 
-	KSJ_API  KSJ_CaptureGetFlatFieldCorrection(int nChannel, bool *pbEnable);
+	KSJ_API  KSJ_CaptureGetFlatFieldCorrection(int nIndex, bool *pbEnable);
 
-	KSJ_API  KSJ_SaveFlatFieldCorrection(int nChannel, TCHAR *pszFilePath);
+	KSJ_API  KSJ_SaveFlatFieldCorrection(int nIndex, TCHAR *pszFilePath);
 
-	KSJ_API  KSJ_LoadFlatFieldCorrection(int nChannel, TCHAR *pszFilePath);
+	KSJ_API  KSJ_LoadFlatFieldCorrection(int nIndex, TCHAR *pszFilePath);
 
 #ifdef linux
 	KSJ_API   KSJ_SoftStartCapture(int nIndex);

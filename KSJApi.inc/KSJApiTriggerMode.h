@@ -41,7 +41,6 @@
 extern "C" {
 #endif
 
-#include "cross_platform_def.h"
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Trigger Mode
 enum KSJ_TRIGGERMODE
@@ -53,8 +52,8 @@ enum KSJ_TRIGGERMODE
 };
 
 // Set Trigger Mode
-KSJ_API  KSJ_TriggerModeSet(IN int nIndex, IN  KSJ_TRIGGERMODE TriggerMode);
-KSJ_API  KSJ_TriggerModeGet(IN int nIndex, OUT KSJ_TRIGGERMODE *pTriggerMode);
+KSJ_API  KSJ_TriggerModeSet(int nIndex,  KSJ_TRIGGERMODE TriggerMode);
+KSJ_API  KSJ_TriggerModeGet(int nIndex,  KSJ_TRIGGERMODE *pTriggerMode);
 
 enum KSJ_TRIGGERSTATUS
 {
@@ -111,10 +110,6 @@ KSJ_API  KSJ_CaptureGetRecover(int nIndex, bool *pbRecover);
 KSJ_API  KSJ_CaptureSetTimeOutEx(int nIndex, unsigned int dwTimeOut, bool bRecover);
 // Get timeout and recover at the same time
 KSJ_API  KSJ_CaptureGetTimeOutEx(int nIndex, unsigned int *pdwTimeOut, bool *pbRecover);
-
-
-
-
 
 #ifdef __cplusplus
 }

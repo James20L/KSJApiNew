@@ -40,20 +40,18 @@
 extern "C"{
 #endif
 
-#include "cross_platform_def.h"
-
 	enum KSJ_EEPROM_TYPE { KSJ_24LC64, KSJ_24LC1024, KSJ_24LC128 };
 
-	KSJ_API  KSJ_EEPROMTypeGet(int nChannel, KSJ_EEPROM_TYPE *pType);
+	KSJ_API  KSJ_EEPROMTypeGet(int nIndex, KSJ_EEPROM_TYPE *pType);
 
-	KSJ_API  KSJ_WrEEPROM(int nChannel, unsigned short uRomAdress, unsigned char btValue);
-	KSJ_API  KSJ_RdEEPROM(int nChannel, unsigned short uRomAdress, unsigned char *pbtValue);
+	KSJ_API  KSJ_WrEEPROM(int nIndex, unsigned short uRomAdress, unsigned char btValue);
+	KSJ_API  KSJ_RdEEPROM(int nIndex, unsigned short uRomAdress, unsigned char *pbtValue);
 
-	KSJ_API  KSJ_WrEEPROMEx(int nChannel, unsigned int ulRomAdress, unsigned char btValue);
-	KSJ_API  KSJ_RdEEPROMEx(int nChannel, unsigned int ulRomAdress, unsigned char *pbtValue);
+	KSJ_API  KSJ_WrEEPROMEx(int nIndex, unsigned int ulRomAdress, unsigned char btValue);
+	KSJ_API  KSJ_RdEEPROMEx(int nIndex, unsigned int ulRomAdress, unsigned char *pbtValue);
 
-	KSJ_API  KSJ_WrEEPROMExEx(int nChannel, unsigned int ulRomAdress, unsigned char *pData, int nBytes);
-	KSJ_API  KSJ_RdEEPROMExEx(int nChannel, unsigned int ulRomAdress, int nBytes, unsigned char *pData);
+	KSJ_API  KSJ_WrEEPROMExEx(int nIndex, unsigned int ulRomAdress, unsigned char *pData, int nBytes);
+	KSJ_API  KSJ_RdEEPROMExEx(int nIndex, unsigned int ulRomAdress, int nBytes, unsigned char *pData);
 
 
 #ifdef __cplusplus
