@@ -40,8 +40,6 @@
 extern "C"{
 #endif
 
-#include "cross_platform_def.h"
-
 
 	// Enable or Disable Log output
 	KSJ_API  KSJ_LogSet(bool bEnable, const TCHAR *pszFolder);
@@ -49,9 +47,9 @@ extern "C"{
 	KSJ_API  KSJ_LogGet(bool *bEnable, TCHAR *pszFolder);
 
 	// Get KSJApi.dll Version, call any time.
-	KSJ_API  KSJ_GetVersion(OUT int *pnMaj1, OUT int *pnMaj2, OUT int *pnMin1, OUT int *pnMin2);
+	KSJ_API  KSJ_GetVersion( int *pnMaj1,  int *pnMaj2,  int *pnMin1,  int *pnMin2);
 	// Get Return String Information. call any time.
-	KSJ_API  KSJ_GetErrorInfo(IN int nErrorNo, OUT TCHAR pszErrorInfo[256]);
+	KSJ_API  KSJ_GetErrorInfo(int nErrorNo,  TCHAR pszErrorInfo[256]);
 	// Initial KSJApi.dll. This Function don't Open Device, only get connected Device Number.
 	KSJ_API  KSJ_Init(void);
 	// Uninitial KSJApi.dll. This should call correspond to KSJ_Init.
@@ -59,9 +57,9 @@ extern "C"{
 	// Get Connected Device Number, Must call after KSJ_Init.
 	KSJ_API  KSJ_DeviceGetCount();
 	// Get Device Information.
-	KSJ_API  KSJ_DeviceGetInformation(IN int nIndex, OUT unsigned short *pusDeviceType, OUT int *pnSerials, OUT unsigned short *pusFirmwareVersion);
+	KSJ_API  KSJ_DeviceGetInformation(int nIndex,  unsigned short *pusDeviceType,  int *pnSerials,  unsigned short *pusFirmwareVersion);
 	// Get Device Information.
-	KSJ_API  KSJ_DeviceGetInformationEx(IN int nIndex, OUT unsigned short *pusDeviceType, OUT int *pnSerials, OUT unsigned short *pusFirmwareVersion, OUT unsigned short *pusFpgaVersion);
+	KSJ_API  KSJ_DeviceGetInformationEx(int nIndex,  unsigned short *pusDeviceType,  int *pnSerials,  unsigned short *pusFirmwareVersion,  unsigned short *pusFpgaVersion);
 
 	// Device Parameter Settings
 	enum KSJ_PARAM
@@ -102,16 +100,16 @@ extern "C"{
 	};
 
 	// Get Settings Range
-	KSJ_API   KSJ_GetParamRange(IN int nIndex, IN KSJ_PARAM Param, OUT int *pnMinValue, OUT int *pnMaxValue);
+	KSJ_API   KSJ_GetParamRange(int nIndex, KSJ_PARAM Param,  int *pnMinValue,  int *pnMaxValue);
 	// Set Parameter
-	KSJ_API   KSJ_SetParam(IN int nIndex, IN KSJ_PARAM Param, IN  int nValue);
+	KSJ_API   KSJ_SetParam(int nIndex, KSJ_PARAM Param,  int nValue);
 	// Get Current Parameter Value
-	KSJ_API   KSJ_GetParam(IN int nIndex, IN KSJ_PARAM Param, OUT int *pnValue);
+	KSJ_API   KSJ_GetParam(int nIndex, KSJ_PARAM Param,  int *pnValue);
 
 	// Set Exposure Time (ms) for float format.( more precision )
-	KSJ_API   KSJ_ExposureTimeSet(IN int nIndex, IN float fExpTimeMs);
+	KSJ_API   KSJ_ExposureTimeSet(int nIndex, float fExpTimeMs);
 	// Get Exposure Time (ms) for float format.
-	KSJ_API   KSJ_ExposureTimeGet(IN int nIndex, OUT float *pfExpTimeMs);
+	KSJ_API   KSJ_ExposureTimeGet(int nIndex,  float *pfExpTimeMs);
 
     // Skip Mode (Address Mode)
 	enum KSJ_ADDRESSMODE
@@ -131,17 +129,17 @@ extern "C"{
 	// Get Current Capture FOV / AOI( Field Of View / Area Of Interesting ）
 	KSJ_API  KSJ_CaptureGetFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode);
 	// Get Capture Image's Width and Height in Pixel Unit.
-	KSJ_API  KSJ_CaptureGetSize(IN int nIndex, OUT int *pnWidth, OUT int *pnHeight);
+	KSJ_API  KSJ_CaptureGetSize(int nIndex,  int *pnWidth,  int *pnHeight);
 	// Get Capture Image's Width, Height in Pixel Unit and BitCount( 8, 24, 32 )
 	KSJ_API  KSJ_CaptureGetSizeEx(int nIndex, int *pnWidth, int *pnHeight, int *pnBitCount);
 	// Capture Raw Data. ( Note: When Set 16bits, Buffer Should double )
-	KSJ_API  KSJ_CaptureRawData(IN int nIndex, OUT unsigned char *pRawData);
+	KSJ_API  KSJ_CaptureRawData(int nIndex,  unsigned char *pRawData);
 	// Capture 8, 24, 32 Format Image Data.( Note: When Set 16bits, Buffer Should double )
 	KSJ_API  KSJ_CaptureRgbData(int nIndex, unsigned char *pRgbData);
 	// Capture 8, 24, 32 Format Image Data.( Note: When Set 16bits, Buffer Should double )
 	KSJ_API  KSJ_CaptureRgbDataEx(int nIndex, unsigned char *pRgbData, int *pnWidth, int *pnHeight, int *pnBitCount);
 	// Save to Bmp Format
-	KSJ_API   KSJ_HelperSaveToBmp(IN unsigned char *pData, IN int nWidth, IN int nHeight, IN int nBitCount, IN const TCHAR *pszFileName);
+	KSJ_API   KSJ_HelperSaveToBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, const TCHAR *pszFileName);
 	// Save to Jpg Format
 	KSJ_API  KSJ_HelperSaveToJpg(unsigned char *pData, int nWidth, int nHeight, int nBitCount, int nQulity, const TCHAR *pszFileName);
 

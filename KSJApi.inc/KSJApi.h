@@ -3,6 +3,9 @@
 
 #pragma message("Include KSJApi.h") 
 
+#include "win_linux.h"
+
+
 #include "KSJApiDeviceType.h"
 #include "KSJApiRetCode.H"
 #include "KSJApiBase.h"

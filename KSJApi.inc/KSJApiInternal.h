@@ -39,8 +39,6 @@
 extern "C"{
 #endif
 
-#include "cross_platform_def.h"
-
 	// 发送控制命令，各字节符合USB协议
 	// MSB( IoBlockEx.uOffset ) = SETUPDAT[3], LSB( IoBlockEx.uOffset ) =  SETUPDAT[2] 
 	// MSB( IoBlockEx.uIndex )  = SETUPDAT[5], LSB( IoBlockEx.uIndex )  =  SETUPDAT[4] 
@@ -59,12 +57,12 @@ extern "C"{
 	}USBCMD, *PUSBCMD;
 #pragma pack ( 8 )
 
-	KSJ_API   KSJ_VendorCmd(int nChannel, PUSBCMD pUsbCmd, unsigned char *pBuf);
+	KSJ_API   KSJ_VendorCmd(int nIndex, PUSBCMD pUsbCmd, unsigned char *pBuf);
 
 	// nIndex is the index of DeviceList in KSJApi internally, not driver symbol name index. It will open first device which not opened as DeviceList[nIndex]
-	KSJ_API   KSJ_Open(IN int nIndex);
+	KSJ_API   KSJ_Open(int nIndex);
 	// nIndex is the index of DeviceList in KSJApi internally
-	KSJ_API   KSJ_Close(IN int nIndex);
+	KSJ_API   KSJ_Close(int nIndex);
 
 
 #ifdef __cplusplus

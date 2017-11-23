@@ -40,8 +40,6 @@
 extern "C"{
 #endif
 
-#include "cross_platform_def.h"
-
 	// SWB - Software White Balance; HWB - Hardware White Balance
 	enum KSJ_WB_MODE
 	{
