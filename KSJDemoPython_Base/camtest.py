@@ -95,8 +95,10 @@ def CapturDataLoop(nIndex,pDataBuf):
   
     while nThreadFlag > 0:
         
+        
        
         CapturData(nIndex,pDataBuf,1216,1936,3)
+        
         if nFrameCount == 0:
             nTimeStart = datetime.datetime.now() 
             

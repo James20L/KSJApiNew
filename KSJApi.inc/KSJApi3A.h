@@ -32,6 +32,7 @@
 
 #ifndef _WIN32
 #define KSJ_API int
+#define __stdcall
 #else
 #define KSJ_API KSJAPI_IMPORT_EXPORT int KSJAPI_CALLTYPE
 #endif
