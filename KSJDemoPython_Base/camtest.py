@@ -58,7 +58,10 @@ def CamParmSet(libKsj,num):
 
 
 def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum): 
-    retValue = libKsj.KSJ_CaptureRgbData(nIndex,cBuf);    
+    retValue = libKsj.KSJ_CaptureRgbData(nIndex,cBuf)
+    if retValue != 0:
+	print "capture error code %d"%(retValue)  
+  
     nparr = np.fromstring(cBuf,np.uint8).reshape(nHeight,nWidth,nChannelNum );     
     return nparr
  
@@ -85,30 +88,31 @@ def  CreateBuf(libKsj,num):
           
 
 def CapturDataLoop(nIndex,pDataBuf):
-    print "cam loop "
-    print nIndex
+    print "cam loop nIndex = %d" %(nIndex)
     global nThreadFlag
-    print nThreadFlag
+    print "nThreadFlag = %d"%(nThreadFlag)
     nFrameCount =0
     nTimeStart = datetime.datetime.now() 
     nTimeStop = datetime.datetime.now()
   
     while nThreadFlag > 0:
-        
-        
        
-        CapturData(nIndex,pDataBuf,1216,1936,3)
+	image =  CapturData(nIndex,pDataBuf,1216,1936,3)
         
+#	cv2.imshow("test",image)
+#    	cv2.waitKey(50)
+
         if nFrameCount == 0:
             nTimeStart = datetime.datetime.now() 
             
         if nFrameCount == 99:
             nTimeStop = datetime.datetime.now() 
-            print nTimeStop-nTimeStart
+            print "cam   %d " %(nIndex)
+	    print (nTimeStop-nTimeStart)
             nFrameCount=-1
             
         nFrameCount=nFrameCount+1    
-#        time.sleep(1)
+        time.sleep(0.001)
     print "thread quit"
 #           
 

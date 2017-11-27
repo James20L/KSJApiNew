@@ -22,8 +22,8 @@ int    time_substract(struct timeval *result, struct timeval *begin,struct timev
 //int width = 1280;
 //int height = 1024;
 
-int width = 1600;
-int height = 1024;
+int width = 1936;
+int height = 1216;
 
 
 
@@ -47,7 +47,6 @@ int main(void)
     memset(&diff,0,sizeof(struct timeval));
 
 
-//    int fd = init_camera(1,0, 0x0816, 0x1a13,0);
 
 
 int ret = KSJ_Init();
@@ -77,6 +76,7 @@ printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTI
 
 
 KSJ_CaptureSetFieldOfView(0,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
+KSJ_CaptureSetFieldOfView(1,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
 
 
 KSJ_CaptureGetFieldOfView(0,&nColStart,&nRowStart,&nColSize,&nRowSize,&ColAddressMode,&RowAddressMode);
@@ -96,6 +96,7 @@ printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nE
 
 KSJ_ExposureTimeSet(0,nExposureTime);
 
+KSJ_ExposureTimeSet(1,nExposureTime);
 printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 KSJ_ExposureTimeGet(0,&nExposureTime);
 
@@ -163,21 +164,21 @@ Mat	mtx1(img1);
 while(i>4)
 {
 
+//sleep(1);
+
+	ret =  KSJ_CaptureRgbData(0,buf0);
 
 
-	ret =  KSJ_CaptureRawData(0,buf0);
-
-
-	printf("%s  %s %d     %d   KSJ_CaptureRawData done %d \n",__FILE__,__FUNCTION__,__LINE__,ret);
+	printf(" 0 %s  %s %d    ret =  %d  KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
 
 
 
 
+//sleep(1);
 
-	ret =  KSJ_CaptureRawData(1,buf1);
+	ret =  KSJ_CaptureRgbData(1,buf1);
 
-
-	printf("%s  %s %d     %d   KSJ_CaptureRawData done %d \n",__FILE__,__FUNCTION__,__LINE__,ret);
+	printf(" 1 %s  %s %d     %d   KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
 
 
 //	ret = KSJ_SoftStartCapture(0);
