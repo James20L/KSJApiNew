@@ -93,15 +93,15 @@ extern "C"{
 	KSJ_API  KSJ_AWBGetRegion(int nIndex, int *pnX, int *pnY, int *pnW, int *pnH, bool *pbShow);
 
 	// 设置聚焦评估区域
-	KSJ_API  KSJ_AFSetRegion(int nChannel, int nX, int nY, int nW, int nH);
+	KSJ_API  KSJ_AFSetRegion(int nIndex, int nX, int nY, int nW, int nH);
 	KSJ_API  KSJ_AFGetRegion(int nIndex, int *pnX, int *pnY, int *pnW, int *pnH, bool *pbShow);
 	KSJ_API  KSJ_AFShowRegion(int nIndex, bool bShow);
 	// 聚焦评估回调函数, nValue为返回的评估值
 	typedef void(__stdcall *KSJ_AFCALLBACK)(int nValue, void *lpContext);
 	// 设置聚焦评估回调
-	KSJ_API  KSJ_AFSetCallback(int nChannel, KSJ_AFCALLBACK fpAFCallback, void *lpContext);
+	KSJ_API  KSJ_AFSetCallback(int nIndex, KSJ_AFCALLBACK fpAFCallback, void *lpContext);
 	// 开始或终止聚焦评估
-	KSJ_API  KSJ_AFStart(int nChannel, bool bStart);
+	KSJ_API  KSJ_AFStart(int nIndex, bool bStart);
 
 
 #ifdef __cplusplus
