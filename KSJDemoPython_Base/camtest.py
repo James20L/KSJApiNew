@@ -31,6 +31,19 @@ def KsjInit():
 def CamParmSet(libKsj,num):
         
     for i in range(0,num):
+        
+        usDeviceType = c_int()
+        nSerials= c_int()
+        usFirmwareVersion = c_int()
+  
+        libKsj.KSJ_DeviceGetInformation(i,byref(usDeviceType),byref(nSerials),byref(usFirmwareVersion))  
+        '''
+        nSerials for distinguish camera
+        '''
+        print(usDeviceType)
+        print(nSerials)
+        print(usFirmwareVersion)
+        
 
         libKsj.KSJ_CaptureSetFieldOfView(i,0,0,1936,1216,0,0)
         
@@ -48,13 +61,49 @@ def CamParmSet(libKsj,num):
         print  nRowSize.value
         print  ColAddressMode.value
         print  RowAddressMode .value
+        '''
+        for set bayer mode ,this is relative to the filp do not change        
+        '''
 
-        libKsj.KSJ_BayerSetMode(1, 0);
-        libKsj.KSJ_WhiteBalanceSet(1,7);
-        fexpTime = c_float()
-        fexpTime=5.00        
+        libKsj.KSJ_BayerSetMode(i, 3);
+        '''
+        for set whitbalance mode 7 stand for auto continus        
+        '''
+
+        libKsj.KSJ_WhiteBalanceSet(i,7);
+	
+
+
+#        fexpTime.value = 100.0              
         libKsj.KSJ_ExposureTimeSet.argtypes = (c_int,c_float)
-        libKsj.KSJ_ExposureTimeSet(0,fexpTime);
+        libKsj.KSJ_ExposureTimeSet(i,2.00);
+        fexpTime = c_float()
+        libKsj.KSJ_ExposureTimeGet(i,byref(fexpTime));
+        print(fexpTime)
+        print(fexpTime.value)
+
+        '''
+        for set gain ,do not change the 2nd parm, ,3rd parm is gain value     
+        '''
+        libKsj.KSJ_SetParam(i,1,30);
+        '''
+        for set the picture to flip ,3rd parm is the  value 0 or 1 ,do not change the 2nd parm  ,do not change     
+        '''
+        libKsj.KSJ_SetParam(i,11,1)
+        '''
+        for set the sensitivity  1 stand for high
+      
+        '''  
+        libKsj.KSJ_SensitivitySetMode(i,1)
+        '''
+        for set color correction 3 is hardware present
+        '''
+        libKsj.KSJ_ColorCorrectionSet(i,3)
+        
+
+      
+
+        
 
 
 def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum): 

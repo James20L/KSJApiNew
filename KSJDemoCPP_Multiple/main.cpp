@@ -17,23 +17,8 @@ using namespace std;
 
 int    time_substract(struct timeval *result, struct timeval *begin,struct timeval *end);
 
-//int width =1280;
-//int height =1024;
-//int width = 1280;
-//int height = 1024;
-
 int width = 1936;
 int height = 1216;
-
-
-
-
-
-
-//int width = 2592/2;
-//int height = 1944/2;
-
-
 
 int main(void)
 {
@@ -48,13 +33,9 @@ int main(void)
 
 
 
-
 int ret = KSJ_Init();
 
 printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,ret);
-
-
-
 
 
 int nColStart = 0;
@@ -107,6 +88,13 @@ KSJ_CaptureGetSize(0,&width,&height);
 printf(" %s %s %d     %d   width %d\n",__FILE__,__FUNCTION__,__LINE__,width);
 printf(" %s %s %d     %d   height %d\n",__FILE__,__FUNCTION__,__LINE__,height);
 
+KSJ_CCM_MODE ccs_mode;
+
+KSJ_ColorCorrectionSet(0,KSJ_HCCM_PRESETTINGS);
+KSJ_ColorCorrectionGet(0,&ccs_mode);
+
+printf(" %s %s %d     ccs_mode = %d\n",__FILE__,__FUNCTION__,__LINE__,ccs_mode);
+
 #if 0
 	KSJ_TRIGGERMODE mode = KSJ_TRIGGER_SOFTWARE;
 
@@ -149,7 +137,7 @@ unsigned char * buf1 = (unsigned char *)malloc(3*width*height);
 int i = 10;
 
 
-IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,3);
+IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,4);
 img0->imageData = (char*)buf0;
 Mat	mtx0(img0);
 
@@ -166,25 +154,31 @@ while(i>4)
 
 //sleep(1);
 
-	ret =  KSJ_CaptureRgbData(0,buf0);
+//	ret =  KSJ_CaptureRgbData(0,buf0);
 
 
-	printf(" 0 %s  %s %d    ret =  %d  KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
-
+//	printf(" 0 %s  %s %d    ret =  %d  KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
+//
 
 
 
 //sleep(1);
 
-	ret =  KSJ_CaptureRgbData(1,buf1);
+//	ret =  KSJ_CaptureRgbData(1,buf1);
 
-	printf(" 1 %s  %s %d     %d   KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
+//	printf(" 1 %s  %s %d     %d   KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
+
+#if 1
+	ret = KSJ_SoftStartCapture(0);
+
+	printf(" 0 %s  %s %d    ret =  %d  KSJ_SoftStartCapture \n",__FILE__,__FUNCTION__,__LINE__,ret);
 
 
-//	ret = KSJ_SoftStartCapture(0);
+	ret=KSJ_ReadRgbDataAfterStart(0,buf0);
 
 
-//	ret=KSJ_ReadRGBDataAfterStart(0,buf0);
+	printf(" 0 %s  %s %d    ret =  %d  ret=KSJ_ReadRgbDataAfterStart  \n",__FILE__,__FUNCTION__,__LINE__,ret);
+#endif
 //	ret=KSJ_ReadDataAfterStart(0,buf0);
 
 
@@ -199,7 +193,6 @@ while(i>4)
 
 
 	imshow("camear 0",mtx0);
-
 
 	imshow("camear 1",mtx1);
 
