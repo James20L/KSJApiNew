@@ -17,8 +17,8 @@ using namespace std;
 
 int    time_substract(struct timeval *result, struct timeval *begin,struct timeval *end);
 
-int width = 1936;
-int height = 1216;
+int width = 800;
+int height = 600;
 
 int main(void)
 {
@@ -70,7 +70,7 @@ printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTI
 
 
 
-float nExposureTime = 100;
+float nExposureTime = 4;
 
 
 printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
@@ -93,7 +93,11 @@ KSJ_CCM_MODE ccs_mode;
 KSJ_ColorCorrectionSet(0,KSJ_HCCM_PRESETTINGS);
 KSJ_ColorCorrectionGet(0,&ccs_mode);
 
+
 printf(" %s %s %d     ccs_mode = %d\n",__FILE__,__FUNCTION__,__LINE__,ccs_mode);
+
+//KSJ_SetParam(0, KSJ_FLIP, 0);
+
 
 #if 0
 	KSJ_TRIGGERMODE mode = KSJ_TRIGGER_SOFTWARE;
@@ -129,7 +133,7 @@ printf(" %s %s %d     %d   KSJ_GetTriggerMode  mode \n",__FILE__,__FUNCTION__,__
 #endif
 
 #if  1
-unsigned char * buf0 = (unsigned char *)malloc(4*width*height);
+unsigned char * buf0 = (unsigned char *)malloc(width*height);
 
 unsigned char * buf1 = (unsigned char *)malloc(3*width*height);
 
@@ -137,7 +141,7 @@ unsigned char * buf1 = (unsigned char *)malloc(3*width*height);
 int i = 10;
 
 
-IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,4);
+IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
 img0->imageData = (char*)buf0;
 Mat	mtx0(img0);
 
@@ -156,8 +160,9 @@ while(i>4)
 
 //	ret =  KSJ_CaptureRgbData(0,buf0);
 
+	ret =  KSJ_CaptureRawData(0,buf0);
 
-//	printf(" 0 %s  %s %d    ret =  %d  KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
+	printf(" 0 %s  %s %d    ret =  %d  KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
 //
 
 
@@ -168,7 +173,7 @@ while(i>4)
 
 //	printf(" 1 %s  %s %d     %d   KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
 
-#if 1
+#if 0
 	ret = KSJ_SoftStartCapture(0);
 
 	printf(" 0 %s  %s %d    ret =  %d  KSJ_SoftStartCapture \n",__FILE__,__FUNCTION__,__LINE__,ret);
@@ -194,7 +199,7 @@ while(i>4)
 
 	imshow("camear 0",mtx0);
 
-	imshow("camear 1",mtx1);
+//	imshow("camear 1",mtx1);
 
 
 //i--;

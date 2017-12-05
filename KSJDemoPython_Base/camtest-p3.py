@@ -14,6 +14,8 @@ import cv2
 from ctypes import * 
 
 nThreadFlag =1;
+g_nWidth = 1280
+g_nheight = 960
 
 def KsjInit():
     libKsj = cdll.LoadLibrary('libksjapi.so')
@@ -28,8 +30,9 @@ def KsjInit():
 
 def CamParmSet(libKsj,num):
         
+global
     for i in range(0,num):
-        libKsj.KSJ_CaptureSetFieldOfView(i,0,0,1936,1216,0,0)
+        libKsj.KSJ_CaptureSetFieldOfView(i,0,0,g_nWidth,g_nheight,0,0)
         nColStart = c_int()
         nRowStart = c_int()
         nColSize = c_int()

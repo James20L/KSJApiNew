@@ -13,6 +13,12 @@ import numpy as np
 import cv2
 import cv2.cv as cv
 from ctypes import * 
+"""
+200w 1936 1216 
+120w 1280 960
+"""
+g_nWidth = 1936
+g_nHeight = 1216
 
 
 nThreadFlag =1;
@@ -29,7 +35,7 @@ def KsjInit():
     return libKsj,camCount
 
 def CamParmSet(libKsj,num):
-        
+    global g_nWidth,g_nHeight
     for i in range(0,num):
         
         usDeviceType = c_int()
@@ -45,7 +51,7 @@ def CamParmSet(libKsj,num):
         print(usFirmwareVersion)
         
 
-        libKsj.KSJ_CaptureSetFieldOfView(i,0,0,1936,1216,0,0)
+        libKsj.KSJ_CaptureSetFieldOfView(i,0,0,g_nWidth,g_nHeight,0,0)
         
         nColStart = c_int()
         nRowStart = c_int()
@@ -63,6 +69,8 @@ def CamParmSet(libKsj,num):
         print  RowAddressMode .value
         '''
         for set bayer mode ,this is relative to the filp do not change        
+        231 set to 3
+        120 set to 1        
         '''
 
         libKsj.KSJ_BayerSetMode(i, 3);
@@ -139,6 +147,7 @@ def  CreateBuf(libKsj,num):
 def CapturDataLoop(nIndex,pDataBuf):
     print "cam loop nIndex = %d" %(nIndex)
     global nThreadFlag
+    global g_nWidth,g_nHeight
     print "nThreadFlag = %d"%(nThreadFlag)
     nFrameCount =0
     nTimeStart = datetime.datetime.now() 
@@ -146,10 +155,10 @@ def CapturDataLoop(nIndex,pDataBuf):
   
     while nThreadFlag > 0:
        
-	image =  CapturData(nIndex,pDataBuf,1216,1936,3)
+	image =  CapturData(nIndex,pDataBuf,g_nHeight,g_nWidth,3)
         
-#	cv2.imshow("test",image)
-#    	cv2.waitKey(50)
+	cv2.imshow("test",image)
+    	cv2.waitKey(50)
 
         if nFrameCount == 0:
             nTimeStart = datetime.datetime.now() 
