@@ -15,8 +15,7 @@ doc/
 *.o
 *.o.*
 
-x86/
-x64/
+obj
 
 ipch/
 /doc

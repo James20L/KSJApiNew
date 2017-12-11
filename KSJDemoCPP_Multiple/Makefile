@@ -1,9 +1,22 @@
 ######################################
 #
 ######################################
-include ../../../011/git.KSJApiNew/cross_compile.mk
 #source file
 #Դ�ļ����Զ�������.c��.cpp�ļ�������Ŀ�궨��Ϊͬ��.o�ļ�
+
+PLATFORM_BIN_DIR=x64
+
+#CROSS_COMPILE=arm-linux-gnueabihf-
+#PLATFORM_BIN_DIR=arm32
+
+#CROSS_COMPILE=/home/terry/work/bubblegum/toolchain/aarch64-linux-gnu/bin/aarch64-linux-gnu-
+#PLATFORM_BIN_DIR=arm64
+
+
+CC=$(CROSS_COMPILE)gcc
+CXX=$(CROSS_COMPILE)g++
+
+
 SOURCE  := $(wildcard *.c) $(wildcard *.cpp)
 OBJS    := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCE)))
   
