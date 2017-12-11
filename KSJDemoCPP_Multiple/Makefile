@@ -1,6 +1,7 @@
 ######################################
 #
 ######################################
+include ../../../011/git.KSJApiNew/cross_compile.mk
 #source file
 #Դ�ļ����Զ�������.c��.cpp�ļ�������Ŀ�궨��Ϊͬ��.o�ļ�
 SOURCE  := $(wildcard *.c) $(wildcard *.cpp)
@@ -13,13 +14,13 @@ TARGET  := catchbesttest
 #compile and lib parameter
 #�������
 #CC      := /home/terry/work/bubblegum/toolchain/aarch64-linux-gnu/bin/aarch64-linux-gnu-g++
-CC      := g++
+#CC      := g++
 LIBS    :=
-LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux -L../../../101/libusb.bin/lib  -L. -L.. -L/usr/local/cuda-8.0/lib64/ -I/usr/local/cuda-8.0/include  -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_contrib -lopencv_imgproc -lOpenCL -lksjapi -lusb-1.0 -ldl
-#LDFLAGS :=  -L. -L.. -L/usr/local/cuda-8.0/lib64/ -I/usr/local/cuda-8.0/include  -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_contrib -lopencv_imgproc -lOpenCL ../libksj_640.a  
+#LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR) -lpng16 -lswresample -llzma -lavcodec  -lavutil -lksjapi -lzvbi -lksjlog -lksjbayer  -ljpeg -lusb-1.0 -ldl
+LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)  -lksjapi -lksjlog -lksjbayer  -ljpeg -lusb-1.0 -ldl
 DEFINES :=
 INCLUDE := -I. -I.. -I../KSJApi.inc 
-CFLAGS  := -gdwarf-2 -g3 -Wall  $(DEFINES) $(INCLUDE)
+CFLAGS  := -gdwarf-2 -g3 -Wall  $(DEFINES) $(INCLUDE) -Wl,-rpath,../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)
 CXXFLAGS:= $(CFLAGS) -DHAVE_CONFIG_H
   
   
@@ -44,6 +45,6 @@ clean :
 veryclean : clean
 	rm -fr $(TARGET)
 $(TARGET) : $(OBJS)
-	$(CC) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
 install:
 	cp $(TARGET) ../build/

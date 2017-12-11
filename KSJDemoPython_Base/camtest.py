@@ -17,8 +17,8 @@ from ctypes import *
 200w 1936 1216 
 120w 1280 960
 """
-g_nWidth = 1936
-g_nHeight = 1216
+g_nWidth = 2048
+g_nHeight = 2048
 
 
 nThreadFlag =1;
@@ -102,7 +102,7 @@ def CamParmSet(libKsj,num):
         for set the sensitivity  1 stand for high
       
         '''  
-        libKsj.KSJ_SensitivitySetMode(i,1)
+        libKsj.KSJ_SensitivitySetMode(i,0)
         '''
         for set color correction 3 is hardware present
         '''

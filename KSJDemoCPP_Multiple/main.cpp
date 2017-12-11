@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include "stdlib.h"
-#if 1
+#if 0
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/contrib/contrib.hpp"
 using namespace cv;
 #endif
 #include <unistd.h>
+#include <string.h>
 
 #include <sys/time.h>
 
@@ -137,8 +138,8 @@ unsigned char * buf0 = (unsigned char *)malloc(width*height);
 
 unsigned char * buf1 = (unsigned char *)malloc(3*width*height);
 
-
 int i = 10;
+#if 0
 
 
 IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
@@ -150,7 +151,7 @@ IplImage* img1=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,3);
 img1->imageData = (char*)buf1;
 Mat	mtx1(img1);
 
-
+#endif
 
 
 while(i>4)
@@ -197,18 +198,18 @@ while(i>4)
 
 
 
-	imshow("camear 0",mtx0);
+//	imshow("camear 0",mtx0);
 
 //	imshow("camear 1",mtx1);
 
 
 //i--;
-    waitKey(1);
+//    waitKey(1);
 
 }
 
-cvReleaseImage( &img0 );
-cvReleaseImage( &img1 );
+//cvReleaseImage( &img0 );
+//cvReleaseImage( &img1 );
 
 free(buf0);
 free(buf1);
