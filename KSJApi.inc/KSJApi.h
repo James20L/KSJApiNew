@@ -7,7 +7,7 @@
 
 
 #include "KSJApiDeviceType.h"
-#include "KSJApiRetCode.H"
+#include "KSJApiRetCode.h"
 #include "KSJApiBase.h"
 #include "KSJApiBayer.h"
 #include "KSJApiTriggerMode.h"

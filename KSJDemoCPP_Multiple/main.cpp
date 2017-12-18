@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "stdlib.h"
-#if 0
+#if 1
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/contrib/contrib.hpp"
@@ -18,13 +18,19 @@ using namespace std;
 
 int    time_substract(struct timeval *result, struct timeval *begin,struct timeval *end);
 
-int width = 800;
-int height = 600;
-
-int main(void)
+int RGBFLAG = 0;
+int main(int argc,void ** argv)
 {
 
- struct timeval start,stop,diff;
+
+
+
+
+	int ret = 0;
+HEAD: 
+	KSJ_Init();
+
+ 	struct timeval start,stop,diff;
 
     memset(&start,0,sizeof(struct timeval));
 
@@ -34,10 +40,23 @@ int main(void)
 
 
 
-int ret = KSJ_Init();
+
+while(0)
+{
+
+ret = KSJ_Init();
 
 printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,ret);
 
+ret = KSJ_DeviceGetCount();
+
+
+printf(" %s %s %d   count  %d    \n",__FILE__,__FUNCTION__,__LINE__,ret);
+
+ret = KSJ_UnInit();
+
+printf(" %s %s %d     %d   uninitdone \n",__FILE__,__FUNCTION__,__LINE__,ret);
+}
 
 int nColStart = 0;
 int nRowStart = 0;
@@ -56,6 +75,9 @@ printf(" =====================%s %s %d       nRowStart = %d \n",__FILE__,__FUNCT
 printf(" =====================%s %s %d       nColSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nColSize);
 printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowSize);
 
+int width = nColSize;
+int height = nRowSize;
+
 
 KSJ_CaptureSetFieldOfView(0,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
 KSJ_CaptureSetFieldOfView(1,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
@@ -71,7 +93,7 @@ printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTI
 
 
 
-float nExposureTime = 4;
+float nExposureTime = 4.0;
 
 
 printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
@@ -96,6 +118,17 @@ KSJ_ColorCorrectionGet(0,&ccs_mode);
 
 
 printf(" %s %s %d     ccs_mode = %d\n",__FILE__,__FUNCTION__,__LINE__,ccs_mode);
+
+if(argc == 2 )
+{
+printf("test capture RGB data \n");
+RGBFLAG = 1;
+}else
+{
+printf("test capture raw data \n");
+RGBFLAG = 0;
+
+}
 
 //KSJ_SetParam(0, KSJ_FLIP, 0);
 
@@ -134,15 +167,15 @@ printf(" %s %s %d     %d   KSJ_GetTriggerMode  mode \n",__FILE__,__FUNCTION__,__
 #endif
 
 #if  1
-unsigned char * buf0 = (unsigned char *)malloc(width*height);
+unsigned char * buf0 = (unsigned char *)malloc(3*width*height);
 
 unsigned char * buf1 = (unsigned char *)malloc(3*width*height);
 
-int i = 10;
-#if 0
+int i = 0;
+#if 1
 
 
-IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
+IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,3);
 img0->imageData = (char*)buf0;
 Mat	mtx0(img0);
 
@@ -154,16 +187,47 @@ Mat	mtx1(img1);
 #endif
 
 
-while(i>4)
+while(1)
 {
 
-//sleep(1);
+if(i == 0)
+{
 
-//	ret =  KSJ_CaptureRgbData(0,buf0);
 
+    gettimeofday(&start,0);
+
+}
+if(RGBFLAG)
+	ret =  KSJ_CaptureRgbData(0,buf0);
+else
+	
 	ret =  KSJ_CaptureRawData(0,buf0);
+i++;
+if(i==100)
+{
 
-	printf(" 0 %s  %s %d    ret =  %d  KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
+   i=0;
+
+
+    gettimeofday(&stop,0);
+
+    time_substract(&diff,&start,&stop);
+    printf("100 frame  Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
+    printf("fps = %f  \n",100.000/(float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00)));
+
+break;
+
+}
+
+
+
+
+
+
+
+//	ret =  KSJ_CaptureRawData(0,buf0);
+
+//	printf(" 0 %s  %s %d    ret =  %d  KSJ_CaptureRgbData \n",__FILE__,__FUNCTION__,__LINE__,ret);
 //
 
 
@@ -204,7 +268,7 @@ while(i>4)
 
 
 //i--;
-//    waitKey(1);
+ //   waitKey(1);
 
 }
 
@@ -213,9 +277,16 @@ while(i>4)
 
 free(buf0);
 free(buf1);
-#endif
-   return 0;
 
+
+ret =KSJ_UnInit();
+
+
+printf(" %s %s %d     %d   uninit \n",__FILE__,__FUNCTION__,__LINE__,ret);
+
+#endif
+goto HEAD;
+   return 0;
 }
 
 
@@ -265,7 +336,7 @@ free(buf1);
     time_substract(&diff,&start,&stop);
 
 
-    printf("cv Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
+yy    printf("cv Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
 
 
     imshow("cv-outimage",image2);
