@@ -67,46 +67,92 @@ def CamParmSet(libKsj,num):
         print  nRowSize.value
         print  ColAddressMode.value
         print  RowAddressMode .value
+
+	g_nWidth = nColSize.value 
+	g_nHeight = nRowSize.value
+
         '''
+        for set ,mirror ,do not change the 2nd parm, ,3rd parm is gain value     
+        '''
+#        libKsj.KSJ_SetParam(i,13,1);
+        
+        '''
+        for set flip ,do not change the 2nd parm, ,3rd parm is gain value     
+        '''
+ #       libKsj.KSJ_SetParam(i,11,1);
+
+	'''
         for set bayer mode ,this is relative to the filp do not change        
         231 set to 3
         120 set to 1        
         '''
 
-        libKsj.KSJ_BayerSetMode(i, 3);
+        libKsj.KSJ_BayerSetMode(i, 6);
         '''
         for set whitbalance mode 7 stand for auto continus        
         '''
 
         libKsj.KSJ_WhiteBalanceSet(i,7);
-	
+#	libKsj.KSJ_WhiteBalancePresettingSet(i,2)	
 
+        '''
+        for set color correction 3 is hardware present
+        '''
+        libKsj.KSJ_ColorCorrectionSet(i,3)
+        
+	libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
 
 #        fexpTime.value = 100.0              
         libKsj.KSJ_ExposureTimeSet.argtypes = (c_int,c_float)
-        libKsj.KSJ_ExposureTimeSet(i,2.00);
+        libKsj.KSJ_ExposureTimeSet(i,3.00);
         fexpTime = c_float()
         libKsj.KSJ_ExposureTimeGet(i,byref(fexpTime));
         print(fexpTime)
         print(fexpTime.value)
 
+
+
+        '''
+        for set the sensitivity  1 stand for high
+      
+        '''  
+        libKsj.KSJ_SensitivitySetMode(i,2)
+
+
+      
+
+        
+
+
+def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum): 
+    retValue = libKsj.KSJ_CaptureRgbData(nIndex,cBuf)
+    if retValue != 0:
+	print "capture error code %d"%(retValue)  
+  
+    nparr = np.fromstring(cBuf,np.uint8).reshape(nHeight,nWidth,nChannelNum );     
+    return nparr
+ 
+ 
+def QuitAll():
+
+
         '''
         for set gain ,do not change the 2nd parm, ,3rd parm is gain value     
         '''
         libKsj.KSJ_SetParam(i,1,30);
-        '''
-        for set the picture to flip ,3rd parm is the  value 0 or 1 ,do not change the 2nd parm  ,do not change     
-        '''
-        libKsj.KSJ_SetParam(i,11,1)
+
+
         '''
         for set the sensitivity  1 stand for high
       
         '''  
         libKsj.KSJ_SensitivitySetMode(i,0)
+
+
         '''
         for set color correction 3 is hardware present
         '''
-        libKsj.KSJ_ColorCorrectionSet(i,3)
+#        libKsj.KSJ_ColorCorrectionSet(i,3)
         
 
       
