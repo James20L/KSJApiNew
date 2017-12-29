@@ -40,8 +40,6 @@
 extern "C"{
 #endif
 
-#include "cross_platform_def.h"
-
 	// 将pData(宽度为nWidth, 高度为nHeight, 比特位数为nBitCount)的图像数据缩放为宽度为nStretchWidh, 高度为nStretchHeight的数据并填充到用户分配的pStretchData缓冲区,比特位数不变
 	KSJ_API  KSJ_HelperStretchBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, unsigned char *pStretchData, int nStretchWidth, int nStretchHeight);
 	// 根据图像的比特深度得到BMP图像的文件头,信息头,及颜色表总的字节数目
@@ -55,7 +53,7 @@ extern "C"{
 	KSJ_API  KSJ_SetFlatFieldCorrectionFieldOfView(int nIndex, int nColStart, int nRowStart, int nColSize, int nRowSize, KSJ_ADDRESSMODE ColAddressMode, KSJ_ADDRESSMODE RowAddressMode, unsigned short wMultiFrameNum);
 
 	// 获取FFC的视场，视场必须相同才可以进行校正。
-	KSJ_API  KSJ_GetFlatFieldCorrectionFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode, unsigned short *pwMultiFrameNum);
+	KSJ_API  KSJ_GetFlatFieldCorrectionFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pAmCol, KSJ_ADDRESSMODE *pAmRow, unsigned short *pwMultiFrameNum);
 
 	// 根据采集视场采集nDarkFrames张图像，平均后作为DarkFrame
 	KSJ_API  KSJ_MakeDarkFrame(int nIndex, int nDarkFrames);
