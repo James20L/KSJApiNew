@@ -18,5 +18,7 @@
 #include "KSJApiCompanding.h"
 #include "KSJApiUserZone.h"
 #include "KSJApiCustom.h"
+#include "KSJApiImage.h"
+#include "KSJApiProgram.h"
 
 #endif

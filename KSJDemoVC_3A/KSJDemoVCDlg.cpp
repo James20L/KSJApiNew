@@ -544,6 +544,7 @@ void CKSJDemoVCDlg::Capture()
 	int    nCaptureWidth, nCaptureHeight, nCaptureBitCount;
 
 	int nRet = KSJ_CaptureGetSizeEx(m_nDeviceCurSel, &nCaptureWidth, &nCaptureHeight, &nCaptureBitCount);
+	if (nRet £¡ = RET_SUCCESS)    return;
 	ShowErrorInfo(nRet);
 
 	BYTE    *pImageData = new BYTE[nCaptureWidth * nCaptureHeight * (nCaptureBitCount >> 3)];

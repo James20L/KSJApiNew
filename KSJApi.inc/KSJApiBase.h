@@ -44,7 +44,7 @@ extern "C"{
 	// Enable or Disable Log output
 	KSJ_API  KSJ_LogSet(bool bEnable, const TCHAR *pszFolder);
 	// Get Log Status
-	KSJ_API  KSJ_LogGet(bool *bEnable, TCHAR *pszFolder);
+	KSJ_API  KSJ_LogGet(bool *pbEnable, TCHAR *pszFolder);
 
 	// Get KSJApi.dll Version, call any time.
 	KSJ_API  KSJ_GetVersion( int *pnMaj1,  int *pnMaj2,  int *pnMin1,  int *pnMin2);
@@ -123,11 +123,11 @@ extern "C"{
 
 	///////////////////////////////////////////Capture/////////////////////////////////
 	// Get The Max Capture FOV( Field Of View ） supported by device
-	KSJ_API  KSJ_CaptureGetDefaultFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode);
+	KSJ_API  KSJ_CaptureGetDefaultFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pAmCol, KSJ_ADDRESSMODE *pAmRow);
 	// Set Capture FOV/AOI( Field Of View / Area Of Interesting ）
 	KSJ_API  KSJ_CaptureSetFieldOfView(int nIndex, int nColStart, int nRowStart, int nColSize, int nRowSize, KSJ_ADDRESSMODE ColAddressMode, KSJ_ADDRESSMODE RowAddressMode);
 	// Get Current Capture FOV / AOI( Field Of View / Area Of Interesting ）
-	KSJ_API  KSJ_CaptureGetFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode);
+	KSJ_API  KSJ_CaptureGetFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pAmCol, KSJ_ADDRESSMODE *pAmRow);
 	// Get Capture Image's Width and Height in Pixel Unit.
 	KSJ_API  KSJ_CaptureGetSize(int nIndex,  int *pnWidth,  int *pnHeight);
 	// Get Capture Image's Width, Height in Pixel Unit and BitCount( 8, 24, 32 )
@@ -145,11 +145,11 @@ extern "C"{
 
 	///////////////////////////////////////////Preview/////////////////////////////////
 	// Get The Max Preview FOV( Field Of View ） supported by device
-	KSJ_API   KSJ_PreviewGetDefaultFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode);
+	KSJ_API   KSJ_PreviewGetDefaultFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pAmCol, KSJ_ADDRESSMODE *pAmRow);
 	// Set Preview FOV/AOI( Field Of View / Area Of Interesting ）
 	KSJ_API   KSJ_PreviewSetFieldOfView(int nIndex, int nColStart, int nRowStart, int nColSize, int nRowSize, KSJ_ADDRESSMODE ColAddressMode, KSJ_ADDRESSMODE RowAddressMode);
 	// Get Current Preview FOV / AOI( Field Of View / Area Of Interesting ）
-	KSJ_API   KSJ_PreviewGetFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pColAddressMode, KSJ_ADDRESSMODE *pRowAddressMode);
+	KSJ_API   KSJ_PreviewGetFieldOfView(int nIndex, int *pnColStart, int *pnRowStart, int *pnColSize, int *pnRowSize, KSJ_ADDRESSMODE *pAmCol, KSJ_ADDRESSMODE *pAmRow);
 	// Get Preivew Image's Width and Height in Pixel Unit.
 	KSJ_API   KSJ_PreviewGetSize(int nIndex, int *pnWidth, int *pnHeight);
 	// Get Preview Image's Width, Height in Pixel Unit and BitCount( 8, 24, 32 )
