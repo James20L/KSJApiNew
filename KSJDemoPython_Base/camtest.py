@@ -17,9 +17,10 @@ from ctypes import *
 200w 1936 1216 
 120w 1280 960
 """
-g_nWidth = 2048
-g_nHeight = 2048
-
+#g_nWidth = 2048
+#g_nHeight = 2048
+nWidthArray = []
+mHeightArray = []
 
 nThreadFlag =1;
 
@@ -35,7 +36,6 @@ def KsjInit():
     return libKsj,camCount
 
 def CamParmSet(libKsj,num):
-    global g_nWidth,g_nHeight
     for i in range(0,num):
         
         usDeviceType = c_int()
@@ -51,7 +51,7 @@ def CamParmSet(libKsj,num):
         print(usFirmwareVersion)
         
 
-        libKsj.KSJ_CaptureSetFieldOfView(i,0,0,g_nWidth,g_nHeight,0,0)
+ #       libKsj.KSJ_CaptureSetFieldOfView(i,0,0,g_nWidth,g_nHeight,0,0)
         
         nColStart = c_int()
         nRowStart = c_int()
@@ -68,8 +68,8 @@ def CamParmSet(libKsj,num):
         print  ColAddressMode.value
         print  RowAddressMode .value
 
-	g_nWidth = nColSize.value 
-	g_nHeight = nRowSize.value
+	nWidthArray[i] = nColSize.value 
+	nHeightArray[i] = nRowSize.value
 
         '''
         for set ,mirror ,do not change the 2nd parm, ,3rd parm is gain value     
@@ -190,10 +190,9 @@ def  CreateBuf(libKsj,num):
     return buflist
           
 
-def CapturDataLoop(nIndex,pDataBuf):
+def CapturDataLoop(nIndex,pDataBuf,nWidth,nHeight):
     print "cam loop nIndex = %d" %(nIndex)
     global nThreadFlag
-    global g_nWidth,g_nHeight
     print "nThreadFlag = %d"%(nThreadFlag)
     nFrameCount =0
     nTimeStart = datetime.datetime.now() 
@@ -201,7 +200,7 @@ def CapturDataLoop(nIndex,pDataBuf):
   
     while nThreadFlag > 0:
        
-	image =  CapturData(nIndex,pDataBuf,g_nHeight,g_nWidth,3)
+	image =  CapturData(nIndex,pDataBuf,nHeight,nWidth,3)
         
 	cv2.imshow("test",image)
     	cv2.waitKey(50)
@@ -240,7 +239,7 @@ if __name__ == '__main__':
         threadlist=[]
         for i in range(0,camNub):
     
-            threadlist.append(threading.Thread(target=CapturDataLoop,args=(i,bufList[i])))     
+            threadlist.append(threading.Thread(target=CapturDataLoop,args=(i,bufList[i],nWidthArray[i],nHeightArray[i])))     
 
 #            threadlist[i].join()
             
