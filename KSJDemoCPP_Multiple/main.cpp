@@ -21,6 +21,12 @@ int    time_substract(struct timeval *result, struct timeval *begin,struct timev
 
 
 int RGBFLAG = 0;
+int SHOWFLAG = 0;
+int PICNUM = 0;
+int CAPTURETWOSTEPFLAG = 0;
+
+
+
 
 int KSJ_Check_Ret_Warn(int nRet)
 {
@@ -108,6 +114,19 @@ int KSJ_CreatBufs(int number,T_Fov_param * fovs)
 
 }
 
+
+int KSJ_ReleaseBufs(int number,T_Fov_param * fovs)
+{
+
+    for(int nCamIndex = 0;nCamIndex < number;nCamIndex++)
+    {
+
+        free(g_buf[nCamIndex]);
+
+    }
+
+}
+
 int KSJ_SetCamsParam(int camcount)
 {
 
@@ -125,7 +144,7 @@ int KSJ_SetCamsParam(int camcount)
     for(int nIndex = 0;nIndex<camcount;nIndex++)
     {
         KSJ_CaptureGetDefaultFieldOfView(nIndex,(int*)&nColStart,(int*)&nRowStart,(int *)&nColSize,(int *)&nRowSize,&ColAddressMode,&RowAddressMode);
-	
+
 #define printf  //
         printf(" =====================%s %s %d       nColStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nColStart);
         printf(" =====================%s %s %d       nRowStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowStart);
@@ -147,23 +166,21 @@ int KSJ_SetCamsParam(int camcount)
         printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowSize);
 
 
+#if 0
+        float nExposureTime = 10.0;
+        printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 
-//        float nExposureTime = 8.0;
-
-
-//        printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
-
-//        KSJ_ExposureTimeSet(nIndex,nExposureTime);
-//        printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
-
+        KSJ_ExposureTimeSet(nIndex,nExposureTime);
+        printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
+#endif
         int nlines = 0;
 
         KSJ_SetParam(nIndex,KSJ_EXPOSURE_LINES,500);
 
 
-        KSJ_GetParam(nIndex,KSJ_EXPOSURE_LINES,&nlines);
+        //KSJ_GetParam(nIndex,KSJ_EXPOSURE_LINES,&nlines);
 
-        printf(" =====================%s %s %d       nlines = %d \n",__FILE__,__FUNCTION__,__LINE__,nlines);
+        //printf(" =====================%s %s %d       nlines = %d \n",__FILE__,__FUNCTION__,__LINE__,nlines);
 
 
         KSJ_CaptureGetSize(nIndex,&g_fov[nIndex].nWidth,&g_fov[nIndex].nHeight);
@@ -209,10 +226,8 @@ int KSJ_SetCamsParam(int camcount)
 }
 
 
-
 void *KSJ_CaptureLoop(void * loopargs)
 {
-
     struct timeval start,stop,diff;
     memset(&start,0,sizeof(struct timeval));
 
@@ -230,10 +245,20 @@ void *KSJ_CaptureLoop(void * loopargs)
     int serialinloop = param->serial;
     int * stopflag =param->stopflag;
 
-//    printf("KSJ_CaptureLoop param->index =  %d  serialinloop = %d  \n",param->index,serialinloop);
+    //    printf("KSJ_CaptureLoop param->index =  %d  serialinloop = %d  \n",param->index,serialinloop);
+
+#ifdef USING_OPENCV
+    IplImage* img0;
+    img0=cvCreateImage(cvSize(g_fov[0].nWidth,g_fov[0].nHeight),IPL_DEPTH_8U,1);
+    img0->imageData = (char*) buf;
+    Mat	mtx0(img0);
+
+#endif
+
 
     int nCount = 0;
     int nRet = 0;
+    int nCountFpsUnit = 1000;
 
     while(*stopflag)
     {
@@ -244,13 +269,43 @@ void *KSJ_CaptureLoop(void * loopargs)
 
         }
         if(RGBFLAG)
-            nRet =  KSJ_CaptureRgbData(index,buf);
-        else
-            nRet =  KSJ_CaptureRawData(index,buf);
+        {
 
+            if(CAPTURETWOSTEPFLAG)
+            {
+                nRet =  KSJ_CaptureDataTwoStep(index,buf);
+
+
+            }else
+            {
+                nRet =  KSJ_CaptureRgbData(index,buf);
+            }
+        }
+        else
+        {
+            if(CAPTURETWOSTEPFLAG)
+            {
+
+            }else
+            {
+                nRet =  KSJ_CaptureRawData(index,buf);;
+            }
+
+
+        }
         if(nRet==0)
         {
             nCount++;
+
+
+#ifdef USING_OPENCV
+
+            //    	cv::cvtColor(mtx0,mtx1,CV_BayerRG2RGB);
+
+            imshow("camear 0",mtx0);
+            waitKey(1);
+
+#endif
 
         }else
         {
@@ -260,17 +315,17 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 
 
-        if(nCount==10)
+        if(nCount==nCountFpsUnit)
         {
 
             nCount=0;
             gettimeofday(&stop,0);
             time_substract(&diff,&start,&stop);
 
-            printf("index = %d  serialinloop = %d fps = %f ",index,serialinloop, 10.000/(float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00)));
-            printf("tid = %lu   10 frame  Total time : %d s,%d us \n",pthread_self(),(int)diff.tv_sec,(int)diff.tv_usec);
+            printf("index = %d  serialinloop = %d fps = %f ",index,serialinloop, nCountFpsUnit/(float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00)));
+            printf("tid = %lu   %d frame  Total time : %d s,%d us \n",pthread_self(),nCountFpsUnit,(int)diff.tv_sec,(int)diff.tv_usec);
 
-           *stopflag = 0;
+            *stopflag = 0;
 
         }
 
@@ -278,8 +333,12 @@ void *KSJ_CaptureLoop(void * loopargs)
 
     }
 
-  //  printf("tid = %lu   exited  \n",pthread_self());
+    //  printf("tid = %lu   exited  \n",pthread_self());
 
+
+#ifdef USING_OPENCV
+    cvReleaseImage( &img0 );
+#endif
 
 }
 
@@ -289,33 +348,105 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 int main(int argc,void ** argv)
 {
+#if 1
+    char ch;
+
+    while((ch = getopt(argc, (char *const *)argv, "c:g:t:h")) != -1){
+        printf("optind = %d, optopt = %d\n", optind, optopt);
+
+        switch(ch){
+        case 'c':
+            printf("选项是%c, 选项内容: %s\n", ch, optarg);
+            if(1==atoi(optarg))
+            {
+                RGBFLAG = 1;
+                printf("test capture RGB data \n");
+            }
+            else
+            {
+                RGBFLAG = 0;
+                printf("test capture raw data \n");
+            }
+
+            break;
+        case 'g':
+            printf("选项是%c, 选项内容: %s\n", ch, optarg);
+            if(1==atoi(optarg))
+            {
+                SHOWFLAG = 1;
+                printf("has gui \n");
+            }
+            else
+            {
+                SHOWFLAG = 0;
+                printf("no gui \n");
+            }
+
+
+            break;
+
+        case 'm':
+            printf("选项是%m, 选项内容: %s\n", ch, optarg);
+            if(1==atoi(optarg))
+            {
+                CAPTURETWOSTEPFLAG = 1;
+                printf("two step \n");
+            }
+            else
+            {
+                CAPTURETWOSTEPFLAG = 0;
+                printf("one  setp\n");
+            }
+
+
+            break;
+
+
+        case 't':
+            printf("选项是%c, 选项内容: %s\n", ch, optarg);
+            if(atoi(optarg)>0)
+            {
+                PICNUM = atoi(optarg);
+                printf("test PICNUM = %d  \n",PICNUM);
+            }
+            else
+            {
+
+                printf("test picnum  = 0 \n");
+            }
+
+            break;
+        case 'h':
+            printf("选项是%c\n", ch);
+            printf("-c 1 or 0 RGB or RAW\n");
+            printf("-g 1 or 0 show or not show\ \n");
+            printf("-t pic  count  \n");
+            printf("-h");
+            exit(0);
+            break;
+        default:
+            printf("other option: %c\n", ch);
+            break;
+        }
+    }
+
+
+#endif
 
 HEAD:
     int nRet = 0;
 
     nRet = KSJ_Init();
 
-//    KSJ_LogSet(1,"zhanwei");
+    //    KSJ_LogSet(1,"zhanwei");
 
 
-//    printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+    //    printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
 
     nCamCount = KSJ_DeviceGetCount();
 
-  //  printf(" %s %s %d   count  %d    \n",__FILE__,__FUNCTION__,__LINE__,nCamCount);
+    //  printf(" %s %s %d   count  %d    \n",__FILE__,__FUNCTION__,__LINE__,nCamCount);
 
-
-    if(argc == 2 )
-    {
-        printf("test capture RGB data \n");
-        RGBFLAG = 1;
-
-    }else
-    {
-//        printf("test capture raw data \n");
-        RGBFLAG = 0;
-
-    }
 
     KSJ_SetCamsParam(nCamCount);
 
@@ -325,30 +456,19 @@ HEAD:
 
     int nCount = 0;
 
-#ifdef USING_OPENCV
-
-    unsigned char * buf0 = (unsigned char *)malloc(3*width*height);
-
-    unsigned char * buf1 = (unsigned char *)malloc(3*width*height);
-
-    IplImage* img0=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,3);
-    img0->imageData = (char*)buf0;
-    Mat	mtx0(img0);
 
 
-    IplImage* img1=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,3);
-    img1->imageData = (char*)buf1;
-    Mat	mtx1(img1);
-
-#endif
-
-#if 0
+#if 1
     T_Thread_Param param;
     param.buf = g_buf[0];
     param.index = 0;
-    param.stopflag = &g_stopflag;
+    param.stopflag = g_stopflag;
 
     KSJ_CaptureLoop(&param);
+
+    KSJ_ReleaseBufs(nCamCount,g_fov);
+
+
 
 #else
 
@@ -385,7 +505,7 @@ HEAD:
             return -1;
         }else
         {
-//            printf("Create  index = %d   ok t_id = %lu \n",nThreadNum,t_id[nThreadNum]);
+            //            printf("Create  index = %d   ok t_id = %lu \n",nThreadNum,t_id[nThreadNum]);
         }
 
     }
@@ -393,28 +513,12 @@ HEAD:
 
 
 
-        for(int nThreadNum = 0; nThreadNum <nCamCount;nThreadNum++)
-        {
-            pthread_join(t_id[nThreadNum],NULL);
-  //          printf("pthread_join   ok t_id = %lu \n",t_id[nThreadNum]);
+    for(int nThreadNum = 0; nThreadNum <nCamCount;nThreadNum++)
+    {
+        pthread_join(t_id[nThreadNum],NULL);
+        //          printf("pthread_join   ok t_id = %lu \n",t_id[nThreadNum]);
 
-        }
-
-#ifdef USING_OPENCV
-
-    //    	cv::cvtColor(mtx0,mtx1,CV_BayerRG2RGB);
-
-    imshow("camear 0",mtx0);
-
-    imshow("camear 1",mtx1);
-    waitKey(1);
-    cvReleaseImage( &img0 );
-    cvReleaseImage( &img1 );
-    free(buf0);
-    free(buf1);
-
-#endif
-
+    }
 
     nRet = KSJ_UnInit();
 
@@ -481,7 +585,7 @@ waitKey(1);
 //    cvSaveImage("capture.bmp",img1);
 //    close(fd);
 
-cvReleaseImage( &img1 );
+
 
 
 #endif
