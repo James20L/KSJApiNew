@@ -351,7 +351,7 @@ int main(int argc,void ** argv)
 #if 1
     char ch;
 
-    while((ch = getopt(argc, (char *const *)argv, "c:g:t:h")) != -1){
+    while((ch = getopt(argc, (char *const *)argv, "c:g:t:m:h")) != -1){
         printf("optind = %d, optopt = %d\n", optind, optopt);
 
         switch(ch){
@@ -386,15 +386,15 @@ int main(int argc,void ** argv)
             break;
 
         case 'm':
-            printf("选项是%m, 选项内容: %s\n", ch, optarg);
+            printf("选项是%c, 选项内容: %s\n", ch, optarg);
             if(1==atoi(optarg))
             {
-                CAPTURETWOSTEPFLAG = 1;
+                CAPTURETWOSTEPFLAG = 0;
                 printf("two step \n");
             }
-            else
+            else if(2==atoi(optarg))
             {
-                CAPTURETWOSTEPFLAG = 0;
+                CAPTURETWOSTEPFLAG = 1;
                 printf("one  setp\n");
             }
 
@@ -420,6 +420,8 @@ int main(int argc,void ** argv)
             printf("选项是%c\n", ch);
             printf("-c 1 or 0 RGB or RAW\n");
             printf("-g 1 or 0 show or not show\ \n");
+            printf("-m 1 or 2 1 or 2 steps\ \n");
+
             printf("-t pic  count  \n");
             printf("-h");
             exit(0);
