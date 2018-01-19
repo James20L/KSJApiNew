@@ -145,7 +145,7 @@ int KSJ_SetCamsParam(int camcount)
     {
         KSJ_CaptureGetDefaultFieldOfView(nIndex,(int*)&nColStart,(int*)&nRowStart,(int *)&nColSize,(int *)&nRowSize,&ColAddressMode,&RowAddressMode);
 
-#define printf  //
+//#define printf  //
         printf(" =====================%s %s %d       nColStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nColStart);
         printf(" =====================%s %s %d       nRowStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowStart);
         printf(" =====================%s %s %d       nColSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nColSize);
@@ -154,6 +154,7 @@ int KSJ_SetCamsParam(int camcount)
         int width = nColSize;
         int height = nRowSize;
 
+#if 1
 
         KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
 
@@ -216,6 +217,7 @@ int KSJ_SetCamsParam(int camcount)
         printf(" %s %s %d     %d   KSJ_GetTriggerMode  mode \n",__FILE__,__FUNCTION__,__LINE__,mode);
 
 
+#endif
 
 #define printf printf
 
