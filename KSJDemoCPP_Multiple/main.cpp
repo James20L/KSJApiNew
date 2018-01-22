@@ -145,7 +145,7 @@ int KSJ_SetCamsParam(int camcount)
     {
         KSJ_CaptureGetDefaultFieldOfView(nIndex,(int*)&nColStart,(int*)&nRowStart,(int *)&nColSize,(int *)&nRowSize,&ColAddressMode,&RowAddressMode);
 
-//#define printf  //
+        //#define printf  //
         printf(" =====================%s %s %d       nColStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nColStart);
         printf(" =====================%s %s %d       nRowStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowStart);
         printf(" =====================%s %s %d       nColSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nColSize);
@@ -165,6 +165,9 @@ int KSJ_SetCamsParam(int camcount)
         printf(" =====================%s %s %d       nRowStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowStart);
         printf(" =====================%s %s %d       nColSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nColSize);
         printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowSize);
+
+
+         KSJ_BayerSetMode(nIndex, KSJ_BGGR_GRAY8 );
 
 
 #if 0
@@ -251,7 +254,32 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 #ifdef USING_OPENCV
     IplImage* img0;
-    img0=cvCreateImage(cvSize(g_fov[0].nWidth,g_fov[0].nHeight),IPL_DEPTH_8U,1);
+
+    int width = 0;
+    int height = 0;
+    int bitscount = 0;
+    int channelnum = 0;
+
+    KSJ_CaptureGetSizeEx(index,&width,&height,&bitscount);
+    printf("bitscount = %d \n",bitscount);
+
+    switch(bitscount)
+    {
+
+        case 8:
+            channelnum = 1;
+            break;
+        case 24:
+            channelnum = 3;
+            break;
+        case 32:
+            channelnum = 4;
+            break;
+        default:
+            printf("not support");
+    }
+
+    img0=cvCreateImage(cvSize(g_fov[0].nWidth,g_fov[0].nHeight),IPL_DEPTH_8U,channelnum);
     img0->imageData = (char*) buf;
     Mat	mtx0(img0);
 
