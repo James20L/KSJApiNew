@@ -19,8 +19,8 @@ from ctypes import *
 """
 #g_nWidth = 2048
 #g_nHeight = 2048
-nWidthArray = []
-mHeightArray = []
+nWidthArray = [25]
+nHeightArray = [25]
 
 nThreadFlag =1;
 
@@ -87,7 +87,7 @@ def CamParmSet(libKsj,num):
         120 set to 1        
         '''
 
-        libKsj.KSJ_BayerSetMode(i, 6);
+        libKsj.KSJ_BayerSetMode(i, 5);
         '''
         for set whitbalance mode 7 stand for auto continus        
         '''
@@ -98,9 +98,9 @@ def CamParmSet(libKsj,num):
         '''
         for set color correction 3 is hardware present
         '''
-        libKsj.KSJ_ColorCorrectionSet(i,3)
+#        libKsj.KSJ_ColorCorrectionSet(i,3)
         
-	libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
+#	libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
 
 #        fexpTime.value = 100.0              
         libKsj.KSJ_ExposureTimeSet.argtypes = (c_int,c_float)
@@ -119,7 +119,7 @@ def CamParmSet(libKsj,num):
         libKsj.KSJ_SensitivitySetMode(i,2)
 
 
-      
+        libKsj.KSJ_ColorCorrectionSet(i, 3)
 
         
 
@@ -239,10 +239,7 @@ if __name__ == '__main__':
         threadlist=[]
         for i in range(0,camNub):
     
-            threadlist.append(threading.Thread(target=CapturDataLoop,args=(i,bufList[i],nWidthArray[i],nHeightArray[i])))     
-
-#            threadlist[i].join()
-            
+            threadlist.append(threading.Thread(target=CapturDataLoop,args=(i,bufList[i],nWidthArray[i],nHeightArray[i])))                 
             threadlist[i].setDaemon(True)
             threadlist[i].start()
     

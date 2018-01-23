@@ -6,8 +6,8 @@
 
 PLATFORM_BIN_DIR=x64
 
-#CROSS_COMPILE=arm-linux-gnueabihf-
-#PLATFORM_BIN_DIR=arm32
+CROSS_COMPILE=arm-linux-gnueabihf-
+PLATFORM_BIN_DIR=arm32
 
 #CROSS_COMPILE=aarch64-linux-gnu-
 #PLATFORM_BIN_DIR=arm64
@@ -29,9 +29,11 @@ TARGET  := catchbesttest
 #CC      := /home/terry/work/bubblegum/toolchain/aarch64-linux-gnu/bin/aarch64-linux-gnu-g++
 #CC      := g++
 LIBS    :=
+
+#DEFINES :=  -DUSING_OPENCV
+#OPENCVLIB := -lopencv_core -lopencv_highgui
 #LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR) -lpng16 -lswresample -llzma -lavcodec  -lavutil -lksjapi -lzvbi -lksjlog -lksjbayer  -ljpeg -lusb-1.0 -ldl
-LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)  -lopencv_core -lopencv_highgui  -lksjapi -lksjlog -lksjbayer -lpthread  -ludev -ljpeg  -ldl
-DEFINES :=  -DUSING_OPENCV
+LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)  $(OPENCVLIB)  -lksjapi -lksjlog -lksjbayer -lpthread -lusb-1.0 -ludev -ljpeg  -ldl
 INCLUDE := -I. -I.. -I../KSJApi.inc 
 CFLAGS  := -gdwarf-2 -g3 -Wall  $(DEFINES) $(INCLUDE) -Wl,-rpath,../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)
 CXXFLAGS:= $(CFLAGS) -DHAVE_CONFIG_H

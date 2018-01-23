@@ -184,10 +184,10 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
 
         image = CapturData(nIndex, pDataBuf, nHeight, nWidth, 3)
 
-#        image =cv2.resize(image,(int(nWidth/4),int(nHeight/4)))
-#        cv2.imshow("test", image)
-#        cv2.moveWindow('test', int(nIndex*nWidth/4), 0)
-#        cv2.waitKey(50)
+        image =cv2.resize(image,(int(nWidth/4),int(nHeight/4)))
+        cv2.imshow("test", image)
+        cv2.moveWindow('test', int(nIndex*nWidth/4), 0)
+        cv2.waitKey(50)
 
         if nFrameCount == 0:
             nTimeStart = datetime.datetime.now()
