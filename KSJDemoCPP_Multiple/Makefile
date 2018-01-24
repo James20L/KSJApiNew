@@ -6,8 +6,8 @@
 
 PLATFORM_BIN_DIR=x64
 
-CROSS_COMPILE=arm-linux-gnueabihf-
-PLATFORM_BIN_DIR=arm32
+#CROSS_COMPILE=arm-linux-gnueabihf-
+#PLATFORM_BIN_DIR=arm32
 
 #CROSS_COMPILE=aarch64-linux-gnu-
 #PLATFORM_BIN_DIR=arm64

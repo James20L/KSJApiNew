@@ -167,7 +167,7 @@ int KSJ_SetCamsParam(int camcount)
         printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowSize);
 
 
-         KSJ_BayerSetMode(nIndex, KSJ_BGGR_GRAY8 );
+        KSJ_BayerSetMode(nIndex, KSJ_BGGR_GRAY8 );
 
 
 #if 0
@@ -266,17 +266,17 @@ void *KSJ_CaptureLoop(void * loopargs)
     switch(bitscount)
     {
 
-        case 8:
-            channelnum = 1;
-            break;
-        case 24:
-            channelnum = 3;
-            break;
-        case 32:
-            channelnum = 4;
-            break;
-        default:
-            printf("not support");
+    case 8:
+        channelnum = 1;
+        break;
+    case 24:
+        channelnum = 3;
+        break;
+    case 32:
+        channelnum = 4;
+        break;
+    default:
+        printf("not support");
     }
 
     img0=cvCreateImage(cvSize(g_fov[0].nWidth,g_fov[0].nHeight),IPL_DEPTH_8U,channelnum);
@@ -288,7 +288,8 @@ void *KSJ_CaptureLoop(void * loopargs)
 
     int nCount = 0;
     int nRet = 0;
-    int nCountFpsUnit = 1000;
+    int nCountFpsUnit = 200;
+
 
     while(*stopflag)
     {
@@ -345,20 +346,22 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 
 
-        if(nCount==nCountFpsUnit)
+        if((nCount%nCountFpsUnit)==0)
         {
 
-            nCount=0;
+
             gettimeofday(&stop,0);
             time_substract(&diff,&start,&stop);
 
             printf("index = %d  serialinloop = %d fps = %f ",index,serialinloop, nCountFpsUnit/(float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00)));
             printf("tid = %lu   %d frame  Total time : %d s,%d us \n",pthread_self(),nCountFpsUnit,(int)diff.tv_sec,(int)diff.tv_usec);
+	
+	     gettimeofday(&start,0);
 
-            *stopflag = 0;
 
         }
 
+        if(  nCount>1000 )  *stopflag=0;
 
 
     }
@@ -379,9 +382,10 @@ void *KSJ_CaptureLoop(void * loopargs)
 int main(int argc,void ** argv)
 {
 #if 1
-    char ch;
+    int ch;
 
     while((ch = getopt(argc, (char *const *)argv, "c:g:t:m:h")) != -1){
+	printf("ch = 0x%x\n",ch );
         printf("optind = %d, optopt = %d\n", optind, optopt);
 
         switch(ch){
@@ -477,8 +481,12 @@ HEAD:
 
     nCamCount = KSJ_DeviceGetCount();
 
-    //  printf(" %s %s %d   count  %d    \n",__FILE__,__FUNCTION__,__LINE__,nCamCount);
 
+    if(nCamCount<=0)
+    {
+        printf(" %s %s %d   count  %d    \n",__FILE__,__FUNCTION__,__LINE__,nCamCount);
+        exit(1);
+    }
 
     KSJ_SetCamsParam(nCamCount);
 
@@ -490,7 +498,7 @@ HEAD:
 
 
 
-#if 1
+#if 0
     T_Thread_Param param;
     param.buf = g_buf[0];
     param.index = 0;
