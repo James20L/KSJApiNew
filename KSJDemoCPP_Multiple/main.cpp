@@ -6,7 +6,7 @@
 #ifdef USING_OPENCV
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include "opencv2/contrib/contrib.hpp"
+//#include "opencv2/contrib/contrib.hpp"
 using namespace cv;
 #endif
 
@@ -51,6 +51,12 @@ int KSJ_Check_Ret_Fatal(int nRet)
     }
     return 0;
 }
+int CHKRET = 0;
+
+#define CHECK_RET(X)  do { \
+    CHKRET=X; \
+    if(CHKRET!=RET_SUCCESS) printf("%s  error code= %d \n",#X,CHKRET); \
+    }while(0)
 
 
 
@@ -143,7 +149,35 @@ int KSJ_SetCamsParam(int camcount)
 
     for(int nIndex = 0;nIndex<camcount;nIndex++)
     {
-        KSJ_CaptureGetDefaultFieldOfView(nIndex,(int*)&nColStart,(int*)&nRowStart,(int *)&nColSize,(int *)&nRowSize,&ColAddressMode,&RowAddressMode);
+
+        unsigned short pusDeviceType;
+        int pnSerials;
+        unsigned short pusFirmwareVersion;
+        unsigned short pusFpgaVersion;
+
+
+
+
+        CHECK_RET(KSJ_DeviceGetInformationEx( nIndex,  &pusDeviceType,  &pnSerials,  &pusFirmwareVersion,  &pusFpgaVersion));
+
+        printf(" =====================%s %s %d       pusDeviceType = %d \n",__FILE__,__FUNCTION__,__LINE__,pusDeviceType);
+        printf(" =====================%s %s %d       pnSerials = %d \n",__FILE__,__FUNCTION__,__LINE__,pnSerials);
+        int fmaj = pusFirmwareVersion>>8;
+        int fmin = pusFirmwareVersion&0x00ff;
+        printf(" =====================%s %s %d       pusFirmwareVersion  fmaj = %d    fmin = %d \n",__FILE__,__FUNCTION__,__LINE__,fmaj,fmin);
+
+        int fpgamaj= pusFpgaVersion>>8;
+        int fpgamin= pusFpgaVersion&0x00ff;
+
+        printf(" =====================%s %s %d       pusFpgaVersion  fpgamaj = %d    fpgamin = %d \n",__FILE__,__FUNCTION__,__LINE__,fpgamaj,fpgamin);
+
+
+
+
+
+
+
+        CHECK_RET(KSJ_CaptureGetDefaultFieldOfView(nIndex,(int*)&nColStart,(int*)&nRowStart,(int *)&nColSize,(int *)&nRowSize,&ColAddressMode,&RowAddressMode));
 
         //#define printf  //
         printf(" =====================%s %s %d       nColStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nColStart);
@@ -152,11 +186,8 @@ int KSJ_SetCamsParam(int camcount)
         printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowSize);
 
         int width = nColSize;
+
         int height = nRowSize;
-
-#if 1
-
-        KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
 
         KSJ_CaptureGetFieldOfView(nIndex,&nColStart,&nRowStart,&nColSize,&nRowSize,&ColAddressMode,&RowAddressMode);
 
@@ -167,40 +198,100 @@ int KSJ_SetCamsParam(int camcount)
         printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowSize);
 
 
-        KSJ_BayerSetMode(nIndex, KSJ_BGGR_GRAY8 );
 
 
-#if 0
-        float nExposureTime = 10.0;
+
+
+        width =1280;
+        height = 1024;
+#if 1
+
+//        KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIP2,KSJ_SKIP2);
+          KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
+
+        KSJ_CaptureGetFieldOfView(nIndex,&nColStart,&nRowStart,&nColSize,&nRowSize,&ColAddressMode,&RowAddressMode);
+
+
+        printf(" =====================%s %s %d       nColStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nColStart);
+        printf(" =====================%s %s %d       nRowStart = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowStart);
+        printf(" =====================%s %s %d       nColSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nColSize);
+        printf(" =====================%s %s %d       nRowSize = %d \n",__FILE__,__FUNCTION__,__LINE__,nRowSize);
+
+        //        CHECK_RET(KSJ_LutSetEnable(nIndex, false));
+
+//        KSJ_FILTERMODE bayermode;
+//        KSJ_FilterGetMode(nIndex,&bayermode);
+
+        KSJ_BAYERMODE bayermode;
+
+        CHECK_RET(KSJ_BayerGetMode(nIndex, &bayermode));
+        printf(" =====================%s %s %d       bayermode = %d \n",__FILE__,__FUNCTION__,__LINE__,bayermode);
+
+
+
+
+        CHECK_RET(KSJ_BayerSetMode(nIndex, KSJ_BGGR_BGR24_FLIP));
+
+#if 1
+        float nExposureTime = .0;
+        KSJ_ExposureTimeGet(nIndex,&nExposureTime);
+
+        printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
+
+        nExposureTime = .1;
         printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 
         KSJ_ExposureTimeSet(nIndex,nExposureTime);
+
+
+        KSJ_ExposureTimeGet(nIndex,&nExposureTime);
+
         printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
+
+
+
+
+
+
 #endif
+#if 1
         int nlines = 0;
 
-        KSJ_SetParam(nIndex,KSJ_EXPOSURE_LINES,500);
+        CHECK_RET(KSJ_SetParam(nIndex,KSJ_EXPOSURE_LINES,200));
 
 
-        //KSJ_GetParam(nIndex,KSJ_EXPOSURE_LINES,&nlines);
+        CHECK_RET(KSJ_GetParam(nIndex,KSJ_EXPOSURE_LINES,&nlines));
 
-        //printf(" =====================%s %s %d       nlines = %d \n",__FILE__,__FUNCTION__,__LINE__,nlines);
+        printf(" KSJ_GetParam =====================%s %s %d       nlines = %d \n",__FILE__,__FUNCTION__,__LINE__,nlines);
+
+        KSJ_WB_MODE wbmode;
+        wbmode = KSJ_HWB_AUTO_CONITNUOUS;
 
 
-        KSJ_CaptureGetSize(nIndex,&g_fov[nIndex].nWidth,&g_fov[nIndex].nHeight);
+        KSJ_WhiteBalanceSet(nIndex,wbmode);
+
+        KSJ_WhiteBalanceGet(nIndex,&wbmode);
+        printf(" KSJ_WhiteBalanceGet =====================%s %s %d       nlines = %d \n",__FILE__,__FUNCTION__,__LINE__,wbmode);
+
+
+#endif
+
+        CHECK_RET(KSJ_CaptureGetSize(nIndex,&g_fov[nIndex].nWidth,&g_fov[nIndex].nHeight));
         printf(" %s %s %d      FOVS[%d].nWidth %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nWidth);
         printf(" %s %s %d      FOVS[%d].nHeight %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nHeight);
 
+
+#if 0
         KSJ_CCM_MODE ccs_mode;
-        KSJ_ColorCorrectionSet(0,KSJ_HCCM_PRESETTINGS);
-        KSJ_ColorCorrectionGet(0,&ccs_mode);
+        CHECK_RET(KSJ_ColorCorrectionSet(0,KSJ_HCCM_PRESETTINGS));
+        CHECK_RET(KSJ_ColorCorrectionGet(0,&ccs_mode));
 
         KSJ_TRIGGERMODE mode = KSJ_TRIGGER_SOFTWARE;
 
         printf(" %s %s %d     %d   KSJ_SetTriggerMode  KSJ_TRIGGER_SOFTWARE  \n",__FILE__,__FUNCTION__,__LINE__,mode);
-        nRet = KSJ_TriggerModeSet(0,mode);
+        CHECK_RET(KSJ_TriggerModeSet(0,mode));
 
-        printf(" %s %s %d     %d   KSJ_SetTriggerMode \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+        printf(" %s %s %d     %d   KSJ_SetTriggerMode \n",__FILE__,__FUNCTION__,__LINE__,CHKRET);
         nRet = KSJ_TriggerModeGet(0,&mode);
 
         printf(" %s %s %d     %d   KSJ_GetTriggerMode nRet  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
@@ -210,15 +301,15 @@ int KSJ_SetCamsParam(int camcount)
         mode = KSJ_TRIGGER_INTERNAL;
 
         printf(" %s %s %d     %d   KSJ_SetTriggerMode  KSJ_TRIGGER_EXTERNAL  \n",__FILE__,__FUNCTION__,__LINE__,mode);
-        nRet = KSJ_TriggerModeSet(0,mode);
+        CHECK_RET(KSJ_TriggerModeSet(0,mode));
 
-        printf(" %s %s %d     %d   KSJ_SetTriggerMode \n",__FILE__,__FUNCTION__,__LINE__,nRet);
-        nRet = KSJ_TriggerModeGet(0,&mode);
+        printf(" %s %s %d     %d   KSJ_SetTriggerMode \n",__FILE__,__FUNCTION__,__LINE__,CHKRET);
+        CHECK_RET(KSJ_TriggerModeGet(0,&mode));
 
-        printf(" %s %s %d     %d   KSJ_GetTriggerMode nRet  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+        printf(" %s %s %d     %d   KSJ_GetTriggerMode nRet  \n",__FILE__,__FUNCTION__,__LINE__,CHKRET);
 
         printf(" %s %s %d     %d   KSJ_GetTriggerMode  mode \n",__FILE__,__FUNCTION__,__LINE__,mode);
-
+#endif
 
 #endif
 
@@ -233,6 +324,9 @@ int KSJ_SetCamsParam(int camcount)
 
 void *KSJ_CaptureLoop(void * loopargs)
 {
+    bool lutflag = false;
+
+
     struct timeval start,stop,diff;
     memset(&start,0,sizeof(struct timeval));
 
@@ -262,6 +356,8 @@ void *KSJ_CaptureLoop(void * loopargs)
 
     KSJ_CaptureGetSizeEx(index,&width,&height,&bitscount);
     printf("bitscount = %d \n",bitscount);
+    char windowname[128];
+    sprintf(windowname,"camera serialinloop = %d index = %d",serialinloop,index);
 
     switch(bitscount)
     {
@@ -281,7 +377,9 @@ void *KSJ_CaptureLoop(void * loopargs)
 
     img0=cvCreateImage(cvSize(g_fov[0].nWidth,g_fov[0].nHeight),IPL_DEPTH_8U,channelnum);
     img0->imageData = (char*) buf;
-    Mat	mtx0(img0);
+    Mat mtx0 = cv::cvarrToMat(img0) ;
+
+    //	Mat	mtx0(img0);
 
 #endif
 
@@ -333,9 +431,11 @@ void *KSJ_CaptureLoop(void * loopargs)
 
             //    	cv::cvtColor(mtx0,mtx1,CV_BayerRG2RGB);
 
-            imshow("camear 0",mtx0);
-            waitKey(1);
-
+            if(SHOWFLAG)
+            {
+                imshow(windowname,mtx0);
+                waitKey(1);
+            }
 #endif
 
         }else
@@ -353,15 +453,24 @@ void *KSJ_CaptureLoop(void * loopargs)
             gettimeofday(&stop,0);
             time_substract(&diff,&start,&stop);
 
-            printf("index = %d  serialinloop = %d fps = %f ",index,serialinloop, nCountFpsUnit/(float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00)));
+            printf("index = %d  serialinloop = %d fps = %f \n",index,serialinloop, nCountFpsUnit/(float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00)));
+            //            lutflag =!lutflag;
+            //            bool luttemp ;
+            //            CHECK_RET(KSJ_LutGetEnable(index,&luttemp));
+            //            printf("get luttemp = %d lutflag = %d \n",luttemp,lutflag);
+            //            CHECK_RET(KSJ_LutSetEnable(index, lutflag));
+            //            CHECK_RET(KSJ_LutGetEnable(index,&luttemp));
+            //            printf("get again luttemp = %d \n",luttemp);
+
             printf("tid = %lu   %d frame  Total time : %d s,%d us \n",pthread_self(),nCountFpsUnit,(int)diff.tv_sec,(int)diff.tv_usec);
-	
-	     gettimeofday(&start,0);
+
+            gettimeofday(&start,0);
+
 
 
         }
 
-        if(  nCount>1000 )  *stopflag=0;
+        if(  nCount>10000 )  *stopflag=0;
 
 
     }
@@ -381,11 +490,12 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 int main(int argc,void ** argv)
 {
+
 #if 1
     int ch;
 
     while((ch = getopt(argc, (char *const *)argv, "c:g:t:m:h")) != -1){
-	printf("ch = 0x%x\n",ch );
+        printf("ch = 0x%x\n",ch );
         printf("optind = %d, optopt = %d\n", optind, optopt);
 
         switch(ch){

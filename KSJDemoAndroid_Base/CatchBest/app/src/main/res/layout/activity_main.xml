@@ -33,12 +33,20 @@
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:id="@+id/button_starstop"
         android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:layout_gravity="top|right"
         android:text="Start/Stop"
         app:layout_anchor="@+id/include"
         app:layout_anchorGravity="bottom|left" />
+
+    <Button
+        android:id="@+id/capture_bitmap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Capture Bitmap"
+        app:layout_anchor="@+id/include"
+        app:layout_anchorGravity="center_horizontal|bottom" />
 
 </android.support.design.widget.CoordinatorLayout>

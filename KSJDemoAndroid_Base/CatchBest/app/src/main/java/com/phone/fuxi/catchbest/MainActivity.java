@@ -1,14 +1,21 @@
 package com.phone.fuxi.catchbest;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.support.design.widget.FloatingActionButton;
@@ -24,22 +31,80 @@ import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import com.catchbest.KSJ_BAYERMODE;
+import com.catchbest.KSJ_PARAM;
 import com.catchbest.KSJ_TRIGGRMODE;
 import com.catchbest.KSJ_WB_MODE;
 import com.catchbest.cam;
 
+import static com.catchbest.KSJ_PARAM.KSJ_BLUE;
+import static com.catchbest.KSJ_PARAM.KSJ_GREEN;
+import static com.catchbest.KSJ_PARAM.KSJ_RED;
 import static java.lang.Thread.sleep;
 
 
-public class MainActivity extends AppCompatActivity {
 
-    Context mContext;
+
+
+
+
+
+
+public class MainActivity extends AppCompatActivity  implements  SurfaceHolder.Callback {
+
+
+    public static boolean upgradeRootPermission(String pkgCodePath) {
+        Process process = null;
+        DataOutputStream os = null;
+        try {
+            String cmd="chmod -R 777 " + pkgCodePath ;
+            process = Runtime.getRuntime().exec("su"); //切换到root帐号
+            os = new DataOutputStream(process.getOutputStream());
+            os.writeBytes(cmd + "\n");
+            os.writeBytes("exit\n");
+            os.flush();
+            process.waitFor();
+        } catch (Exception e) {
+            return false;
+        } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+                process.destroy();
+            } catch (Exception e) {
+            }
+        }
+        return true;
+    }
+
+    Context mContext = this;
     BroadcastReceiver mUsbReceiver;
 
     public ByteBuffer[] m_receiverbuffer;
 
 
+    private SurfaceHolder m_PreviewHolder;
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
+    }
 
     public int m_nwidth;
     public int m_nheight;
@@ -48,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
     public ImageView[] m_imgvw;
 
     cam ksjcam;
+    Lock m_Lock;
 
     public int prepare_imagevw() {
         m_imgvw = new ImageView[2];
@@ -91,6 +157,8 @@ public class MainActivity extends AppCompatActivity {
             Toast debugToast3 = Toast.makeText(getApplicationContext(), "BlueGain  == " + ShutterWidth, Toast.LENGTH_LONG);
             debugToast3.show();
 
+
+
 //            ca.setBlueGain(BlueGain);
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -130,59 +198,186 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
+//        upgradeRootPermission("/dev/bus/usb");
+
+        SurfaceView Preview = (SurfaceView)findViewById(R.id.surfaceView);
+        m_PreviewHolder = Preview.getHolder();
+        m_PreviewHolder.addCallback(this);
+
+
+
         prepare_imagevw();
 
-         int[] widtharray = new int[1];
-         int[] heightarray=new int[1];
+        int[] widtharray = new int[1];
+        int[] heightarray=new int[1];
+
+        int[] DeviceTypeArray = new int[1];
+        int[] SerialsArray=new int[1];
+        int[] FirmwareVersionArray = new int[1];
+        ;
+
+        Log.e("zhanwei", "UsbManager openDevice start");
+        UsbManager manager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+        final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
+
+        HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
+        Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
+
+        PendingIntent mPermissionIntent = PendingIntent.getBroadcast(mContext, 0,
+                new Intent(ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        mContext.registerReceiver(mUsbReceiver, filter);
+
+        int fd = -1;
+        while(deviceIterator.hasNext()){
+            UsbDevice device = deviceIterator.next();
+
+            Log.i("zhanwei", device.getDeviceName() + " " + Integer.toHexString(device.getVendorId()) +
+                    " " + Integer.toHexString(device.getProductId()));
+
+            manager.requestPermission(device, mPermissionIntent);
+            UsbDeviceConnection connection = manager.openDevice(device);
+            if(connection != null){
+                fd = connection.getFileDescriptor();
+            } else
+                Log.e("zhanwei", "UsbManager openDevice failed");
+            break;
+        }
+
+
 
 
         ksjcam = new cam();
 
+        if(fd <= 0) return;
 
-        ksjcam.Init();
-
-
-        ksjcam.m_devicecount = ksjcam.DeviceGetCount();
-        Log.e("zhanwei", "ksjcam.m_devicecount = " + String.valueOf(ksjcam.m_devicecount));
-
-        for (int i = 0; i < ksjcam.m_devicecount; i++) {
-
-            ksjcam.CaptureSetFieldOfView(i, 0, 0, 1280, 1024);
-
-            ksjcam.SetBayerMode(i,8);
-
-            ksjcam.CaptureGetSize(i, widtharray, heightarray);
-
-            ksjcam.SetTriggerMode(i, KSJ_TRIGGRMODE.KSJ_TRIGGER_SOFTWARE.ordinal());
-
-            ksjcam.WhiteBalanceSet(i, KSJ_WB_MODE.KSJ_HWB_AUTO_CONITNUOUS.ordinal());
-
-            ksjcam.ExposureTimeSet(i, 20);
-
-        }
-
-        m_nwidth = widtharray[0];
-        m_nheight = heightarray[0];
-
-        Log.e("zhanwei", "m_nwidth = " + String.valueOf(m_nwidth));
-        Log.e("zhanwei", "m_nheight = " + String.valueOf(m_nheight));
+        ksjcam.PreInit(fd);
+        Log.e("zhanwei", "PreInit");
 
 
-        try {
-            sleep(300);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        Toast debugToast = Toast.makeText(getApplicationContext(), "fd =      "+String.valueOf(fd), Toast.LENGTH_LONG);
+        debugToast.show();
+
+        if(fd>0) {
+
+            Log.e("zhanwei", "before ksjcam.Init()  = " + String.valueOf(fd));
+            int  ret = ksjcam.Init();
+            Log.e("zhanwei", "after ksjcam.Init()  = " + String.valueOf(fd));
+
+            {
+                debugToast = Toast.makeText(getApplicationContext(), "   ksjcam.Init() ret =      " + String.valueOf(ret), Toast.LENGTH_SHORT);
+                debugToast.show();
+            }
+
+
+            Log.e("zhanwei", "ksjcam.m_devicecount = " + String.valueOf(ksjcam.m_devicecount));
+            {
+                debugToast = Toast.makeText(getApplicationContext(), "   ksjcam.m_devicecount =      " + String.valueOf(ksjcam.m_devicecount), Toast.LENGTH_SHORT);
+                debugToast.show();
+            }
+
+            m_Lock  = new ReentrantLock();
+            Log.e("zhanwei", "ksjcam.m_devicecount = " + String.valueOf(ksjcam.m_devicecount));
+            {
+                debugToast = Toast.makeText(getApplicationContext(), "   ksjcam.m_devicecount =      " + String.valueOf(ksjcam.m_devicecount), Toast.LENGTH_SHORT);
+                debugToast.show();
+            }
+
+
+            ksjcam.m_devicecount = ksjcam.DeviceGetCount();
+
+            Log.e("zhanwei", "ksjcam.m_devicecount = " + String.valueOf(ksjcam.m_devicecount));
+            {
+                debugToast = Toast.makeText(getApplicationContext(), "   ksjcam.m_devicecount =      " + String.valueOf(ksjcam.m_devicecount), Toast.LENGTH_LONG);
+                debugToast.show();
+            }
+            for (int i = 0; i < ksjcam.m_devicecount; i++) {
+
+                ksjcam.CaptureSetFieldOfView(i, 0, 0, 1280, 960);
+
+                ksjcam.SetBayerMode(i,15);
+
+
+                ksjcam.SetParam(i, KSJ_RED.ordinal(),80);
+                ksjcam.SetParam(i, KSJ_GREEN.ordinal(),80);
+                ksjcam.SetParam(i, KSJ_BLUE.ordinal(),80);
+
+
+                ksjcam.DeviceGetInformation(i,DeviceTypeArray,SerialsArray,FirmwareVersionArray);
+                int nSerial = SerialsArray[0];
+                Log.e("zhanwei", "nSerial = " + String.valueOf(nSerial)+"   index = "+ String.valueOf(i));
+
+                ksjcam.CaptureGetSize(i, widtharray, heightarray);
+                ksjcam.LutSetEnable(i,0);
+
+                ksjcam.SetTriggerMode(i, KSJ_TRIGGRMODE.KSJ_TRIGGER_SOFTWARE.ordinal());
+
+//            ksjcam.WhiteBalanceSet(i, KSJ_WB_MODE.KSJ_HWB_AUTO_CONITNUOUS.ordinal());
+                ksjcam.WhiteBalanceSet(i, KSJ_WB_MODE.KSJ_HWB_PRESETTINGS.ordinal());
+
+                ksjcam.ExposureTimeSet(i, 20);
+
+                m_nwidth = widtharray[0];
+                m_nheight = heightarray[0];
+
+                Log.e("zhanwei", "m_nwidth = " + String.valueOf(m_nwidth));
+                Log.e("zhanwei", "m_nheight = " + String.valueOf(m_nheight));
+            }
+
+
+            try {
+                sleep(300);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 //        ca.setShutterWidth(100);
-        try {
-            sleep(300);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            try {
+                sleep(300);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+
+
         }
 
-        Button bt = (Button) findViewById(R.id.button);
+
+        Button btcapture = (Button) findViewById(R.id.capture_bitmap);
+
+        btcapture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                m_Lock.lock();
+
+//                ksjcam.SetBayerMode(0,19);
+
+                ksjcam.SetBayerMode(0, KSJ_BAYERMODE.KSJ_GBRG_GRAY8.ordinal());
+
+                ksjcam.CaptureBitmap(0,"/sdcard/bitmapcaptured.bmp");
+
+//                ksjcam.SetBayerMode(0,15);
+
+
+                m_Lock.unlock();
+
+                Toast debugToast = Toast.makeText(getApplicationContext(), "captured /sdcard/bitmapcaptured.bmp", Toast.LENGTH_LONG);
+
+                debugToast.show();
+
+
+            }
+        });
+
+
+
+
+        Button bt = (Button) findViewById(R.id.button_starstop);
         bt.setOnClickListener(new View.OnClickListener() {
 
                                   @Override
@@ -193,36 +388,52 @@ public class MainActivity extends AppCompatActivity {
 
                                               captureThreadGo = false;
 
+
                                               return;
 
                                           }
+                                          captureThreadGo = true;
+                                          startCaptureThread(ksjcam.m_devicecount, m_nwidth, m_nheight); //130W
 //
 //                                          String[] mypermis = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-//                                          PermissionHelper.checkPermission(MainActivity.this, mypermis);
-                                          captureThreadGo = true;
-                                          startCaptureThread(ksjcam.m_devicecount,m_nwidth, m_nheight); //130W
+//                                          if(PermissionHelper.checkPermission(MainActivity.this, mypermis)) {
 
+//                                          }
                                       }
                                   }
                               }
         );
     }
 
+
     public void startCaptureThread(int camnum, final int width, final int height) {
+        {
+            Toast debugToast = Toast.makeText(getApplicationContext(), "   ksjcam.m_devicecount =      " + String.valueOf(ksjcam.m_devicecount)   +"width "+String.valueOf(width)+String.valueOf(ksjcam.m_devicecount)   +"height "+String.valueOf(height), Toast.LENGTH_SHORT);
+            debugToast.show();
+        }
+
+        if(0 == camnum) return;
 
         Toast debugToast = Toast.makeText(getApplicationContext(), "startCaptureThread", Toast.LENGTH_LONG);
         debugToast.show();
-
-
         Thread captureThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (captureThreadGo) {
 //                    captureAndshow_TwoStep(0,width,height);
-//                    Log.d("zhanwei", "before captureAndshow_Capture");
-                   captureAndshow_Capture(0, width, height);
-//                    Log.d("zhanwei", "after captureAndshow_Capture");
+                    Log.d("zhanwei", "before captureAndshow_Capture");
 
+
+                    if(m_PreviewHolder.getSurface().isValid()) {
+                        m_Lock.lock();
+
+                        ksjcam.CaptureBySurface(0, m_PreviewHolder.getSurface(), 0); // 0 no save 1 save bmp at /sdcard/
+
+//                    ksjcam.CaptureBySurfaceSave(0,m_PreviewHolder.getSurface(),1,"/dev/capture.bmp");
+
+                        m_Lock.unlock();
+//                    captureAndshow_Capture(0, width, height);
+                    }
                 }
 
             }
@@ -236,9 +447,11 @@ public class MainActivity extends AppCompatActivity {
             Thread captureThread1 = new Thread(new Runnable() {
                 @Override
                 public void run() {
+
+
                     while (captureThreadGo) {
-                        captureAndshow_TwoStep(1, width, height);
-//                    captureAndshow_Capture(1,width,height);
+                        //                      captureAndshow_TwoStep(1, width, height);
+                        captureAndshow_Capture(1,width,height);
 
 
                     }
@@ -246,7 +459,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             });
-            Log.d("zhanwei", "startCaptureThread1");
             captureThread1.start();
         }
     }
@@ -256,33 +468,47 @@ public class MainActivity extends AppCompatActivity {
 
         int[] dataarray1 = ksjcam.CaptureRGBdataIntArrayAfterStart(index, width, height);//read
 
-        final Bitmap bmp = CreateBitmap_from_int_rgba_data(width, height, dataarray1);
+        if(dataarray1!=null  && dataarray1.length>0) {
+            final Bitmap bmp = CreateBitmap_from_int_rgba_data(width, height, dataarray1);
 
-        hd.post(new Runnable() {
-            @Override
-            public void run() {
-                m_imgvw[index].setImageBitmap(bmp);
+            hd.post(new Runnable() {
+                @Override
+                public void run() {
+                    m_imgvw[index].setImageBitmap(bmp);
 
-            }
-        });
+                }
+            });
+        }else
+        {
+            Log.e("zhanwei", "read date failed");
+        }
         return 0;
 
     }
 
     public int captureAndshow_Capture(final int index, int width, int height) {
-
         int[] dataarray = ksjcam.CaptureRGBdataIntArray(index, width, height);//trigger
 
-        final Bitmap bmp = CreateBitmap_from_int_rgba_data(width, height, dataarray);
+        if(dataarray!=null  && dataarray.length>0) {
+
+            final Bitmap bmp = CreateBitmap_from_int_rgba_data(width, height, dataarray);
 
 
-        hd.post(new Runnable() {
-            @Override
-            public void run() {
-                m_imgvw[index].setImageBitmap(bmp);
+            hd.post(new Runnable() {
+                @Override
+                public void run() {
+                    m_imgvw[index].setImageBitmap(bmp);
 
-            }
-        });
+                }
+            });
+
+        }else
+        {
+
+            Log.e("zhanwei", "read date failed");
+        }
+
+
         return 0;
 
     }
@@ -450,6 +676,7 @@ public class MainActivity extends AppCompatActivity {
 //        Log.d("zhanwei", "buf.length    " + String.valueOf(buf.length));
 
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+
         bmp.setHasAlpha(false);
 
         bmp.setPixels(buf, 0, w, 0, 0, w, h);
@@ -549,11 +776,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-//
-//        if(ca640!=null)
-//        {
-//            ca640.release_camera();
-//        }
+
+        ksjcam.UnInit();
 
         super.onDestroy();
     }

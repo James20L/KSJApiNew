@@ -30,12 +30,11 @@ TARGET  := catchbesttest
 #CC      := g++
 LIBS    :=
 
-#DEFINES :=  -DUSING_OPENCV
-#OPENCVLIB := -lopencv_core -lopencv_highgui
-#LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR) -lpng16 -lswresample -llzma -lavcodec  -lavutil -lksjapi -lzvbi -lksjlog -lksjbayer  -ljpeg -lusb-1.0 -ldl
+DEFINES :=  -DUSING_OPENCV
+OPENCVLIB := -lopencv_core -lopencv_highgui
 LDFLAGS :=  -L../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)  $(OPENCVLIB)  -lksjapi -lksjlog -lksjbayer -lpthread -lusb-1.0 -ludev -ljpeg  -ldl
 INCLUDE := -I. -I.. -I../KSJApi.inc 
-CFLAGS  := -gdwarf-2 -g3 -Wall  $(DEFINES) $(INCLUDE) -Wl,-rpath,../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)
+CFLAGS  := -gdwarf-2   -g3 -Wall  $(DEFINES) $(INCLUDE) -Wl,-rpath,../../github.KSJApiNew/KSJApi.bin/linux/$(PLATFORM_BIN_DIR)
 CXXFLAGS:= $(CFLAGS) -DHAVE_CONFIG_H
   
   
