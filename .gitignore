@@ -3,6 +3,7 @@ tmp.delete/
 KSJApiLog/
 common/
 doc/
+KSJApi.bin/KSJAndroidLibs
 
 *.obj
 *.idb
