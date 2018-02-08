@@ -1,0 +1,3 @@
+[submodule "KSJApi.bin/KSJAndroidLibs"]
+	path = KSJApi.bin/KSJAndroidLibs
+	url = git@github.com:catchbest/KSJAndroidLibs.git
