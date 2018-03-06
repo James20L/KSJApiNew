@@ -1,9 +1,10 @@
 #include "KSJDemoQT_Matrix.h"
 #include "ui_KSJDemoQT_Matrix.h"
 
+#define _T(a)  a
 KSJDemoQT_Matrix::KSJDemoQT_Matrix(QWidget *parent) :
     QDialog(parent),
-	m_bPreview(false),
+    m_bPreview(false),m_pKsjpreviewwidget(0),
     ui(new Ui::KSJDemoQT_Matrix)
 {
     ui->setupUi(this);
@@ -41,7 +42,7 @@ void KSJDemoQT_Matrix::GetRealExposureTime()
 	KSJ_ExposureTimeGet(m_nDeviceCurSel, &fExposureTimeMs);
 
 	TCHAR   szExposureTimeMs[32] = { '\0' };
-	sprintf_s(szExposureTimeMs, _T("Exp Time: %0.5f ms"), fExposureTimeMs);
+    sprintf(szExposureTimeMs, _T("Exp Time: %0.5f ms"), fExposureTimeMs);
 	ui->EXPOSURE_TIME_REAL_Label->setText(szExposureTimeMs);
 }
 
@@ -79,10 +80,11 @@ void KSJDemoQT_Matrix::on_SetPreviewFovButton_clicked()
 	nColSize = ui->PreviewColSizeSpinBox->value();
 	nRowSize = ui->PreviewRowSizeSpinBox->value();
 	usMultiFrame = ui->PreviewMultiFrameSpinBox->value();
-
+#if 0
 	KSJ_PreviewSetFieldOfViewEx(m_nDeviceCurSel, nColStart, nRowStart, nColSize, nRowSize, ColAddressMode, RowAddressMode, usMultiFrame);
 	KSJ_PreviewGetFieldOfViewEx(m_nDeviceCurSel, &nColStart, &nRowStart, &nColSize, &nRowSize, &ColAddressMode, &RowAddressMode, &usMultiFrame);
-	ui->PreviewColStartSpinBox->setValue(nColStart);
+#endif
+    ui->PreviewColStartSpinBox->setValue(nColStart);
 	ui->PreviewRowStartSpinBox->setValue(nRowStart);
 	ui->PreviewColSizeSpinBox->setValue(nColSize);
 	ui->PreviewRowSizeSpinBox->setValue(nRowSize);
@@ -93,6 +95,26 @@ void KSJDemoQT_Matrix::on_PreviewButton_clicked()
 {
 	if (m_nDeviceCurSel == -1)   return;
 
+    if(m_pKsjpreviewwidget==NULL)
+    {
+        m_pKsjpreviewwidget= new CKSJPreviewWidget();
+
+        m_pKsjpreviewwidget->CreatCaptureThread();
+
+        m_pKsjpreviewwidget->show();
+
+    }else
+    {
+
+        m_pKsjpreviewwidget->DestoryCaptureThread();
+        m_pKsjpreviewwidget->close();
+        delete m_pKsjpreviewwidget;
+        m_pKsjpreviewwidget = NULL;
+
+    }
+
+
+#if 0
 	HWND   hPreviewWnd = (HWND)ui->PREVIEWWND_Widget->winId();
 	int    nPreviewWndWidth = ui->PREVIEWWND_Widget->width();
 	int    nPreviewWndHeight = ui->PREVIEWWND_Widget->height();
@@ -114,11 +136,12 @@ void KSJDemoQT_Matrix::on_PreviewButton_clicked()
 	ui->PreviewButton->setAutoFillBackground(true);
 
 	KSJ_PreviewStart(m_nDeviceCurSel, m_bPreview);
+#endif
 }
 
 void KSJDemoQT_Matrix::on_SetCaptureFovButton_clicked()
 {
-	int nColStart;
+    int nColStart;
 	int nRowStart;
 	int nColSize;
 	int nRowSize;
@@ -131,10 +154,11 @@ void KSJDemoQT_Matrix::on_SetCaptureFovButton_clicked()
 	nColSize = ui->CaptureColSizeSpinBox->value();
 	nRowSize = ui->CaptureRowSizeSpinBox->value();
 	usMultiFrame = ui->CaptureMultiFrameSpinBox->value();
-
+#if 0
 	KSJ_CaptureSetFieldOfViewEx(m_nDeviceCurSel, nColStart, nRowStart, nColSize, nRowSize, ColAddressMode, RowAddressMode, usMultiFrame);
 	KSJ_CaptureGetFieldOfViewEx(m_nDeviceCurSel, &nColStart, &nRowStart, &nColSize, &nRowSize, &ColAddressMode, &RowAddressMode, &usMultiFrame);
-	ui->CaptureColStartSpinBox->setValue(nColStart);
+#endif
+    ui->CaptureColStartSpinBox->setValue(nColStart);
 	ui->CaptureRowStartSpinBox->setValue(nRowStart);
 	ui->CaptureColSizeSpinBox->setValue(nColSize);
 	ui->CaptureRowSizeSpinBox->setValue(nRowSize);
@@ -164,6 +188,9 @@ void KSJDemoQT_Matrix::on_CaptureButton_clicked()
 	int   nRet = KSJ_CaptureGetSizeEx(m_nDeviceCurSel, &nCaptureWidth, &nCaptureHeight, &nCaptureBitCount);
 	ShowErrorInfo(nRet);
 	unsigned char *pImageData = new unsigned char[nCaptureWidth * nCaptureHeight * (nCaptureBitCount >> 3)];
+    nRet = KSJ_CaptureRgbData(m_nDeviceCurSel, pImageData);
+
+#if 0
 	LARGE_INTEGER    counterStart;
 	QueryPerformanceCounter(&counterStart);
 	nRet = KSJ_CaptureRgbData(m_nDeviceCurSel, pImageData);
@@ -176,9 +203,9 @@ void KSJDemoQT_Matrix::on_CaptureButton_clicked()
 	float fInterval = (float)(counterEnd.QuadPart - counterStart.QuadPart);
 	float fElapse = fInterval / (float)nFreq.QuadPart * 1000;    // MS
 	TCHAR   szElapseTime[32] = { '\0' };
-	sprintf_s(szElapseTime, _T("Elapse: %0.2fms"), fElapse);
+    sprintf(szElapseTime, _T("Elapse: %0.2fms"), fElapse);
 	ui->ELAPSE_TIME_Label->setText(szElapseTime);
-
+#endif
 	unsigned char* pConvertData = new unsigned char[nCaptureWidth * nCaptureHeight * (nCaptureBitCount >> 3)];
 	ConvetData(pImageData, nCaptureWidth, nCaptureHeight, nCaptureBitCount, pConvertData);
 	QImage::Format format;
@@ -228,7 +255,7 @@ void KSJDemoQT_Matrix::UpdateInterfaceFunction()
 		ui->FunctionTableWidget->setItem(i, 0, new QTableWidgetItem(QString(QLatin1String(g_szFunction[i]))));
 		int nSupport = 0;
 		KSJ_QueryFunction(m_nDeviceCurSel, (KSJ_FUNCTION)i, &nSupport);
-		sprintf_s(szSupport, _T("%d"), nSupport);
+        sprintf(szSupport, _T("%d"), nSupport);
 		ui->FunctionTableWidget->setItem(i, 1, new QTableWidgetItem(QString(QLatin1String(szSupport))));
 	} while (i--);
 }
@@ -248,21 +275,21 @@ void KSJDemoQT_Matrix::UpdateInterface()
 	ui->ExposureTimeSpinBox->setRange(nMin, nMax);
 	ui->ExposureTimeSpinBox->setValue(nCur);
 	TCHAR   szText[64] = { '\0' };
-	sprintf_s(szText, _T("%d-%d ms (%0.2fsec, %0.2fmin)"), nMin, nMax, (float)nMin / 1000.0f, (float)nMax / 60000.0f);
+    sprintf(szText, _T("%d-%d ms (%0.2fsec, %0.2fmin)"), nMin, nMax, (float)nMin / 1000.0f, (float)nMax / 60000.0f);
 	ui->EXPOSURE_TIME_RANGE_Label->setText(szText);
 
 	KSJ_GetParamRange(m_nDeviceCurSel, KSJ_EXPOSURE_LINES, &nMin, &nMax);
 	KSJ_GetParam(m_nDeviceCurSel, KSJ_EXPOSURE_LINES, &nCur);
 	ui->ExposureLinesSpinBox->setRange(nMin, nMax);
 	ui->ExposureLinesSpinBox->setValue(nCur);
-	sprintf_s(szText, _T("%d-%d Lines"), nMin, nMax);
+    sprintf(szText, _T("%d-%d Lines"), nMin, nMax);
 	ui->EXPOSURE_LINES_RANGE_Label->setText(szText);
 
 	KSJ_GetParamRange(m_nDeviceCurSel, KSJ_RED, &nMin, &nMax);
 	KSJ_GetParam(m_nDeviceCurSel, KSJ_RED, &nCur);
 	ui->GainSpinBox->setRange(nMin, nMax);
 	ui->GainSpinBox->setValue(nCur);
-	sprintf_s(szText, _T("%d-%d"), nMin, nMax);
+    sprintf(szText, _T("%d-%d"), nMin, nMax);
 	ui->GAIN_RANGE_Label->setText(szText);
 
 	// FOV
@@ -273,9 +300,9 @@ void KSJDemoQT_Matrix::UpdateInterface()
 	unsigned short usMultiFrame;
 	KSJ_ADDRESSMODE ColAddressMode;
 	KSJ_ADDRESSMODE RowAddressMode;
-	KSJ_PreviewGetFieldOfViewEx(m_nDeviceCurSel, &nColStart, &nRowStart, &nColSize, &nRowSize, &ColAddressMode, &RowAddressMode, &usMultiFrame);
+    KSJ_CaptureGetFieldOfView(m_nDeviceCurSel, &nColStart, &nRowStart, &nColSize, &nRowSize, &ColAddressMode, &RowAddressMode);
 	// Preview, Capture they are same, so you should get one is ok!
-	sprintf_s(szText, _T("%d-%d"), nColSize, nRowSize);
+    sprintf(szText, _T("%d-%d"), nColSize, nRowSize);
 	ui->FOV_RANGE_Label->setText(szText);
 
 	ui->PreviewColStartSpinBox->setRange(0, nColSize);
@@ -289,7 +316,7 @@ void KSJDemoQT_Matrix::UpdateInterface()
 	ui->PreviewMultiFrameSpinBox->setRange(1, 20000);
 	ui->PreviewMultiFrameSpinBox->setValue(usMultiFrame);
 
-	KSJ_CaptureGetFieldOfViewEx(m_nDeviceCurSel, &nColStart, &nRowStart, &nColSize, &nRowSize, &ColAddressMode, &RowAddressMode, &usMultiFrame);
+    KSJ_CaptureGetFieldOfView(m_nDeviceCurSel, &nColStart, &nRowStart, &nColSize, &nRowSize, &ColAddressMode, &RowAddressMode);
 	ui->CaptureColStartSpinBox->setRange(0, nColSize);
 	ui->CaptureColStartSpinBox->setValue(nColStart);
 	ui->CaptureRowStartSpinBox->setRange(0, nRowSize);
@@ -315,7 +342,7 @@ void KSJDemoQT_Matrix::UpdateDeviceList()
 	for (int i = 0; i < m_nDeviceNum; i++)
 	{
 		m_DeviceInfo[i].nIndex = i;
-		KSJ_DeviceGetInformationEx(i, &(m_DeviceInfo[i].DeviceType), &(m_DeviceInfo[i].nSerials), &(m_DeviceInfo[i].wFirmwareVersion), &(m_DeviceInfo[i].wFpgaVersion));
+        KSJ_DeviceGetInformationEx(i, &(m_DeviceInfo[i].DeviceType), &(m_DeviceInfo[i].nSerials), &(m_DeviceInfo[i].wFirmwareVersion), &(m_DeviceInfo[i].wFpgaVersion));
 
 		unsigned char btMajVersion = (m_DeviceInfo[i].wFirmwareVersion & 0xFF00) >> 8;		// 得到主版本号
 		unsigned char btMinVersion = m_DeviceInfo[i].wFirmwareVersion & 0x00FF;				// 得到副版本号
@@ -346,18 +373,18 @@ void KSJDemoQT_Matrix::UpdateWbmControls()
 	int nRet = KSJ_WhiteBalanceMatrixGet(m_nDeviceCurSel, fMatrix);
 
 	TCHAR  szMatrix[16] = { '\0' };
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fMatrix[0]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fMatrix[0]);
 	ui->REdit->setText(szMatrix);
 	ui->RSlider->setRange(0, (int)(5 * WHITE_BALANCE_RATIO_PRESION));
 	ui->RSlider->setValue((int)(fMatrix[0] * WHITE_BALANCE_RATIO_PRESION));
 
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fMatrix[1]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fMatrix[1]);
 	ui->GEdit->setText(szMatrix);
 	ui->GSlider->setRange(0, (int)(5 * WHITE_BALANCE_RATIO_PRESION));
 	ui->GSlider->setValue((int)(fMatrix[1] * WHITE_BALANCE_RATIO_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fMatrix[2]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fMatrix[2]);
 	ui->BEdit->setText(szMatrix);
 	ui->BSlider->setRange(0, (int)(5 * WHITE_BALANCE_RATIO_PRESION));
 	ui->BSlider->setValue((int)(fMatrix[1] * WHITE_BALANCE_RATIO_PRESION));
@@ -370,55 +397,55 @@ void KSJDemoQT_Matrix::UpdateCcmControls()
 	int nRet = KSJ_ColorCorrectionMatrixGet(m_nDeviceCurSel, fCcmMatrix);
 
 	TCHAR  szMatrix[16] = { '\0' };
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[0][0]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[0][0]);
 	ui->GEdit00->setText(szMatrix);
 	ui->GEdit00->setCursorPosition(1);
 	ui->GSlider00->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider00->setValue((int)(fCcmMatrix[0][0] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[0][1]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[0][1]);
 	ui->GEdit01->setText(szMatrix);
 	ui->GEdit01->setCursorPosition(1);
 	ui->GSlider01->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider01->setValue((int)(fCcmMatrix[0][1] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[0][2]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[0][2]);
 	ui->GEdit02->setText(szMatrix);
 	ui->GEdit02->setCursorPosition(1);
 	ui->GSlider02->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider02->setValue((int)(fCcmMatrix[0][2] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[1][0]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[1][0]);
 	ui->GEdit10->setText(szMatrix);
 	ui->GEdit10->setCursorPosition(1);
 	ui->GSlider10->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider10->setValue((int)(fCcmMatrix[1][0] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[1][1]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[1][1]);
 	ui->GEdit11->setText(szMatrix);
 	ui->GEdit11->setCursorPosition(1);
 	ui->GSlider11->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider11->setValue((int)(fCcmMatrix[1][1] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[1][2]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[1][2]);
 	ui->GEdit12->setText(szMatrix);
 	ui->GEdit12->setCursorPosition(1);
 	ui->GSlider12->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider12->setValue((int)(fCcmMatrix[1][2] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[2][0]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[2][0]);
 	ui->GEdit20->setText(szMatrix);
 	ui->GEdit20->setCursorPosition(1);
 	ui->GSlider20->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider20->setValue((int)(fCcmMatrix[2][0] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[2][1]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[2][1]);
 	ui->GEdit21->setText(szMatrix);
 	ui->GEdit21->setCursorPosition(1);
 	ui->GSlider21->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
 	ui->GSlider21->setValue((int)(fCcmMatrix[2][1] * COLOR_CORRECTION_PRESION));
 
-	sprintf_s(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[2][2]);
+    sprintf(szMatrix, WHITE_BALANCE_RATIO_FORMAT, fCcmMatrix[2][2]);
 	ui->GEdit22->setText(szMatrix);
 	ui->GEdit22->setCursorPosition(1);
 	ui->GSlider22->setRange((int)(-COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION), (int)(COLOR_CORRECTION_RANGE * COLOR_CORRECTION_PRESION));
@@ -487,13 +514,13 @@ void KSJDemoQT_Matrix::UpdateInterfaceColor()
 
 	UpdateCcmControls();
 }
-
+#if 0
 VOID WINAPI WBACALLBACK(float fMatrix[3], void *lpContext)
 {
 	KSJDemoQT_Matrix *pKSJDemoVCDlg = (KSJDemoQT_Matrix *)lpContext;
 	pKSJDemoVCDlg->WBACallback(fMatrix);
 }
-
+#endif
 void KSJDemoQT_Matrix::WBACallback(float fMatrix[3])
 {
 	// fMatrix is Final Matrix for White Balance
@@ -504,13 +531,13 @@ void KSJDemoQT_Matrix::WBACallback(float fMatrix[3])
 	float fGRatio = fMatrix[1];
 	float fBRatio = fMatrix[2];
 
-	sprintf_s(szWBValue, WHITE_BALANCE_RATIO_FORMAT, fRRatio);
+    sprintf(szWBValue, WHITE_BALANCE_RATIO_FORMAT, fRRatio);
 	ui->REdit->setText(szWBValue);
 
-	sprintf_s(szWBValue, WHITE_BALANCE_RATIO_FORMAT, fGRatio);
+    sprintf(szWBValue, WHITE_BALANCE_RATIO_FORMAT, fGRatio);
 	ui->GEdit->setText(szWBValue);
 
-	sprintf_s(szWBValue, WHITE_BALANCE_RATIO_FORMAT, fBRatio);
+    sprintf(szWBValue, WHITE_BALANCE_RATIO_FORMAT, fBRatio);
 	ui->BEdit->setText(szWBValue);
 
 	ui->RSlider->setValue((int)(fRRatio * WHITE_BALANCE_RATIO_PRESION));
@@ -528,7 +555,7 @@ void KSJDemoQT_Matrix::on_WBComboBox_currentIndexChanged(int index)
 
 
 	int nRet = KSJ_WhiteBalanceSet(m_nDeviceCurSel, KSJ_WB_MODE(index));
-	KSJ_WhiteBalanceAutoSetCallBack(m_nDeviceCurSel, WBACALLBACK, this);
+//	KSJ_WhiteBalanceAutoSetCallBack(m_nDeviceCurSel, WBACALLBACK, this);
 }
 
 void KSJDemoQT_Matrix::on_PresettingComboBox_currentIndexChanged(int index)
@@ -550,7 +577,7 @@ void KSJDemoQT_Matrix::on_RSlider_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, WHITE_BALANCE_RATIO_FORMAT, (float)(nValue / WHITE_BALANCE_RATIO_PRESION));
+    sprintf(szValue, WHITE_BALANCE_RATIO_FORMAT, (float)(nValue / WHITE_BALANCE_RATIO_PRESION));
 	ui->REdit->setText(szValue);
 	SetWbm();
 }
@@ -560,7 +587,7 @@ void KSJDemoQT_Matrix::on_GSlider_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, WHITE_BALANCE_RATIO_FORMAT, (float)(nValue / WHITE_BALANCE_RATIO_PRESION));
+    sprintf(szValue, WHITE_BALANCE_RATIO_FORMAT, (float)(nValue / WHITE_BALANCE_RATIO_PRESION));
 	ui->GEdit->setText(szValue);
 	SetWbm();
 }
@@ -570,7 +597,7 @@ void KSJDemoQT_Matrix::on_BSlider_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, WHITE_BALANCE_RATIO_FORMAT, (float)(nValue / WHITE_BALANCE_RATIO_PRESION));
+    sprintf(szValue, WHITE_BALANCE_RATIO_FORMAT, (float)(nValue / WHITE_BALANCE_RATIO_PRESION));
 	ui->BEdit->setText(szValue); 
 	SetWbm();
 }
@@ -606,7 +633,7 @@ void KSJDemoQT_Matrix::on_GSlider00_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit00->setText(szValue);
 	SetCcm();
 }
@@ -616,7 +643,7 @@ void KSJDemoQT_Matrix::on_GSlider01_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit01->setText(szValue);
 	SetCcm();
 }
@@ -626,7 +653,7 @@ void KSJDemoQT_Matrix::on_GSlider02_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit02->setText(szValue);
 	SetCcm();
 }
@@ -636,7 +663,7 @@ void KSJDemoQT_Matrix::on_GSlider10_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit10->setText(szValue);
 	SetCcm();
 }
@@ -646,7 +673,7 @@ void KSJDemoQT_Matrix::on_GSlider11_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit11->setText(szValue);
 	SetCcm();
 }
@@ -656,7 +683,7 @@ void KSJDemoQT_Matrix::on_GSlider12_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit12->setText(szValue);
 	SetCcm();
 }
@@ -666,7 +693,7 @@ void KSJDemoQT_Matrix::on_GSlider20_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit20->setText(szValue);
 	SetCcm();
 }
@@ -676,7 +703,7 @@ void KSJDemoQT_Matrix::on_GSlider21_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit21->setText(szValue);
 	SetCcm();
 }
@@ -686,7 +713,7 @@ void KSJDemoQT_Matrix::on_GSlider22_valueChanged(int nValue)
 	if (m_nDeviceCurSel == -1)   return;
 
 	TCHAR               szValue[16] = { '\0' };
-	sprintf_s(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
+    sprintf(szValue, COLOR_CORRECTION_FORMAT, (float)(nValue / COLOR_CORRECTION_PRESION));
 	ui->GEdit22->setText(szValue);
 	SetCcm();
 }

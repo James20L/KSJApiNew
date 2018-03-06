@@ -10,6 +10,8 @@
 
 #include "stdio.h"
 
+#include "KSJPreviewWidget.h"
+
 #ifdef _WIN64
 #ifdef _DEBUG
 #pragma comment( lib, "..\\KSJApi.Lib\\KSJApi64.lib" )
@@ -28,11 +30,11 @@
 
 struct DEVICEINFO
 {
-	int                 nIndex;
-	KSJ_DEVICETYPE		DeviceType;
-	int					nSerials;
-        short				wFirmwareVersion;
-        short                wFpgaVersion;
+    int                 nIndex;
+    unsigned short		DeviceType;
+    int					nSerials;
+    unsigned    short				wFirmwareVersion;
+    unsigned  short                wFpgaVersion;
 };
 
 #define WHITE_BALANCE_RATIO_PRESION    1000.0f
@@ -71,60 +73,62 @@ private slots:
 
     void on_CaptureButton_clicked();
 
-	void on_WBComboBox_currentIndexChanged(int index);
+    void on_WBComboBox_currentIndexChanged(int index);
 
-	void on_PresettingComboBox_currentIndexChanged(int index);
+    void on_PresettingComboBox_currentIndexChanged(int index);
 
-	void on_PhiSpinBox_valueChanged(int arg1);
+    void on_PhiSpinBox_valueChanged(int arg1);
 
-	void on_RSlider_valueChanged(int nValue);
+    void on_RSlider_valueChanged(int nValue);
 
-	void on_GSlider_valueChanged(int nValue);
+    void on_GSlider_valueChanged(int nValue);
 
-	void on_BSlider_valueChanged(int nValue);
+    void on_BSlider_valueChanged(int nValue);
 
-	void on_CCMComboBox_currentIndexChanged(int index);
+    void on_CCMComboBox_currentIndexChanged(int index);
 
-	void on_CCMPresettingComboBox_currentIndexChanged(int index);
+    void on_CCMPresettingComboBox_currentIndexChanged(int index);
 
-	void on_GSlider00_valueChanged(int nValue);
+    void on_GSlider00_valueChanged(int nValue);
 
-	void on_GSlider01_valueChanged(int nValue);
+    void on_GSlider01_valueChanged(int nValue);
 
-	void on_GSlider02_valueChanged(int nValue);
+    void on_GSlider02_valueChanged(int nValue);
 
-	void on_GSlider10_valueChanged(int nValue);
+    void on_GSlider10_valueChanged(int nValue);
 
-	void on_GSlider11_valueChanged(int nValue);
+    void on_GSlider11_valueChanged(int nValue);
 
-	void on_GSlider12_valueChanged(int nValue);
+    void on_GSlider12_valueChanged(int nValue);
 
-	void on_GSlider20_valueChanged(int nValue);
+    void on_GSlider20_valueChanged(int nValue);
 
-	void on_GSlider21_valueChanged(int nValue);
+    void on_GSlider21_valueChanged(int nValue);
 
-	void on_GSlider22_valueChanged(int nValue);
+    void on_GSlider22_valueChanged(int nValue);
 private:
     Ui::KSJDemoQT_Matrix *ui;
-	int m_nDeviceNum;
-	int m_nDeviceCurSel;
-	DEVICEINFO    m_DeviceInfo[MAX_DEVICE];
-	QVector<QRgb> m_vcolorTable; //生成灰度颜色表
-	bool  m_bPreview;
-	QColor m_col;
+    int m_nDeviceNum;
+    int m_nDeviceCurSel;
+    DEVICEINFO    m_DeviceInfo[MAX_DEVICE];
+    QVector<QRgb> m_vcolorTable; //生成灰度颜色表
+    bool  m_bPreview;
+    QColor m_col;
+
+    CKSJPreviewWidget  *m_pKsjpreviewwidget;
 public:
-	void UpdateInterfaceFunction();
-	void UpdateInterface();
-	void UpdateDeviceList();
-	void GetRealExposureTime();
-	void ConvetData(unsigned char *pData, int nWidth, int nHeight, int nBitCount, unsigned char* pConvertData);
-	void ShowErrorInfo(int nRet);
-	void UpdateWbmControls();
-	void UpdateCcmControls();
-	void UpdateInterfaceColor();
-	void WBACallback(float fMatrix[3]);
-	void SetWbm();
-	void SetCcm();
+    void UpdateInterfaceFunction();
+    void UpdateInterface();
+    void UpdateDeviceList();
+    void GetRealExposureTime();
+    void ConvetData(unsigned char *pData, int nWidth, int nHeight, int nBitCount, unsigned char* pConvertData);
+    void ShowErrorInfo(int nRet);
+    void UpdateWbmControls();
+    void UpdateCcmControls();
+    void UpdateInterfaceColor();
+    void WBACallback(float fMatrix[3]);
+    void SetWbm();
+    void SetCcm();
 };
 
 #endif // KSJDEMOQT_BASE_H

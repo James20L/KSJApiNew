@@ -23,9 +23,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+INCLUDEPATH +=../../KSJApi.inc
 
-HEADERS  += mainwindow.h
+INCLUDEPATH +=../../../git.KSJLog/KSJLog.Inc/
 
-FORMS    += mainwindow.ui
+
+LIBS += -L../../KSJApi.bin/linux/x64 \
+        -Wl,--start-group  -lopencv_core -lopencv_highgui \
+        -lksjlog -lopencv_imgproc -lavformat -lavcodec -lavutil -lswresample -lusb-1.0 -lksjapi \
+        -lksjbayer  -ljpeg -ldl -lpthread  -lz -llzma -Wl,--end-group -Wl,-rpath,../../KSJApi.bin/linux/x64
+
+
+
+
+SOURCES += main.cpp \
+    KSJDemoQT_Matrix.cpp \
+    KSJ_GS.cpp \
+    KSJPreviewThread.cpp \
+    KSJPreviewWidget.cpp
+
+HEADERS  += \
+    KSJDemoQT_Matrix.h \
+    KSJPreviewWidget.h \
+    KSJPreviewThread.h
+
+FORMS    += mainwindow.ui \
+    KSJDemoQT_Matrix.ui

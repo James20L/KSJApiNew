@@ -11,7 +11,6 @@ import threading
 import time
 import numpy as np
 import cv2
-import cv2.cv as cv
 from ctypes import * 
 """
 200w 1936 1216 
@@ -21,21 +20,23 @@ from ctypes import *
 #g_nHeight = 2048
 nWidthArray = [25]
 nHeightArray = [25]
-
+g_mono = 0;
 nThreadFlag =1;
 
 def KsjInit():
     libKsj = cdll.LoadLibrary('libksjapi.so')
     libKsj.KSJ_Init()
     camCount =libKsj.KSJ_DeviceGetCount()
-    print camCount
+    print(camCount)
     if camCount < 1:
-        print "no cam fount"
+        print("no cam fount")
     else:
-        print "cam found"
+        print("cam found")
     return libKsj,camCount
 
 def CamParmSet(libKsj,num):
+
+    global g_mono
     for i in range(0,num):
         
         usDeviceType = c_int()
@@ -61,15 +62,15 @@ def CamParmSet(libKsj,num):
         RowAddressMode = c_int() 
 #        libKsj.KSJ_CaptureGetDefaultFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))        
         libKsj.KSJ_CaptureGetFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))        
-        print  nColStart.value
-        print  nRowStart.value
-        print  nColSize.value
-        print  nRowSize.value
-        print  ColAddressMode.value
-        print  RowAddressMode .value
+        print(nColStart.value)
+        print(nRowStart.value)
+        print(nColSize.value)
+        print(nRowSize.value)
+        print(ColAddressMode.value)
+        print(RowAddressMode .value)
 
-	nWidthArray[i] = nColSize.value 
-	nHeightArray[i] = nRowSize.value
+        nWidthArray[i] = nColSize.value
+        nHeightArray[i] = nRowSize.value
 
         '''
         for set ,mirror ,do not change the 2nd parm, ,3rd parm is gain value     
@@ -81,26 +82,36 @@ def CamParmSet(libKsj,num):
         '''
  #       libKsj.KSJ_SetParam(i,11,1);
 
-	'''
-        for set bayer mode ,this is relative to the filp do not change        
+        '''
+        for set bayer mode ,this is relative to the filp do not change
         231 set to 3
         120 set to 1        
         '''
 
-        libKsj.KSJ_BayerSetMode(i, 5);
-        '''
-        for set whitbalance mode 7 stand for auto continus        
-        '''
+        mono = c_int()
 
-        libKsj.KSJ_WhiteBalanceSet(i,7);
-#	libKsj.KSJ_WhiteBalancePresettingSet(i,2)	
+        libKsj.KSJ_QueryFunction(i, 0, byref(mono));
 
-        '''
-        for set color correction 3 is hardware present
-        '''
-#        libKsj.KSJ_ColorCorrectionSet(i,3)
-        
-#	libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
+        if mono.value == 0:
+            g_mono = 0;
+            libKsj.KSJ_BayerSetMode(i, 5);
+            '''
+            for set whitbalance mode 7 stand for auto continus
+            '''
+
+            libKsj.KSJ_WhiteBalanceSet(i,7);
+            libKsj.KSJ_WhiteBalancePresettingSet(i,2)
+
+            '''
+            for set color correction 3 is hardware present
+            '''
+            libKsj.KSJ_ColorCorrectionSet(i,3)
+            libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
+        else:
+            g_mono = 1;
+
+        print("g_mono is ")
+        print(g_mono)
 
 #        fexpTime.value = 100.0              
         libKsj.KSJ_ExposureTimeSet.argtypes = (c_int,c_float)
@@ -125,98 +136,86 @@ def CamParmSet(libKsj,num):
 
 
 def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum): 
-    retValue = libKsj.KSJ_CaptureRgbData(nIndex,cBuf)
+    if nChannelNum==1:
+        retValue = libKsj.KSJ_CaptureRawData(nIndex,cBuf)
+    if  nChannelNum>1:
+        retValue = libKsj.KSJ_CaptureRgbData(nIndex,cBuf)
     if retValue != 0:
-	print "capture error code %d"%(retValue)  
+        print("capture error code %d"%(retValue))
   
     nparr = np.fromstring(cBuf,np.uint8).reshape(nHeight,nWidth,nChannelNum );     
     return nparr
  
- 
-def QuitAll():
-
-
-        '''
-        for set gain ,do not change the 2nd parm, ,3rd parm is gain value     
-        '''
-        libKsj.KSJ_SetParam(i,1,30);
-
-
-        '''
-        for set the sensitivity  1 stand for high
-      
-        '''  
-        libKsj.KSJ_SensitivitySetMode(i,0)
-
-
-        '''
-        for set color correction 3 is hardware present
-        '''
-#        libKsj.KSJ_ColorCorrectionSet(i,3)
-        
-
-      
-
-        
-
-
-def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum): 
-    retValue = libKsj.KSJ_CaptureRgbData(nIndex,cBuf)
-    if retValue != 0:
-	print "capture error code %d"%(retValue)  
-  
-    nparr = np.fromstring(cBuf,np.uint8).reshape(nHeight,nWidth,nChannelNum );     
-    return nparr
  
  
 def QuitAll():
     global nThreadFlag
-    print "exit"
+    print("exit")
     nThreadFlag=0;
     
 def  CreateBuf(libKsj,num):
+    global g_mono
     buflist=[]
     nWidth = c_int()
     nHeight = c_int()
     nBitCount = c_int()
     for i in range(0,num) :
         libKsj.KSJ_CaptureGetSizeEx(i,byref(nWidth), byref(nHeight),byref(nBitCount))
-        print     nWidth
-        print     nHeight
-        print     nBitCount
-        nbufferSize = nWidth.value*nHeight.value*nBitCount.value/8
-        pRawData = create_string_buffer(nbufferSize)
+        print(nWidth)
+        print(nHeight)
+        print(nBitCount)
+        if g_mono == 0 :
+            nbufferSize = nWidth.value*nHeight.value*nBitCount.value/8
+        else:
+            nbufferSize = nWidth.value*nHeight.value
+#        import pdb;pdb.set_trace()
+        pRawData = create_string_buffer(int(nbufferSize))
         buflist.append(pRawData)
     return buflist
           
 
 def CapturDataLoop(nIndex,pDataBuf,nWidth,nHeight):
-    print "cam loop nIndex = %d" %(nIndex)
+    print("cam loop nIndex = %d" %(nIndex))
     global nThreadFlag
-    print "nThreadFlag = %d"%(nThreadFlag)
+    global g_mono
+    print("nThreadFlag = %d"%(nThreadFlag))
     nFrameCount =0
     nTimeStart = datetime.datetime.now() 
     nTimeStop = datetime.datetime.now()
+    nxxWidth = c_int()
+    nxxHeight = c_int()
+    nBitCount = c_int()
+
+    libKsj.KSJ_CaptureGetSizeEx(i,byref(nxxWidth), byref(nxxHeight),byref(nBitCount))
   
+    if g_mono==1:
+        channelnum =1;
+    else:
+        channelnum = nBitCount.value/8
+
+
+    print("g_mono is ")
+    print(g_mono)
+
     while nThreadFlag > 0:
        
-	image =  CapturData(nIndex,pDataBuf,nHeight,nWidth,3)
+        image =  CapturData(nIndex,pDataBuf,nHeight,nWidth,int(channelnum))
         
-	cv2.imshow("test",image)
-    	cv2.waitKey(50)
+        cv2.imshow("test",image)
+        cv2.waitKey(1)
 
         if nFrameCount == 0:
             nTimeStart = datetime.datetime.now() 
             
         if nFrameCount == 99:
             nTimeStop = datetime.datetime.now() 
-            print "cam   %d " %(nIndex)
-	    print (nTimeStop-nTimeStart)
+            print ("cam   %d " %(nIndex))
+            print (nTimeStop-nTimeStart)
             nFrameCount=-1
             
         nFrameCount=nFrameCount+1    
         time.sleep(0.001)
-    print "thread quit"
+    print("thread quit")
 #           
 
 #face_cascade = cv2.CascadeClassifier('/home/terry/work/opencv/opencv-3.2.0/data/haarcascades/haarcascade_frontalface_default.xml')
@@ -232,21 +231,22 @@ if __name__ == '__main__':
         initRes=KsjInit()
         libKsj=initRes[0]
         camNub=initRes[1]
-        print libKsj
-        print camNub
+        print(libKsj)
+        print(camNub)
         CamParmSet(libKsj,camNub)
+
         bufList=CreateBuf(libKsj,camNub)
         threadlist=[]
-        for i in range(0,camNub):
-    
+        import pdb;pdb.set_trace()
+        for i in range(0,camNub):   
             threadlist.append(threading.Thread(target=CapturDataLoop,args=(i,bufList[i],nWidthArray[i],nHeightArray[i])))                 
             threadlist[i].setDaemon(True)
             threadlist[i].start()
     
         while nThreadFlag>0:
             pass
-    except Exception, exc:
-        print exc
+    except Exception as exc:
+        print(exc)
 
 
 

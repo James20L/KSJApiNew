@@ -24,9 +24,21 @@ CKSJPreviewWidget::CKSJPreviewWidget(QWidget *parent) : QWidget(parent)
         exit(-1);
     }
 
+    KSJ_BAYERMODE mode;
+
+    KSJ_BayerGetDefaultMode(0, &mode);
+    qDebug(" %s %s %d   KSJ_BayerGetDefaultMode= %d \n",__FILE__,__FUNCTION__,__LINE__,mode);
 
 
-    KSJ_BayerSetMode(0, KSJ_BGGR_BGR24);
+    //    KSJ_BayerSetMode(0, KSJ_GRBG_BGR24_FLIP);
+
+    //    KSJ_BAYERMODE mode;
+
+    KSJ_BayerGetMode(0, &mode);
+
+
+    qDebug(" %s %s %d   KSJ_BayerGetMode  = %d \n",__FILE__,__FUNCTION__,__LINE__,mode);
+
 
     nRet = KSJ_CaptureGetSizeEx(0,&m_nWindowW,&m_nWindowH,&m_nBitCount);
 
@@ -77,7 +89,7 @@ void CKSJPreviewWidget:: DestoryCaptureThread()
 
 void CKSJPreviewWidget:: On_UpdateSignal(unsigned char * pData)
 {
-    qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
+    //    qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
 
     int nRet= 0;
 
@@ -104,7 +116,7 @@ void CKSJPreviewWidget:: On_UpdateSignal(unsigned char * pData)
 
 void CKSJPreviewWidget:: paintEvent(QPaintEvent *event)
 {
-    qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
+    //  qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
     if(m_pBuf==NULL) return;
 
     QImage *pImg =NULL;
@@ -112,15 +124,21 @@ void CKSJPreviewWidget:: paintEvent(QPaintEvent *event)
 
 
     m_mMutex.lock();
+    QImage mirroredImage ;
     switch (m_nColormode) {
     case 0:
     {
         pImg = new QImage(m_pBuf,m_nImageW,m_nImageH,QImage::Format_RGB888);
+
+         mirroredImage = pImg->mirrored(false, false);
+
+
     }
         break;
     case 1:
     {
         pImg = new QImage(m_pBuf,m_nImageW,m_nImageH,QImage::Format_Grayscale8);
+         mirroredImage = pImg->mirrored(false, false);
     }
         break;
     case 2:
@@ -132,10 +150,10 @@ void CKSJPreviewWidget:: paintEvent(QPaintEvent *event)
         break;
     }
 
-    painter.drawImage(m_nWindowX, m_nWindowY, *pImg, m_nImageX, m_nImageY, m_nImageW, m_nImageH,Qt::AutoColor);
+    painter.drawImage(m_nWindowX, m_nWindowY, mirroredImage, m_nImageX, m_nImageY, m_nImageW, m_nImageH,Qt::AutoColor);
     m_mMutex.unlock();
     if(pImg!=NULL)
         delete pImg;
-    qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
+    //   qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
 }
 

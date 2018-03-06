@@ -41,11 +41,32 @@ void CKSJPreviewThread:: run()
     while(m_bIsrunning)
     {
         m_pMutex->lock();
-         qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
+        //         qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
         nRet=KSJ_CaptureRgbData(0,m_pBuf[GetBufIndex()]);
-        qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
-                m_pMutex->unlock();
-        emit(UpdateImage(m_pBuf[GetBufIndex()]));
+
+//        int bitscount = m_nBitCount/8;
+
+//        for(int i = 0;i<m_nWidth*m_nHeight;i++)
+//        {
+
+//            for(int j = 0 ;j <bitscount ;j++)
+//            {
+
+//                if(j==0)
+//                    *(m_pBuf[1]+i*bitscount+j) = *(m_pBuf[0]+(m_nWidth*m_nHeight-i+1)*bitscount-1);
+//                if(j==1)
+//                    *(m_pBuf[1]+i*bitscount+j) = *(m_pBuf[0]+(m_nWidth*m_nHeight-i+1)*bitscount - 2);
+
+//                if(j==2)
+//                    *(m_pBuf[1]+i*bitscount+j) = *(m_pBuf[0]+(m_nWidth*m_nHeight-i+1)*bitscount-0);
+
+//            }
+
+//        }
+
+        //        qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
+        m_pMutex->unlock();
+        emit(UpdateImage(m_pBuf[0]));
         usleep(100);
 
     }
@@ -60,7 +81,7 @@ void CKSJPreviewThread::SetFpRunBody(const fpRunBody &fpRunBody)
 CKSJPreviewThread:: ~CKSJPreviewThread()
 {
 
-if(m_pBuf[0]!=NULL) free(m_pBuf[0]);
-if(m_pBuf[1]!=NULL) free(m_pBuf[1]);
- qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
+    if(m_pBuf[0]!=NULL) free(m_pBuf[0]);
+    if(m_pBuf[1]!=NULL) free(m_pBuf[1]);
+    qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
 }

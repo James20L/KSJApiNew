@@ -202,8 +202,8 @@ int KSJ_SetCamsParam(int camcount)
 
 
 
-        width =1280;
-        height = 1024;
+//        width =1280;
+//        height = 1024;
 #if 1
 
 //        KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIP2,KSJ_SKIP2);
@@ -238,7 +238,7 @@ int KSJ_SetCamsParam(int camcount)
 
         printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 
-        nExposureTime = .1;
+        nExposureTime = 20;
         printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 
         KSJ_ExposureTimeSet(nIndex,nExposureTime);
