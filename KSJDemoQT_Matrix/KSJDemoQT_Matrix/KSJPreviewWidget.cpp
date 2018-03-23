@@ -6,12 +6,12 @@
 #include "KSJLog.h"
 #include <unistd.h>
 
+
 CKSJPreviewWidget::CKSJPreviewWidget(QWidget *parent) : QWidget(parent)
 {
 
     m_pPreview_Thread =NULL;
     m_pBuf = NULL;
-
 
     int nRet = 0;
 
@@ -24,32 +24,29 @@ CKSJPreviewWidget::CKSJPreviewWidget(QWidget *parent) : QWidget(parent)
         exit(-1);
     }
 
-    KSJ_BAYERMODE mode;
+    int info = 0;
+    KSJ_QueryFunction(0, KSJ_PROPERTY_MONO_DEVICE, &info);
 
-    KSJ_BayerGetDefaultMode(0, &mode);
-    qDebug(" %s %s %d   KSJ_BayerGetDefaultMode= %d \n",__FILE__,__FUNCTION__,__LINE__,mode);
+    if(info==0)
+    {
+        m_nColormode =1;
+    }else
+    {
+        m_nColormode =0;
+    }
 
+    if(m_nColormode){
+        KSJ_BAYERMODE mode;
 
-    //    KSJ_BayerSetMode(0, KSJ_GRBG_BGR24_FLIP);
+        KSJ_BayerGetDefaultMode(0, &mode);
+        qDebug(" %s %s %d   KSJ_BayerGetDefaultMode= %d \n",__FILE__,__FUNCTION__,__LINE__,mode);
 
-    //    KSJ_BAYERMODE mode;
+        KSJ_BayerSetMode(0, KSJ_BAYERMODE(mode+4));
 
-    KSJ_BayerGetMode(0, &mode);
+        KSJ_BayerGetMode(0, &mode);
+        qDebug(" %s %s %d   KSJ_BayerGetMode  = %d \n",__FILE__,__FUNCTION__,__LINE__,mode);
+    }
 
-
-    qDebug(" %s %s %d   KSJ_BayerGetMode  = %d \n",__FILE__,__FUNCTION__,__LINE__,mode);
-
-
-    nRet = KSJ_CaptureGetSizeEx(0,&m_nWindowW,&m_nWindowH,&m_nBitCount);
-
-    this->setGeometry(0,0,m_nWindowW,m_nWindowH);
-
-
-    KSJ_WhiteBalanceSet(0,KSJ_HWB_AUTO_CONITNUOUS);
-
-
-
-    \
 }
 
 void CKSJPreviewWidget:: CreatCaptureThread()
@@ -58,10 +55,9 @@ void CKSJPreviewWidget:: CreatCaptureThread()
     {
         m_pPreview_Thread = new CKSJPreviewThread(&m_mMutex);
 
-        connect(m_pPreview_Thread,SIGNAL(UpdateImage(unsigned char * )),this,SLOT(On_UpdateSignal(unsigned char * )));
+        connect(m_pPreview_Thread,SIGNAL(UpdateImage(unsigned char * )),this,SLOT(On_UpdateSignal(unsigned char * )),Qt::BlockingQueuedConnection);
 
         m_pPreview_Thread->start();
-
 
     }
 
@@ -83,25 +79,14 @@ void CKSJPreviewWidget:: DestoryCaptureThread()
 
 
 
-
-
-
-
 void CKSJPreviewWidget:: On_UpdateSignal(unsigned char * pData)
 {
-    //    qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
 
     int nRet= 0;
 
     nRet = KSJ_CaptureGetSizeEx(0,&m_nImageW,&m_nImageH,&m_nBitCount);
 
-    if(m_nBitCount==8)
-    {
-        m_nColormode =1;
-    }else
-    {
-        m_nColormode =0;
-    }
+
     m_pBuf = pData;
 
     m_nWindowX =0;
@@ -114,9 +99,30 @@ void CKSJPreviewWidget:: On_UpdateSignal(unsigned char * pData)
 
 }
 
+bool CKSJPreviewWidget:: IsPreviewing()
+{
+    if(m_pPreview_Thread != NULL )
+        return true;
+    else
+        return false;
+
+}
+
+void CKSJPreviewWidget:: SaveImageBuf(QImage *pImg)
+{
+    static int nSaveIndex = 0;
+
+    QString name = "captured" ;
+
+    QString filename =name+QString(nSaveIndex)+".bmp";
+
+    pImg->save(filename);
+    nSaveIndex++;
+
+}
+
 void CKSJPreviewWidget:: paintEvent(QPaintEvent *event)
 {
-    //  qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
     if(m_pBuf==NULL) return;
 
     QImage *pImg =NULL;
@@ -124,36 +130,41 @@ void CKSJPreviewWidget:: paintEvent(QPaintEvent *event)
 
 
     m_mMutex.lock();
-    QImage mirroredImage ;
+    QImage swapedImage ;
+    QImage resizedImage ;
+
     switch (m_nColormode) {
-    case 0:
+    case 1:
     {
         pImg = new QImage(m_pBuf,m_nImageW,m_nImageH,QImage::Format_RGB888);
 
-         mirroredImage = pImg->mirrored(false, false);
+        swapedImage =pImg->rgbSwapped();
 
+        resizedImage =pImg->scaled(this->width(),this->height());
+
+        painter.drawImage(m_nWindowX, m_nWindowY, swapedImage, 0, 0, resizedImage.width(), resizedImage.height(),Qt::AutoColor);
 
     }
         break;
-    case 1:
-    {
-        pImg = new QImage(m_pBuf,m_nImageW,m_nImageH,QImage::Format_Grayscale8);
-         mirroredImage = pImg->mirrored(false, false);
-    }
-        break;
-    case 2:
+
+    case 0:
     {
 
+        pImg = new QImage(m_pBuf,m_nImageW,m_nImageH,m_nImageW,QImage::Format_Grayscale8);
+
+        resizedImage =pImg->scaled(this->width(),this->height());
+
+        painter.drawImage(m_nWindowX, m_nWindowY, resizedImage, 0, 0, m_nImageW, m_nImageH,Qt::AutoColor);
+
     }
         break;
+
     default:
         break;
     }
 
-    painter.drawImage(m_nWindowX, m_nWindowY, mirroredImage, m_nImageX, m_nImageY, m_nImageW, m_nImageH,Qt::AutoColor);
     m_mMutex.unlock();
     if(pImg!=NULL)
         delete pImg;
-    //   qDebug(" %s %s %d  \n",__FILE__,__FUNCTION__,__LINE__);
 }
 

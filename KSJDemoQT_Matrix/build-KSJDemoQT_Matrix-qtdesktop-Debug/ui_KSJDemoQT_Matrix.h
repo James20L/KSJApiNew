@@ -16,7 +16,10 @@
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QDialog>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
@@ -24,6 +27,7 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QTableWidget>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -31,24 +35,36 @@ QT_BEGIN_NAMESPACE
 class Ui_KSJDemoQT_Matrix
 {
 public:
+    QWidget *widget;
+    QFormLayout *formLayout;
     QWidget *PREVIEWWND_Widget;
+    QVBoxLayout *verticalLayout_6;
+    QGridLayout *gridLayout_3;
     QLabel *DEVICENUM_Label;
     QComboBox *DEVICE_LIST_ComboBox;
-    QSpinBox *ExposureLinesSpinBox;
-    QSpinBox *GainSpinBox;
-    QLabel *label_6;
-    QLabel *label_7;
+    QHBoxLayout *horizontalLayout_4;
+    QVBoxLayout *verticalLayout_5;
+    QGridLayout *gridLayout_4;
     QLabel *label_8;
-    QSpinBox *ExposureTimeSpinBox;
-    QLabel *label_9;
-    QLabel *label_10;
-    QLabel *label_11;
     QLabel *EXPOSURE_TIME_RANGE_Label;
+    QLabel *label_9;
+    QSpinBox *ExposureTimeSpinBox;
+    QSpinBox *ExposureLinesSpinBox;
+    QLabel *label_10;
+    QLabel *label_7;
     QLabel *EXPOSURE_LINES_RANGE_Label;
-    QLabel *GAIN_RANGE_Label;
     QLabel *EXPOSURE_TIME_REAL_Label;
-    QLabel *FOV_RANGE_Label;
+    QVBoxLayout *verticalLayout_3;
+    QHBoxLayout *horizontalLayout_3;
+    QLabel *label_6;
+    QSpinBox *GainSpinBox;
+    QHBoxLayout *horizontalLayout_2;
+    QLabel *label_11;
+    QLabel *GAIN_RANGE_Label;
+    QGridLayout *gridLayout_6;
     QLabel *label_12;
+    QLabel *FOV_RANGE_Label;
+    QVBoxLayout *verticalLayout;
     QGroupBox *groupBox;
     QLabel *label;
     QLabel *label_2;
@@ -61,6 +77,8 @@ public:
     QSpinBox *PreviewRowStartSpinBox;
     QSpinBox *PreviewRowSizeSpinBox;
     QSpinBox *PreviewMultiFrameSpinBox;
+    QPushButton *PreviewButton;
+    QVBoxLayout *verticalLayout_2;
     QGroupBox *groupBox_2;
     QLabel *label_18;
     QLabel *label_19;
@@ -73,112 +91,206 @@ public:
     QSpinBox *CaptureRowStartSpinBox;
     QSpinBox *CaptureRowSizeSpinBox;
     QSpinBox *CaptureMultiFrameSpinBox;
-    QPushButton *PreviewButton;
+    QCheckBox *SaveCheckBox;
     QPushButton *CaptureButton;
+    QHBoxLayout *horizontalLayout;
     QLabel *ERROR_INFO_Label;
     QLabel *ELAPSE_TIME_Label;
-    QTableWidget *FunctionTableWidget;
-    QCheckBox *SaveCheckBox;
-    QLabel *DEVICENUM_Label_2;
+    QVBoxLayout *verticalLayout_4;
+    QGridLayout *gridLayout;
+    QSpinBox *PhiSpinBox;
     QComboBox *WBComboBox;
     QComboBox *PresettingComboBox;
-    QLabel *DEVICENUM_Label_3;
     QLabel *label_13;
-    QSpinBox *PhiSpinBox;
-    QSlider *RSlider;
-    QLabel *label_14;
-    QLineEdit *REdit;
-    QSlider *GSlider;
-    QLabel *label_15;
-    QLineEdit *GEdit;
-    QSlider *BSlider;
-    QLabel *label_16;
-    QLineEdit *BEdit;
-    QComboBox *CCMComboBox;
-    QLabel *DEVICENUM_Label_4;
-    QComboBox *CCMPresettingComboBox;
     QLabel *DEVICENUM_Label_5;
-    QSlider *GSlider00;
-    QLineEdit *GEdit00;
-    QLineEdit *GEdit01;
-    QSlider *GSlider01;
+    QSlider *GSlider;
+    QTableWidget *FunctionTableWidget;
+    QLabel *DEVICENUM_Label_3;
+    QLabel *label_14;
+    QSlider *BSlider;
+    QLabel *label_15;
+    QLabel *DEVICENUM_Label_4;
+    QComboBox *CCMComboBox;
+    QLabel *label_16;
+    QSlider *RSlider;
+    QComboBox *CCMPresettingComboBox;
+    QLabel *DEVICENUM_Label_2;
+    QLineEdit *REdit;
+    QLineEdit *GEdit;
+    QLineEdit *BEdit;
+    QLabel *label_17;
+    QGridLayout *gridLayout_2;
     QLineEdit *GEdit02;
-    QSlider *GSlider02;
     QSlider *GSlider12;
-    QLineEdit *GEdit10;
-    QSlider *GSlider10;
-    QSlider *GSlider11;
-    QLineEdit *GEdit11;
-    QLineEdit *GEdit12;
-    QLineEdit *GEdit20;
     QSlider *GSlider20;
-    QLineEdit *GEdit21;
-    QSlider *GSlider22;
-    QLineEdit *GEdit22;
+    QSlider *GSlider01;
+    QSlider *GSlider02;
     QSlider *GSlider21;
+    QLineEdit *GEdit20;
+    QLineEdit *GEdit22;
+    QSlider *GSlider11;
+    QLineEdit *GEdit12;
+    QLineEdit *GEdit00;
+    QLineEdit *GEdit10;
+    QLineEdit *GEdit21;
+    QLineEdit *GEdit11;
+    QSlider *GSlider10;
+    QSlider *GSlider22;
+    QLineEdit *GEdit01;
+    QSlider *GSlider00;
 
     void setupUi(QDialog *KSJDemoQT_Matrix)
     {
         if (KSJDemoQT_Matrix->objectName().isEmpty())
             KSJDemoQT_Matrix->setObjectName(QStringLiteral("KSJDemoQT_Matrix"));
-        KSJDemoQT_Matrix->resize(1199, 561);
-        PREVIEWWND_Widget = new QWidget(KSJDemoQT_Matrix);
+        KSJDemoQT_Matrix->resize(1411, 908);
+        KSJDemoQT_Matrix->setLayoutDirection(Qt::LeftToRight);
+        widget = new QWidget(KSJDemoQT_Matrix);
+        widget->setObjectName(QStringLiteral("widget"));
+        widget->setGeometry(QRect(0, 0, 1811, 623));
+        formLayout = new QFormLayout(widget);
+        formLayout->setObjectName(QStringLiteral("formLayout"));
+        formLayout->setContentsMargins(0, 0, 0, 0);
+        PREVIEWWND_Widget = new QWidget(widget);
         PREVIEWWND_Widget->setObjectName(QStringLiteral("PREVIEWWND_Widget"));
-        PREVIEWWND_Widget->setGeometry(QRect(-10, 0, 501, 561));
-        DEVICENUM_Label = new QLabel(KSJDemoQT_Matrix);
+        PREVIEWWND_Widget->setMinimumSize(QSize(800, 600));
+
+        formLayout->setWidget(0, QFormLayout::LabelRole, PREVIEWWND_Widget);
+
+        verticalLayout_6 = new QVBoxLayout();
+        verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
+        gridLayout_3 = new QGridLayout();
+        gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
+        DEVICENUM_Label = new QLabel(widget);
         DEVICENUM_Label->setObjectName(QStringLiteral("DEVICENUM_Label"));
-        DEVICENUM_Label->setGeometry(QRect(510, 20, 71, 21));
-        DEVICE_LIST_ComboBox = new QComboBox(KSJDemoQT_Matrix);
+        DEVICENUM_Label->setMaximumSize(QSize(80, 16777215));
+
+        gridLayout_3->addWidget(DEVICENUM_Label, 0, 0, 1, 1);
+
+        DEVICE_LIST_ComboBox = new QComboBox(widget);
         DEVICE_LIST_ComboBox->setObjectName(QStringLiteral("DEVICE_LIST_ComboBox"));
-        DEVICE_LIST_ComboBox->setGeometry(QRect(590, 20, 301, 22));
-        ExposureLinesSpinBox = new QSpinBox(KSJDemoQT_Matrix);
-        ExposureLinesSpinBox->setObjectName(QStringLiteral("ExposureLinesSpinBox"));
-        ExposureLinesSpinBox->setGeometry(QRect(640, 100, 91, 22));
-        GainSpinBox = new QSpinBox(KSJDemoQT_Matrix);
-        GainSpinBox->setObjectName(QStringLiteral("GainSpinBox"));
-        GainSpinBox->setGeometry(QRect(640, 170, 91, 22));
-        label_6 = new QLabel(KSJDemoQT_Matrix);
-        label_6->setObjectName(QStringLiteral("label_6"));
-        label_6->setGeometry(QRect(600, 170, 41, 21));
-        label_7 = new QLabel(KSJDemoQT_Matrix);
-        label_7->setObjectName(QStringLiteral("label_7"));
-        label_7->setGeometry(QRect(520, 60, 111, 21));
-        label_8 = new QLabel(KSJDemoQT_Matrix);
+
+        gridLayout_3->addWidget(DEVICE_LIST_ComboBox, 0, 1, 1, 1);
+
+
+        verticalLayout_6->addLayout(gridLayout_3);
+
+        horizontalLayout_4 = new QHBoxLayout();
+        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
+        verticalLayout_5 = new QVBoxLayout();
+        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
+        gridLayout_4 = new QGridLayout();
+        gridLayout_4->setObjectName(QStringLiteral("gridLayout_4"));
+        label_8 = new QLabel(widget);
         label_8->setObjectName(QStringLiteral("label_8"));
-        label_8->setGeometry(QRect(530, 100, 91, 21));
-        ExposureTimeSpinBox = new QSpinBox(KSJDemoQT_Matrix);
-        ExposureTimeSpinBox->setObjectName(QStringLiteral("ExposureTimeSpinBox"));
-        ExposureTimeSpinBox->setGeometry(QRect(640, 60, 91, 22));
-        label_9 = new QLabel(KSJDemoQT_Matrix);
-        label_9->setObjectName(QStringLiteral("label_9"));
-        label_9->setGeometry(QRect(760, 60, 61, 21));
-        label_10 = new QLabel(KSJDemoQT_Matrix);
-        label_10->setObjectName(QStringLiteral("label_10"));
-        label_10->setGeometry(QRect(760, 100, 41, 21));
-        label_11 = new QLabel(KSJDemoQT_Matrix);
-        label_11->setObjectName(QStringLiteral("label_11"));
-        label_11->setGeometry(QRect(760, 170, 41, 21));
-        EXPOSURE_TIME_RANGE_Label = new QLabel(KSJDemoQT_Matrix);
+
+        gridLayout_4->addWidget(label_8, 1, 0, 1, 1);
+
+        EXPOSURE_TIME_RANGE_Label = new QLabel(widget);
         EXPOSURE_TIME_RANGE_Label->setObjectName(QStringLiteral("EXPOSURE_TIME_RANGE_Label"));
-        EXPOSURE_TIME_RANGE_Label->setGeometry(QRect(830, 60, 71, 21));
-        EXPOSURE_LINES_RANGE_Label = new QLabel(KSJDemoQT_Matrix);
+
+        gridLayout_4->addWidget(EXPOSURE_TIME_RANGE_Label, 0, 3, 1, 1);
+
+        label_9 = new QLabel(widget);
+        label_9->setObjectName(QStringLiteral("label_9"));
+
+        gridLayout_4->addWidget(label_9, 0, 2, 1, 1);
+
+        ExposureTimeSpinBox = new QSpinBox(widget);
+        ExposureTimeSpinBox->setObjectName(QStringLiteral("ExposureTimeSpinBox"));
+
+        gridLayout_4->addWidget(ExposureTimeSpinBox, 0, 1, 1, 1);
+
+        ExposureLinesSpinBox = new QSpinBox(widget);
+        ExposureLinesSpinBox->setObjectName(QStringLiteral("ExposureLinesSpinBox"));
+
+        gridLayout_4->addWidget(ExposureLinesSpinBox, 1, 1, 1, 1);
+
+        label_10 = new QLabel(widget);
+        label_10->setObjectName(QStringLiteral("label_10"));
+
+        gridLayout_4->addWidget(label_10, 1, 2, 1, 1);
+
+        label_7 = new QLabel(widget);
+        label_7->setObjectName(QStringLiteral("label_7"));
+
+        gridLayout_4->addWidget(label_7, 0, 0, 1, 1);
+
+        EXPOSURE_LINES_RANGE_Label = new QLabel(widget);
         EXPOSURE_LINES_RANGE_Label->setObjectName(QStringLiteral("EXPOSURE_LINES_RANGE_Label"));
-        EXPOSURE_LINES_RANGE_Label->setGeometry(QRect(830, 100, 71, 21));
-        GAIN_RANGE_Label = new QLabel(KSJDemoQT_Matrix);
-        GAIN_RANGE_Label->setObjectName(QStringLiteral("GAIN_RANGE_Label"));
-        GAIN_RANGE_Label->setGeometry(QRect(830, 170, 71, 21));
-        EXPOSURE_TIME_REAL_Label = new QLabel(KSJDemoQT_Matrix);
+
+        gridLayout_4->addWidget(EXPOSURE_LINES_RANGE_Label, 1, 3, 1, 1);
+
+        EXPOSURE_TIME_REAL_Label = new QLabel(widget);
         EXPOSURE_TIME_REAL_Label->setObjectName(QStringLiteral("EXPOSURE_TIME_REAL_Label"));
-        EXPOSURE_TIME_REAL_Label->setGeometry(QRect(640, 140, 201, 21));
-        FOV_RANGE_Label = new QLabel(KSJDemoQT_Matrix);
-        FOV_RANGE_Label->setObjectName(QStringLiteral("FOV_RANGE_Label"));
-        FOV_RANGE_Label->setGeometry(QRect(640, 200, 201, 21));
-        label_12 = new QLabel(KSJDemoQT_Matrix);
+        EXPOSURE_TIME_REAL_Label->setMinimumSize(QSize(80, 20));
+        EXPOSURE_TIME_REAL_Label->setMaximumSize(QSize(80, 20));
+
+        gridLayout_4->addWidget(EXPOSURE_TIME_REAL_Label, 2, 0, 1, 1);
+
+
+        verticalLayout_5->addLayout(gridLayout_4);
+
+        verticalLayout_3 = new QVBoxLayout();
+        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        horizontalLayout_3 = new QHBoxLayout();
+        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        label_6 = new QLabel(widget);
+        label_6->setObjectName(QStringLiteral("label_6"));
+
+        horizontalLayout_3->addWidget(label_6);
+
+        GainSpinBox = new QSpinBox(widget);
+        GainSpinBox->setObjectName(QStringLiteral("GainSpinBox"));
+
+        horizontalLayout_3->addWidget(GainSpinBox);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_3);
+
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        label_11 = new QLabel(widget);
+        label_11->setObjectName(QStringLiteral("label_11"));
+
+        horizontalLayout_2->addWidget(label_11);
+
+        GAIN_RANGE_Label = new QLabel(widget);
+        GAIN_RANGE_Label->setObjectName(QStringLiteral("GAIN_RANGE_Label"));
+
+        horizontalLayout_2->addWidget(GAIN_RANGE_Label);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_2);
+
+        gridLayout_6 = new QGridLayout();
+        gridLayout_6->setObjectName(QStringLiteral("gridLayout_6"));
+        gridLayout_6->setSizeConstraint(QLayout::SetFixedSize);
+        label_12 = new QLabel(widget);
         label_12->setObjectName(QStringLiteral("label_12"));
-        label_12->setGeometry(QRect(570, 200, 61, 21));
-        groupBox = new QGroupBox(KSJDemoQT_Matrix);
+        label_12->setMinimumSize(QSize(20, 20));
+        label_12->setMaximumSize(QSize(80, 20));
+
+        gridLayout_6->addWidget(label_12, 0, 0, 1, 1);
+
+        FOV_RANGE_Label = new QLabel(widget);
+        FOV_RANGE_Label->setObjectName(QStringLiteral("FOV_RANGE_Label"));
+        FOV_RANGE_Label->setMaximumSize(QSize(80, 20));
+
+        gridLayout_6->addWidget(FOV_RANGE_Label, 0, 1, 1, 1);
+
+
+        verticalLayout_3->addLayout(gridLayout_6);
+
+
+        verticalLayout_5->addLayout(verticalLayout_3);
+
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        groupBox = new QGroupBox(widget);
         groupBox->setObjectName(QStringLiteral("groupBox"));
-        groupBox->setGeometry(QRect(500, 230, 331, 141));
+        groupBox->setMinimumSize(QSize(320, 140));
+        groupBox->setMaximumSize(QSize(320, 140));
         label = new QLabel(groupBox);
         label->setObjectName(QStringLiteral("label"));
         label->setGeometry(QRect(20, 20, 61, 21));
@@ -212,9 +324,24 @@ public:
         PreviewMultiFrameSpinBox = new QSpinBox(groupBox);
         PreviewMultiFrameSpinBox->setObjectName(QStringLiteral("PreviewMultiFrameSpinBox"));
         PreviewMultiFrameSpinBox->setGeometry(QRect(90, 100, 71, 22));
-        groupBox_2 = new QGroupBox(KSJDemoQT_Matrix);
+
+        verticalLayout->addWidget(groupBox);
+
+        PreviewButton = new QPushButton(widget);
+        PreviewButton->setObjectName(QStringLiteral("PreviewButton"));
+        PreviewButton->setMaximumSize(QSize(80, 20));
+
+        verticalLayout->addWidget(PreviewButton);
+
+
+        verticalLayout_5->addLayout(verticalLayout);
+
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        groupBox_2 = new QGroupBox(widget);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
-        groupBox_2->setGeometry(QRect(500, 370, 331, 141));
+        groupBox_2->setMinimumSize(QSize(320, 140));
+        groupBox_2->setMaximumSize(QSize(320, 140));
         label_18 = new QLabel(groupBox_2);
         label_18->setObjectName(QStringLiteral("label_18"));
         label_18->setGeometry(QRect(20, 20, 61, 21));
@@ -248,159 +375,308 @@ public:
         CaptureMultiFrameSpinBox = new QSpinBox(groupBox_2);
         CaptureMultiFrameSpinBox->setObjectName(QStringLiteral("CaptureMultiFrameSpinBox"));
         CaptureMultiFrameSpinBox->setGeometry(QRect(90, 100, 71, 22));
-        PreviewButton = new QPushButton(KSJDemoQT_Matrix);
-        PreviewButton->setObjectName(QStringLiteral("PreviewButton"));
-        PreviewButton->setGeometry(QRect(840, 340, 75, 23));
-        CaptureButton = new QPushButton(KSJDemoQT_Matrix);
-        CaptureButton->setObjectName(QStringLiteral("CaptureButton"));
-        CaptureButton->setGeometry(QRect(840, 480, 75, 23));
-        ERROR_INFO_Label = new QLabel(KSJDemoQT_Matrix);
-        ERROR_INFO_Label->setObjectName(QStringLiteral("ERROR_INFO_Label"));
-        ERROR_INFO_Label->setGeometry(QRect(510, 530, 201, 21));
-        ELAPSE_TIME_Label = new QLabel(KSJDemoQT_Matrix);
-        ELAPSE_TIME_Label->setObjectName(QStringLiteral("ELAPSE_TIME_Label"));
-        ELAPSE_TIME_Label->setGeometry(QRect(740, 530, 121, 21));
-        FunctionTableWidget = new QTableWidget(KSJDemoQT_Matrix);
-        FunctionTableWidget->setObjectName(QStringLiteral("FunctionTableWidget"));
-        FunctionTableWidget->setGeometry(QRect(920, 0, 311, 171));
-        SaveCheckBox = new QCheckBox(KSJDemoQT_Matrix);
+
+        verticalLayout_2->addWidget(groupBox_2);
+
+        SaveCheckBox = new QCheckBox(widget);
         SaveCheckBox->setObjectName(QStringLiteral("SaveCheckBox"));
-        SaveCheckBox->setGeometry(QRect(840, 450, 71, 20));
-        DEVICENUM_Label_2 = new QLabel(KSJDemoQT_Matrix);
-        DEVICENUM_Label_2->setObjectName(QStringLiteral("DEVICENUM_Label_2"));
-        DEVICENUM_Label_2->setGeometry(QRect(930, 190, 51, 21));
-        WBComboBox = new QComboBox(KSJDemoQT_Matrix);
-        WBComboBox->setObjectName(QStringLiteral("WBComboBox"));
-        WBComboBox->setGeometry(QRect(980, 190, 191, 22));
-        PresettingComboBox = new QComboBox(KSJDemoQT_Matrix);
-        PresettingComboBox->setObjectName(QStringLiteral("PresettingComboBox"));
-        PresettingComboBox->setGeometry(QRect(980, 220, 191, 22));
-        DEVICENUM_Label_3 = new QLabel(KSJDemoQT_Matrix);
-        DEVICENUM_Label_3->setObjectName(QStringLiteral("DEVICENUM_Label_3"));
-        DEVICENUM_Label_3->setGeometry(QRect(910, 220, 71, 21));
-        label_13 = new QLabel(KSJDemoQT_Matrix);
-        label_13->setObjectName(QStringLiteral("label_13"));
-        label_13->setGeometry(QRect(950, 250, 31, 21));
-        PhiSpinBox = new QSpinBox(KSJDemoQT_Matrix);
+
+        verticalLayout_2->addWidget(SaveCheckBox);
+
+        CaptureButton = new QPushButton(widget);
+        CaptureButton->setObjectName(QStringLiteral("CaptureButton"));
+        CaptureButton->setMaximumSize(QSize(80, 20));
+
+        verticalLayout_2->addWidget(CaptureButton);
+
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        ERROR_INFO_Label = new QLabel(widget);
+        ERROR_INFO_Label->setObjectName(QStringLiteral("ERROR_INFO_Label"));
+        ERROR_INFO_Label->setMinimumSize(QSize(160, 40));
+        ERROR_INFO_Label->setMaximumSize(QSize(160, 40));
+
+        horizontalLayout->addWidget(ERROR_INFO_Label);
+
+        ELAPSE_TIME_Label = new QLabel(widget);
+        ELAPSE_TIME_Label->setObjectName(QStringLiteral("ELAPSE_TIME_Label"));
+        ELAPSE_TIME_Label->setMinimumSize(QSize(160, 40));
+        ELAPSE_TIME_Label->setMaximumSize(QSize(160, 40));
+
+        horizontalLayout->addWidget(ELAPSE_TIME_Label);
+
+
+        verticalLayout_2->addLayout(horizontalLayout);
+
+
+        verticalLayout_5->addLayout(verticalLayout_2);
+
+
+        horizontalLayout_4->addLayout(verticalLayout_5);
+
+        verticalLayout_4 = new QVBoxLayout();
+        verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        gridLayout = new QGridLayout();
+        gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        PhiSpinBox = new QSpinBox(widget);
         PhiSpinBox->setObjectName(QStringLiteral("PhiSpinBox"));
-        PhiSpinBox->setGeometry(QRect(980, 250, 71, 22));
-        RSlider = new QSlider(KSJDemoQT_Matrix);
-        RSlider->setObjectName(QStringLiteral("RSlider"));
-        RSlider->setGeometry(QRect(960, 280, 141, 20));
-        RSlider->setOrientation(Qt::Horizontal);
-        label_14 = new QLabel(KSJDemoQT_Matrix);
-        label_14->setObjectName(QStringLiteral("label_14"));
-        label_14->setGeometry(QRect(940, 280, 16, 16));
-        REdit = new QLineEdit(KSJDemoQT_Matrix);
-        REdit->setObjectName(QStringLiteral("REdit"));
-        REdit->setGeometry(QRect(1110, 280, 51, 20));
-        REdit->setReadOnly(true);
-        GSlider = new QSlider(KSJDemoQT_Matrix);
-        GSlider->setObjectName(QStringLiteral("GSlider"));
-        GSlider->setGeometry(QRect(960, 310, 141, 20));
-        GSlider->setOrientation(Qt::Horizontal);
-        label_15 = new QLabel(KSJDemoQT_Matrix);
-        label_15->setObjectName(QStringLiteral("label_15"));
-        label_15->setGeometry(QRect(940, 310, 16, 16));
-        GEdit = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit->setObjectName(QStringLiteral("GEdit"));
-        GEdit->setGeometry(QRect(1110, 310, 51, 20));
-        GEdit->setReadOnly(true);
-        BSlider = new QSlider(KSJDemoQT_Matrix);
-        BSlider->setObjectName(QStringLiteral("BSlider"));
-        BSlider->setGeometry(QRect(960, 340, 141, 20));
-        BSlider->setOrientation(Qt::Horizontal);
-        label_16 = new QLabel(KSJDemoQT_Matrix);
-        label_16->setObjectName(QStringLiteral("label_16"));
-        label_16->setGeometry(QRect(940, 340, 16, 16));
-        BEdit = new QLineEdit(KSJDemoQT_Matrix);
-        BEdit->setObjectName(QStringLiteral("BEdit"));
-        BEdit->setGeometry(QRect(1110, 340, 51, 20));
-        BEdit->setReadOnly(true);
-        CCMComboBox = new QComboBox(KSJDemoQT_Matrix);
-        CCMComboBox->setObjectName(QStringLiteral("CCMComboBox"));
-        CCMComboBox->setGeometry(QRect(980, 370, 191, 22));
-        DEVICENUM_Label_4 = new QLabel(KSJDemoQT_Matrix);
-        DEVICENUM_Label_4->setObjectName(QStringLiteral("DEVICENUM_Label_4"));
-        DEVICENUM_Label_4->setGeometry(QRect(920, 370, 51, 21));
-        CCMPresettingComboBox = new QComboBox(KSJDemoQT_Matrix);
-        CCMPresettingComboBox->setObjectName(QStringLiteral("CCMPresettingComboBox"));
-        CCMPresettingComboBox->setGeometry(QRect(980, 400, 191, 22));
-        DEVICENUM_Label_5 = new QLabel(KSJDemoQT_Matrix);
+        PhiSpinBox->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(PhiSpinBox, 4, 1, 1, 1);
+
+        WBComboBox = new QComboBox(widget);
+        WBComboBox->setObjectName(QStringLiteral("WBComboBox"));
+        WBComboBox->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(WBComboBox, 2, 1, 1, 1);
+
+        PresettingComboBox = new QComboBox(widget);
+        PresettingComboBox->setObjectName(QStringLiteral("PresettingComboBox"));
+        PresettingComboBox->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(PresettingComboBox, 3, 1, 1, 1);
+
+        label_13 = new QLabel(widget);
+        label_13->setObjectName(QStringLiteral("label_13"));
+        label_13->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(label_13, 4, 0, 1, 1);
+
+        DEVICENUM_Label_5 = new QLabel(widget);
         DEVICENUM_Label_5->setObjectName(QStringLiteral("DEVICENUM_Label_5"));
-        DEVICENUM_Label_5->setGeometry(QRect(910, 400, 71, 21));
-        GSlider00 = new QSlider(KSJDemoQT_Matrix);
-        GSlider00->setObjectName(QStringLiteral("GSlider00"));
-        GSlider00->setGeometry(QRect(930, 450, 41, 20));
-        GSlider00->setOrientation(Qt::Horizontal);
-        GEdit00 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit00->setObjectName(QStringLiteral("GEdit00"));
-        GEdit00->setGeometry(QRect(979, 450, 31, 20));
-        GEdit00->setReadOnly(true);
-        GEdit01 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit01->setObjectName(QStringLiteral("GEdit01"));
-        GEdit01->setGeometry(QRect(1070, 450, 31, 20));
-        GEdit01->setReadOnly(true);
-        GSlider01 = new QSlider(KSJDemoQT_Matrix);
-        GSlider01->setObjectName(QStringLiteral("GSlider01"));
-        GSlider01->setGeometry(QRect(1020, 450, 41, 20));
-        GSlider01->setOrientation(Qt::Horizontal);
-        GEdit02 = new QLineEdit(KSJDemoQT_Matrix);
+        DEVICENUM_Label_5->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(DEVICENUM_Label_5, 12, 0, 1, 1);
+
+        GSlider = new QSlider(widget);
+        GSlider->setObjectName(QStringLiteral("GSlider"));
+        GSlider->setMaximumSize(QSize(200, 16777215));
+        GSlider->setOrientation(Qt::Horizontal);
+
+        gridLayout->addWidget(GSlider, 7, 1, 1, 1);
+
+        FunctionTableWidget = new QTableWidget(widget);
+        FunctionTableWidget->setObjectName(QStringLiteral("FunctionTableWidget"));
+        FunctionTableWidget->setMinimumSize(QSize(200, 200));
+        FunctionTableWidget->setMaximumSize(QSize(200, 200));
+
+        gridLayout->addWidget(FunctionTableWidget, 1, 1, 1, 1);
+
+        DEVICENUM_Label_3 = new QLabel(widget);
+        DEVICENUM_Label_3->setObjectName(QStringLiteral("DEVICENUM_Label_3"));
+        DEVICENUM_Label_3->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(DEVICENUM_Label_3, 3, 0, 1, 1);
+
+        label_14 = new QLabel(widget);
+        label_14->setObjectName(QStringLiteral("label_14"));
+        label_14->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(label_14, 5, 0, 1, 1);
+
+        BSlider = new QSlider(widget);
+        BSlider->setObjectName(QStringLiteral("BSlider"));
+        BSlider->setMaximumSize(QSize(200, 16777215));
+        BSlider->setOrientation(Qt::Horizontal);
+
+        gridLayout->addWidget(BSlider, 9, 1, 1, 1);
+
+        label_15 = new QLabel(widget);
+        label_15->setObjectName(QStringLiteral("label_15"));
+        label_15->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(label_15, 7, 0, 1, 1);
+
+        DEVICENUM_Label_4 = new QLabel(widget);
+        DEVICENUM_Label_4->setObjectName(QStringLiteral("DEVICENUM_Label_4"));
+        DEVICENUM_Label_4->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(DEVICENUM_Label_4, 11, 0, 1, 1);
+
+        CCMComboBox = new QComboBox(widget);
+        CCMComboBox->setObjectName(QStringLiteral("CCMComboBox"));
+        CCMComboBox->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(CCMComboBox, 11, 1, 1, 1);
+
+        label_16 = new QLabel(widget);
+        label_16->setObjectName(QStringLiteral("label_16"));
+        label_16->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(label_16, 9, 0, 1, 1);
+
+        RSlider = new QSlider(widget);
+        RSlider->setObjectName(QStringLiteral("RSlider"));
+        RSlider->setMaximumSize(QSize(200, 16777215));
+        RSlider->setOrientation(Qt::Horizontal);
+
+        gridLayout->addWidget(RSlider, 5, 1, 1, 1);
+
+        CCMPresettingComboBox = new QComboBox(widget);
+        CCMPresettingComboBox->setObjectName(QStringLiteral("CCMPresettingComboBox"));
+        CCMPresettingComboBox->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(CCMPresettingComboBox, 12, 1, 1, 1);
+
+        DEVICENUM_Label_2 = new QLabel(widget);
+        DEVICENUM_Label_2->setObjectName(QStringLiteral("DEVICENUM_Label_2"));
+        DEVICENUM_Label_2->setMaximumSize(QSize(200, 16777215));
+
+        gridLayout->addWidget(DEVICENUM_Label_2, 2, 0, 1, 1);
+
+        REdit = new QLineEdit(widget);
+        REdit->setObjectName(QStringLiteral("REdit"));
+        REdit->setMaximumSize(QSize(200, 16777215));
+        REdit->setReadOnly(true);
+
+        gridLayout->addWidget(REdit, 6, 1, 1, 1);
+
+        GEdit = new QLineEdit(widget);
+        GEdit->setObjectName(QStringLiteral("GEdit"));
+        GEdit->setMaximumSize(QSize(200, 16777215));
+        GEdit->setReadOnly(true);
+
+        gridLayout->addWidget(GEdit, 8, 1, 1, 1);
+
+        BEdit = new QLineEdit(widget);
+        BEdit->setObjectName(QStringLiteral("BEdit"));
+        BEdit->setMaximumSize(QSize(200, 16777215));
+        BEdit->setReadOnly(true);
+
+        gridLayout->addWidget(BEdit, 10, 1, 1, 1);
+
+        label_17 = new QLabel(widget);
+        label_17->setObjectName(QStringLiteral("label_17"));
+
+        gridLayout->addWidget(label_17, 1, 0, 1, 1);
+
+
+        verticalLayout_4->addLayout(gridLayout);
+
+        gridLayout_2 = new QGridLayout();
+        gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
+        GEdit02 = new QLineEdit(widget);
         GEdit02->setObjectName(QStringLiteral("GEdit02"));
-        GEdit02->setGeometry(QRect(1160, 450, 31, 20));
         GEdit02->setReadOnly(true);
-        GSlider02 = new QSlider(KSJDemoQT_Matrix);
-        GSlider02->setObjectName(QStringLiteral("GSlider02"));
-        GSlider02->setGeometry(QRect(1110, 450, 41, 20));
-        GSlider02->setOrientation(Qt::Horizontal);
-        GSlider12 = new QSlider(KSJDemoQT_Matrix);
+
+        gridLayout_2->addWidget(GEdit02, 0, 5, 1, 1);
+
+        GSlider12 = new QSlider(widget);
         GSlider12->setObjectName(QStringLiteral("GSlider12"));
-        GSlider12->setGeometry(QRect(1110, 480, 41, 20));
         GSlider12->setOrientation(Qt::Horizontal);
-        GEdit10 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit10->setObjectName(QStringLiteral("GEdit10"));
-        GEdit10->setGeometry(QRect(979, 480, 31, 20));
-        GEdit10->setReadOnly(true);
-        GSlider10 = new QSlider(KSJDemoQT_Matrix);
-        GSlider10->setObjectName(QStringLiteral("GSlider10"));
-        GSlider10->setGeometry(QRect(930, 480, 41, 20));
-        GSlider10->setOrientation(Qt::Horizontal);
-        GSlider11 = new QSlider(KSJDemoQT_Matrix);
-        GSlider11->setObjectName(QStringLiteral("GSlider11"));
-        GSlider11->setGeometry(QRect(1020, 480, 41, 20));
-        GSlider11->setOrientation(Qt::Horizontal);
-        GEdit11 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit11->setObjectName(QStringLiteral("GEdit11"));
-        GEdit11->setGeometry(QRect(1070, 480, 31, 20));
-        GEdit11->setReadOnly(true);
-        GEdit12 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit12->setObjectName(QStringLiteral("GEdit12"));
-        GEdit12->setGeometry(QRect(1160, 480, 31, 20));
-        GEdit12->setReadOnly(true);
-        GEdit20 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit20->setObjectName(QStringLiteral("GEdit20"));
-        GEdit20->setGeometry(QRect(979, 510, 31, 20));
-        GEdit20->setReadOnly(true);
-        GSlider20 = new QSlider(KSJDemoQT_Matrix);
+
+        gridLayout_2->addWidget(GSlider12, 1, 4, 1, 1);
+
+        GSlider20 = new QSlider(widget);
         GSlider20->setObjectName(QStringLiteral("GSlider20"));
-        GSlider20->setGeometry(QRect(930, 510, 41, 20));
         GSlider20->setOrientation(Qt::Horizontal);
-        GEdit21 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit21->setObjectName(QStringLiteral("GEdit21"));
-        GEdit21->setGeometry(QRect(1070, 510, 31, 20));
-        GEdit21->setReadOnly(true);
-        GSlider22 = new QSlider(KSJDemoQT_Matrix);
-        GSlider22->setObjectName(QStringLiteral("GSlider22"));
-        GSlider22->setGeometry(QRect(1110, 510, 41, 20));
-        GSlider22->setOrientation(Qt::Horizontal);
-        GEdit22 = new QLineEdit(KSJDemoQT_Matrix);
-        GEdit22->setObjectName(QStringLiteral("GEdit22"));
-        GEdit22->setGeometry(QRect(1159, 510, 31, 20));
-        GEdit22->setReadOnly(true);
-        GSlider21 = new QSlider(KSJDemoQT_Matrix);
+
+        gridLayout_2->addWidget(GSlider20, 2, 0, 1, 1);
+
+        GSlider01 = new QSlider(widget);
+        GSlider01->setObjectName(QStringLiteral("GSlider01"));
+        GSlider01->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(GSlider01, 0, 2, 1, 1);
+
+        GSlider02 = new QSlider(widget);
+        GSlider02->setObjectName(QStringLiteral("GSlider02"));
+        GSlider02->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(GSlider02, 0, 4, 1, 1);
+
+        GSlider21 = new QSlider(widget);
         GSlider21->setObjectName(QStringLiteral("GSlider21"));
-        GSlider21->setGeometry(QRect(1020, 510, 41, 20));
         GSlider21->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(GSlider21, 2, 2, 1, 1);
+
+        GEdit20 = new QLineEdit(widget);
+        GEdit20->setObjectName(QStringLiteral("GEdit20"));
+        GEdit20->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit20, 2, 1, 1, 1);
+
+        GEdit22 = new QLineEdit(widget);
+        GEdit22->setObjectName(QStringLiteral("GEdit22"));
+        GEdit22->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit22, 2, 5, 1, 1);
+
+        GSlider11 = new QSlider(widget);
+        GSlider11->setObjectName(QStringLiteral("GSlider11"));
+        GSlider11->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(GSlider11, 1, 2, 1, 1);
+
+        GEdit12 = new QLineEdit(widget);
+        GEdit12->setObjectName(QStringLiteral("GEdit12"));
+        GEdit12->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit12, 1, 5, 1, 1);
+
+        GEdit00 = new QLineEdit(widget);
+        GEdit00->setObjectName(QStringLiteral("GEdit00"));
+        GEdit00->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit00, 0, 1, 1, 1);
+
+        GEdit10 = new QLineEdit(widget);
+        GEdit10->setObjectName(QStringLiteral("GEdit10"));
+        GEdit10->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit10, 1, 1, 1, 1);
+
+        GEdit21 = new QLineEdit(widget);
+        GEdit21->setObjectName(QStringLiteral("GEdit21"));
+        GEdit21->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit21, 2, 3, 1, 1);
+
+        GEdit11 = new QLineEdit(widget);
+        GEdit11->setObjectName(QStringLiteral("GEdit11"));
+        GEdit11->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit11, 1, 3, 1, 1);
+
+        GSlider10 = new QSlider(widget);
+        GSlider10->setObjectName(QStringLiteral("GSlider10"));
+        GSlider10->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(GSlider10, 1, 0, 1, 1);
+
+        GSlider22 = new QSlider(widget);
+        GSlider22->setObjectName(QStringLiteral("GSlider22"));
+        GSlider22->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(GSlider22, 2, 4, 1, 1);
+
+        GEdit01 = new QLineEdit(widget);
+        GEdit01->setObjectName(QStringLiteral("GEdit01"));
+        GEdit01->setReadOnly(true);
+
+        gridLayout_2->addWidget(GEdit01, 0, 3, 1, 1);
+
+        GSlider00 = new QSlider(widget);
+        GSlider00->setObjectName(QStringLiteral("GSlider00"));
+        GSlider00->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(GSlider00, 0, 0, 1, 1);
+
+
+        verticalLayout_4->addLayout(gridLayout_2);
+
+
+        horizontalLayout_4->addLayout(verticalLayout_4);
+
+
+        verticalLayout_6->addLayout(horizontalLayout_4);
+
+
+        formLayout->setLayout(0, QFormLayout::FieldRole, verticalLayout_6);
+
+        PREVIEWWND_Widget->raise();
+        groupBox->raise();
 
         retranslateUi(KSJDemoQT_Matrix);
 
@@ -411,18 +687,18 @@ public:
     {
         KSJDemoQT_Matrix->setWindowTitle(QApplication::translate("KSJDemoQT_Matrix", "KSJDemoQT", 0));
         DEVICENUM_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Device Num:", 0));
-        label_6->setText(QApplication::translate("KSJDemoQT_Matrix", "Gain:", 0));
-        label_7->setText(QApplication::translate("KSJDemoQT_Matrix", "Exposure Time(ms):", 0));
         label_8->setText(QApplication::translate("KSJDemoQT_Matrix", "Exposure Lines:", 0));
+        EXPOSURE_TIME_RANGE_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Range", 0));
         label_9->setText(QApplication::translate("KSJDemoQT_Matrix", "Range(ms):", 0));
         label_10->setText(QApplication::translate("KSJDemoQT_Matrix", "Range:", 0));
-        label_11->setText(QApplication::translate("KSJDemoQT_Matrix", "Range:", 0));
-        EXPOSURE_TIME_RANGE_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Range", 0));
+        label_7->setText(QApplication::translate("KSJDemoQT_Matrix", "Exposure Time(ms):", 0));
         EXPOSURE_LINES_RANGE_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Range", 0));
-        GAIN_RANGE_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Range", 0));
         EXPOSURE_TIME_REAL_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "REAL EXP TIME", 0));
-        FOV_RANGE_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "EXP LINES RANGE", 0));
+        label_6->setText(QApplication::translate("KSJDemoQT_Matrix", "Gain:", 0));
+        label_11->setText(QApplication::translate("KSJDemoQT_Matrix", "Range:", 0));
+        GAIN_RANGE_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Range", 0));
         label_12->setText(QApplication::translate("KSJDemoQT_Matrix", "FOV Range:", 0));
+        FOV_RANGE_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "EXP LINES RANGE", 0));
         groupBox->setTitle(QApplication::translate("KSJDemoQT_Matrix", "Preview", 0));
         label->setText(QApplication::translate("KSJDemoQT_Matrix", "Col Start:", 0));
         label_2->setText(QApplication::translate("KSJDemoQT_Matrix", "Row Start:", 0));
@@ -430,6 +706,7 @@ public:
         label_4->setText(QApplication::translate("KSJDemoQT_Matrix", "Row Size:", 0));
         label_5->setText(QApplication::translate("KSJDemoQT_Matrix", "MultiFrame:", 0));
         SetPreviewFovButton->setText(QApplication::translate("KSJDemoQT_Matrix", "Set Preview Fov", 0));
+        PreviewButton->setText(QApplication::translate("KSJDemoQT_Matrix", "Preview", 0));
         groupBox_2->setTitle(QApplication::translate("KSJDemoQT_Matrix", "Capture", 0));
         label_18->setText(QApplication::translate("KSJDemoQT_Matrix", "Col Start:", 0));
         label_19->setText(QApplication::translate("KSJDemoQT_Matrix", "Row Start:", 0));
@@ -437,19 +714,19 @@ public:
         label_21->setText(QApplication::translate("KSJDemoQT_Matrix", "Row Size:", 0));
         label_22->setText(QApplication::translate("KSJDemoQT_Matrix", "MultiFrame:", 0));
         SetCaptureFovButton->setText(QApplication::translate("KSJDemoQT_Matrix", "Set Capture Fov", 0));
-        PreviewButton->setText(QApplication::translate("KSJDemoQT_Matrix", "Preview", 0));
+        SaveCheckBox->setText(QApplication::translate("KSJDemoQT_Matrix", "Save", 0));
         CaptureButton->setText(QApplication::translate("KSJDemoQT_Matrix", "Capture", 0));
         ERROR_INFO_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Error Info", 0));
         ELAPSE_TIME_Label->setText(QApplication::translate("KSJDemoQT_Matrix", "Elapse", 0));
-        SaveCheckBox->setText(QApplication::translate("KSJDemoQT_Matrix", "Save", 0));
-        DEVICENUM_Label_2->setText(QApplication::translate("KSJDemoQT_Matrix", "WB Mode:", 0));
-        DEVICENUM_Label_3->setText(QApplication::translate("KSJDemoQT_Matrix", "Presetting:", 0));
         label_13->setText(QApplication::translate("KSJDemoQT_Matrix", "Phi:", 0));
+        DEVICENUM_Label_5->setText(QApplication::translate("KSJDemoQT_Matrix", "Presetting:", 0));
+        DEVICENUM_Label_3->setText(QApplication::translate("KSJDemoQT_Matrix", "Presetting:", 0));
         label_14->setText(QApplication::translate("KSJDemoQT_Matrix", "R:", 0));
         label_15->setText(QApplication::translate("KSJDemoQT_Matrix", "G:", 0));
-        label_16->setText(QApplication::translate("KSJDemoQT_Matrix", "B:", 0));
         DEVICENUM_Label_4->setText(QApplication::translate("KSJDemoQT_Matrix", "CCM Mode:", 0));
-        DEVICENUM_Label_5->setText(QApplication::translate("KSJDemoQT_Matrix", "Presetting:", 0));
+        label_16->setText(QApplication::translate("KSJDemoQT_Matrix", "B:", 0));
+        DEVICENUM_Label_2->setText(QApplication::translate("KSJDemoQT_Matrix", "WB Mode:", 0));
+        label_17->setText(QApplication::translate("KSJDemoQT_Matrix", "TextLabel", 0));
     } // retranslateUi
 
 };

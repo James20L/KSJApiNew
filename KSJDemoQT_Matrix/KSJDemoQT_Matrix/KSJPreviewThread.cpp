@@ -33,38 +33,85 @@ int CKSJPreviewThread:: StopCapture()
 }
 
 
+void CKSJPreviewThread :: CreatSampleImage(unsigned char * pBuf,int nWidth,int nHeight,int nBitCounts)
+{
+    int nByteCounts = nBitCounts >>3;
+
+    for(int rowindex = 0;rowindex < nHeight; rowindex++)
+    {
+        for(int colindex = 0;colindex <nWidth; colindex++)
+        {
+
+            for(int bytesindx = 0; bytesindx <nByteCounts; bytesindx++)
+            {
+                if(bytesindx==0)
+                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
+                if(bytesindx==1)
+                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
+                if(bytesindx==2)
+                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= colindex%255*(rowindex/255);;
+
+
+            }
+        }
+    }
+
+}
+
+
+int CKSJPreviewThread:: CheckData( unsigned char * buf)
+{
+
+    for(int index = 0;index<m_nWidth*m_nHeight*m_nBitCount/8;index++)
+    {
+
+
+
+        if(*buf < 127)
+        {
+            *buf = 0;
+            qDebug(" %s %s %d  index = %d\n",__FILE__,__FUNCTION__,__LINE__,index);
+            break;
+        }
+
+        buf++;
+    }
+    return 0;
+
+}
+
+
 void CKSJPreviewThread:: run()
 {
 
     int nRet = 0;
 
+    int info = 0;
+    KSJ_QueryFunction(0, KSJ_PROPERTY_MONO_DEVICE, &info);
+    int nColormode = 0;
+
+    if(info==0)
+    {
+        nColormode =1;
+    }else
+    {
+        nColormode =0;
+    }
+
     while(m_bIsrunning)
     {
         m_pMutex->lock();
-        //         qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
-        nRet=KSJ_CaptureRgbData(0,m_pBuf[GetBufIndex()]);
 
-//        int bitscount = m_nBitCount/8;
+        if(nColormode)
+            nRet=KSJ_CaptureRgbData(0,m_pBuf[GetBufIndex()]);
+        else
+            nRet=KSJ_CaptureRawData(0,m_pBuf[GetBufIndex()]);
 
-//        for(int i = 0;i<m_nWidth*m_nHeight;i++)
-//        {
 
-//            for(int j = 0 ;j <bitscount ;j++)
-//            {
 
-//                if(j==0)
-//                    *(m_pBuf[1]+i*bitscount+j) = *(m_pBuf[0]+(m_nWidth*m_nHeight-i+1)*bitscount-1);
-//                if(j==1)
-//                    *(m_pBuf[1]+i*bitscount+j) = *(m_pBuf[0]+(m_nWidth*m_nHeight-i+1)*bitscount - 2);
+//        CreatSampleImage(m_pBuf[GetBufIndex()],m_nWidth,m_nHeight,m_nBitCount);
+//        CheckData(m_pBuf[GetBufIndex()]);
 
-//                if(j==2)
-//                    *(m_pBuf[1]+i*bitscount+j) = *(m_pBuf[0]+(m_nWidth*m_nHeight-i+1)*bitscount-0);
-
-//            }
-
-//        }
-
-        //        qDebug(" %s %s %d \n",__FILE__,__FUNCTION__,__LINE__);
         m_pMutex->unlock();
         emit(UpdateImage(m_pBuf[0]));
         usleep(100);

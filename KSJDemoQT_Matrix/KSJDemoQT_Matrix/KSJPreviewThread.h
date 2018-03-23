@@ -20,6 +20,8 @@ public:
 
     void SetFpRunBody(const fpRunBody &fpRunBody);
     int  StopCapture();
+    int  CheckData( unsigned char * buf);
+    void CreatSampleImage(unsigned char * pBuf,int nWidth,int nHeight,int nBitCounts);
 
     ~CKSJPreviewThread();
 private:
@@ -40,8 +42,6 @@ signals:
 
 private:
     int GetBufIndex();
-
-
 
 };
 

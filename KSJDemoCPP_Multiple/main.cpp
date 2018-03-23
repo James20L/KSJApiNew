@@ -17,7 +17,7 @@ using namespace cv;
 #include "KSJApi.h"
 using namespace std;
 
-int    time_substract(struct timeval *result, struct timeval *begin,struct timeval *end);
+int    TimeSubstract(struct timeval *result, struct timeval *begin,struct timeval *end);
 
 
 int RGBFLAG = 0;
@@ -133,6 +133,62 @@ int KSJ_ReleaseBufs(int number,T_Fov_param * fovs)
 
 }
 
+int KSJ_SetCamsParam_jd(int CAMERA_NUMBER)
+{
+    int nRet = 0;
+    int nColStart = 0;
+    int nRowStart = 0;
+    int ggx;
+    int nColSize = 0;
+    int nRowSize = 0;
+    KSJ_ADDRESSMODE ColAddressMode;
+    KSJ_ADDRESSMODE RowAddressMode;
+
+    for(int nIndex = 0;nIndex<CAMERA_NUMBER;nIndex++)
+    {
+        KSJ_CaptureGetDefaultFieldOfView(nIndex,(int*)&nColStart,(int*)&nRowStart,(int *)&nColSize,(int *)&nRowSize,&ColAddressMode,&RowAddressMode);
+
+        printf(" %s %s %dnColStart = %d \n ",__FILE__,__FUNCTION__,__LINE__,nColStart);
+        printf(" %s %s %dnRowStart = %d \n ",__FILE__,__FUNCTION__,__LINE__,nRowStart);
+        printf(" %s %s %dnColSize = %d \n ",__FILE__,__FUNCTION__,__LINE__,nColSize);
+        printf(" %s %s %dnRowSize = %d \n ",__FILE__,__FUNCTION__,__LINE__,nRowSize);
+        int width = nColSize;
+        int height = nRowSize;
+        width =3096;//1280;
+        height = 2080;//960;
+        //      KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIP2,KSJ_SKIP2);
+        //        KSJ_BayerSetMode(nIndex, KSJ_GRBG_BGR24_FLIP);
+
+        int nlines = 0;
+        //        KSJ_SetParam(nIndex,KSJ_EXPOSURE_LINES,1000);
+        //        KSJ_GetParam(nIndex,KSJ_EXPOSURE_LINES,&nlines);
+        float nExposureTime = .0;
+        nExposureTime = 20.0;
+        printf(" %s %s %d       nExposureTime = %f \n ",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
+        KSJ_ExposureTimeSet(nIndex,nExposureTime);
+        KSJ_WB_MODE wbmode;
+        wbmode = KSJ_HWB_AUTO_CONITNUOUS;  //KSJ_HWB_PRESETTINGS,
+        KSJ_WhiteBalanceSet(nIndex,wbmode);
+        //        KSJ_WhiteBalancePresettingSet(nIndex,KSJ_CT_5000K)
+        KSJ_WhiteBalanceGet(nIndex,&wbmode);
+        KSJ_SetParam(nIndex,KSJ_RED,100);
+        KSJ_SetParam(nIndex,KSJ_GREEN,100);
+        KSJ_SetParam(nIndex,KSJ_BLUE,100);
+        printf(" KSJ_WhiteBalanceGet =====================%s %s %d       nlines = %d \n ",__FILE__,__FUNCTION__,__LINE__,wbmode);
+#if 0
+        KSJ_SENSITIVITYMODE  smode  =  KSJ_HIGH;
+        KSJ_SensitivitySetMode(nIndex,smode);
+#endif
+        KSJ_ColorCorrectionSet(0, KSJ_HCCM_PRESETTINGS);
+
+        KSJ_ColorCorrectionPresettingSet(0, KSJ_CT_5000K);
+
+
+    }
+    return 0;
+}
+
+
 int KSJ_SetCamsParam(int camcount)
 {
 
@@ -154,8 +210,6 @@ int KSJ_SetCamsParam(int camcount)
         int pnSerials;
         unsigned short pusFirmwareVersion;
         unsigned short pusFpgaVersion;
-
-
 
 
         CHECK_RET(KSJ_DeviceGetInformationEx( nIndex,  &pusDeviceType,  &pnSerials,  &pusFirmwareVersion,  &pusFpgaVersion));
@@ -202,12 +256,12 @@ int KSJ_SetCamsParam(int camcount)
 
 
 
-//        width =1280;
-//        height = 1024;
+        //        width =1280;
+        //        height = 1024;
 #if 1
 
-//        KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIP2,KSJ_SKIP2);
-          KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
+        KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
+        //          KSJ_CaptureSetFieldOfView(nIndex,0,0,width,height,KSJ_SKIPNONE,KSJ_SKIPNONE);
 
         KSJ_CaptureGetFieldOfView(nIndex,&nColStart,&nRowStart,&nColSize,&nRowSize,&ColAddressMode,&RowAddressMode);
 
@@ -219,8 +273,8 @@ int KSJ_SetCamsParam(int camcount)
 
         //        CHECK_RET(KSJ_LutSetEnable(nIndex, false));
 
-//        KSJ_FILTERMODE bayermode;
-//        KSJ_FilterGetMode(nIndex,&bayermode);
+        //        KSJ_FILTERMODE bayermode;
+        //        KSJ_FilterGetMode(nIndex,&bayermode);
 
         KSJ_BAYERMODE bayermode;
 
@@ -230,7 +284,7 @@ int KSJ_SetCamsParam(int camcount)
 
 
 
-        CHECK_RET(KSJ_BayerSetMode(nIndex, KSJ_BGGR_BGR24_FLIP));
+        //        CHECK_RET(KSJ_BayerSetMode(nIndex, KSJ_BGGR_BGR24_FLIP));
 
 #if 1
         float nExposureTime = .0;
@@ -238,7 +292,7 @@ int KSJ_SetCamsParam(int camcount)
 
         printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 
-        nExposureTime = 20;
+        nExposureTime = 30;
         printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 
         KSJ_ExposureTimeSet(nIndex,nExposureTime);
@@ -321,13 +375,45 @@ int KSJ_SetCamsParam(int camcount)
 
 }
 
+void CreatSampleImage(unsigned char * pBuf,int nWidth,int nHeight,int nBitCounts)
+{
+    printf(" %s %s %d    CreatSampleImage     nWidth= %d   \n",__FILE__,__FUNCTION__,__LINE__,nWidth);
+    printf(" %s %s %d    CreatSampleImage     nHeight= %d   \n",__FILE__,__FUNCTION__,__LINE__,nHeight);
+    printf(" %s %s %d    CreatSampleImage     nBitCounts= %d   \n",__FILE__,__FUNCTION__,__LINE__,nBitCounts);
 
+    int nByteCounts = nBitCounts >>3;
+    printf(" %s %s %d    CreatSampleImage     nByteCounts= %d   \n",__FILE__,__FUNCTION__,__LINE__,nByteCounts);
+
+
+    for(int rowindex = 0;rowindex < nHeight; rowindex++)
+    {
+        for(int colindex = 0;colindex <nWidth; colindex++)
+        {
+
+            for(int bytesindx = 0; bytesindx <nByteCounts; bytesindx++)
+            {
+                if(bytesindx==0)
+                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
+                if(bytesindx==1)
+                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
+                if(bytesindx==2)
+                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= colindex%255*(rowindex/255);;
+
+
+            }
+        }
+    }
+
+}
+
+
+
+struct timeval start,stop,diff;
 void *KSJ_CaptureLoop(void * loopargs)
 {
     bool lutflag = false;
 
 
-    struct timeval start,stop,diff;
     memset(&start,0,sizeof(struct timeval));
 
     memset(&stop,0,sizeof(struct timeval));
@@ -374,6 +460,13 @@ void *KSJ_CaptureLoop(void * loopargs)
     default:
         printf("not support");
     }
+
+    int info ;
+    KSJ_QueryFunction(index, KSJ_PROPERTY_MONO_DEVICE, &info);
+    if(info>0) channelnum =1;
+
+
+
 
     img0=cvCreateImage(cvSize(g_fov[0].nWidth,g_fov[0].nHeight),IPL_DEPTH_8U,channelnum);
     img0->imageData = (char*) buf;
@@ -427,9 +520,14 @@ void *KSJ_CaptureLoop(void * loopargs)
             nCount++;
 
 
+//            CreatSampleImage(buf,width,height,bitscount);
+
 #ifdef USING_OPENCV
 
             //    	cv::cvtColor(mtx0,mtx1,CV_BayerRG2RGB);
+
+
+
 
             if(SHOWFLAG)
             {
@@ -451,7 +549,7 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 
             gettimeofday(&stop,0);
-            time_substract(&diff,&start,&stop);
+            TimeSubstract(&diff,&start,&stop);
 
             printf("index = %d  serialinloop = %d fps = %f \n",index,serialinloop, nCountFpsUnit/(float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00)));
             //            lutflag =!lutflag;
@@ -608,7 +706,7 @@ HEAD:
 
 
 
-#if 0
+#if 1
     T_Thread_Param param;
     param.buf = g_buf[0];
     param.index = 0;
@@ -686,7 +784,7 @@ HEAD:
 gettimeofday(&start,0);
 cl_entrance("bayer2",width,height,(unsigned char*)buf,(unsigned char*)outbuf);
 gettimeofday(&stop,0);
-time_substract(&diff,&start,&stop);
+TimeSubstract(&diff,&start,&stop);
 printf("cl Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
 
 IplImage* img0=cvCreateImage(cvSize(width-1,height),IPL_DEPTH_8U,3);
@@ -724,10 +822,10 @@ resize(mtx1,image2,dsize);
 gettimeofday(&stop,0);
 
 
-time_substract(&diff,&start,&stop);
+TimeSubstract(&diff,&start,&stop);
 
 
-yy    printf("cv Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
+printf("cv Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
 
 
 imshow("cv-outimage",image2);
@@ -739,10 +837,37 @@ waitKey(1);
 
 
 #endif
+int    TimeSubstract(struct timeval *result, struct timeval *begin,struct timeval *end);
 
+int StartTimeCounter()
+{
+    static struct timeval start,stop,diff;
+    memset(&start,0,sizeof(struct timeval));
 
+    memset(&stop,0,sizeof(struct timeval));
 
-int    time_substract(struct timeval *result, struct timeval *begin,struct timeval *end)
+    memset(&diff,0,sizeof(struct timeval));
+    gettimeofday(&start,0);
+
+}
+
+float CheckTimePassedSec()
+{
+    gettimeofday(&stop,0);
+    TimeSubstract(&diff,&start,&stop);
+    printf("cv Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
+    return (float)(diff.tv_sec+(float)(diff.tv_usec/1000000.00));
+}
+
+int CheckTimePassedMilSec()
+{
+    gettimeofday(&stop,0);
+    TimeSubstract(&diff,&start,&stop);
+    printf("cv Total time : %d s,%d us\n",(int)diff.tv_sec,(int)diff.tv_usec);
+    return (diff.tv_sec*1000+(int)(diff.tv_usec/1000));
+}
+
+int TimeSubstract(struct timeval *result, struct timeval *begin,struct timeval *end)
 
 {
 
@@ -750,13 +875,9 @@ int    time_substract(struct timeval *result, struct timeval *begin,struct timev
 
     if((begin->tv_sec == end->tv_sec) && (begin->tv_usec > end->tv_usec))    return -2;
 
-
-
     result->tv_sec    = (end->tv_sec - begin->tv_sec);
 
     result->tv_usec    = (end->tv_usec - begin->tv_usec);
-
-
 
     if(result->tv_usec < 0)
 
@@ -767,8 +888,6 @@ int    time_substract(struct timeval *result, struct timeval *begin,struct timev
         result->tv_usec += 1000000;
 
     }
-
-
 
     return 0;
 }

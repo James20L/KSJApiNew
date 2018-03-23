@@ -28,10 +28,17 @@ INCLUDEPATH +=../../KSJApi.inc
 INCLUDEPATH +=../../../git.KSJLog/KSJLog.Inc/
 
 
+#LIBS += -L../../KSJApi.bin/linux/x64 \
+#        -Wl,--start-group  -lopencv_core -lopencv_highgui \
+#        -lksjlog -lopencv_imgproc -lavformat -lavcodec -lavutil -lswresample -lusb-1.0 -lksjapi \
+#        -lksjbayer  -ljpeg -ldl -lpthread  -lz -llzma -Wl,--end-group -Wl,-rpath,../../KSJApi.bin/linux/x64
+
+
 LIBS += -L../../KSJApi.bin/linux/x64 \
-        -Wl,--start-group  -lopencv_core -lopencv_highgui \
-        -lksjlog -lopencv_imgproc -lavformat -lavcodec -lavutil -lswresample -lusb-1.0 -lksjapi \
-        -lksjbayer  -ljpeg -ldl -lpthread  -lz -llzma -Wl,--end-group -Wl,-rpath,../../KSJApi.bin/linux/x64
+        -Wl,--start-group  \
+        -lksjlog  -lusb-1.0 -lksjapi \
+        -lksjbayer  -ljpeg -ldl -lpthread  -lz  -Wl,--end-group -Wl,-rpath,../../KSJApi.bin/linux/x64
+
 
 
 
@@ -47,5 +54,5 @@ HEADERS  += \
     KSJPreviewWidget.h \
     KSJPreviewThread.h
 
-FORMS    += mainwindow.ui \
+FORMS    += \
     KSJDemoQT_Matrix.ui

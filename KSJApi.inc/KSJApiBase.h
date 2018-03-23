@@ -138,6 +138,14 @@ extern "C"{
 	KSJ_API  KSJ_CaptureRgbData(int nIndex, unsigned char *pRgbData);
 	// Capture 8, 24, 32 Format Image Data.( Note: When Set 16bits, Buffer Should double )
 	KSJ_API  KSJ_CaptureRgbDataEx(int nIndex, unsigned char *pRgbData, int *pnWidth, int *pnHeight, int *pnBitCount);
+
+    // Start the timer
+    KSJ_API KSJ_StartTimeCounter();
+    //Stop the timer and get the value Second
+    KSJ_API KSJ_CheckTimePassedSec(float *nTimeSec);
+    //Stop the timer and get the value MilSecond
+    KSJ_API KSJ_CheckTimePassedMilSec(int *nTimeMilSec);
+
 	// Save to Bmp Format
 	KSJ_API   KSJ_HelperSaveToBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, const TCHAR *pszFileName);
 	// Save to Jpg Format

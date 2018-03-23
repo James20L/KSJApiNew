@@ -16,6 +16,10 @@ public:
 
     void CreatCaptureThread();
     void  DestoryCaptureThread();
+    void  SaveImageBuf(QImage *pImg);
+    bool IsPreviewing();
+    CKSJPreviewThread * m_pPreview_Thread;
+
 
 private:
     int m_nColormode;
@@ -31,10 +35,12 @@ private:
     int m_nImageY;
     int m_nImageW;
     int m_nImageH;
-    CKSJPreviewThread * m_pPreview_Thread;
+
 
     QMutex m_mMutex;
     int m_nBitCount;
+
+
 
 
 

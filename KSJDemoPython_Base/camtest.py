@@ -16,12 +16,34 @@ from ctypes import *
 200w 1936 1216 
 120w 1280 960
 """
-#g_nWidth = 2048
-#g_nHeight = 2048
+#g_nWidth = 2400
+#g_nHeight = 2000
+#g_nStartx = 348
+#g_nStarty = 40
+
+g_nWidth = 800
+g_nHeight = 200
+g_nStartx = 0
+g_nStarty = 0
+
+g_skipmode  = 0
+g_exptime = 20
+g_gain = 100
+g_sensitity = 2
+g_lut = 1
+g_aemin = 0.1
+g_aemax = 30
+g_aetarget =120
+g_show  = 1;
+g_ae = 0
+
+
+
 nWidthArray = [25]
 nHeightArray = [25]
 g_mono = 0;
 nThreadFlag =1;
+
 
 def KsjInit():
     libKsj = cdll.LoadLibrary('libksjapi.so')
@@ -33,6 +55,36 @@ def KsjInit():
     else:
         print("cam found")
     return libKsj,camCount
+
+def CamAeCallBack(bsuccess,nResult,lpContext):
+    print("callback called")
+    print(bsuccess)
+    print(nResult)
+def CamSetAe(libKsj,num):
+    for i in range(0,num):
+        nBitCount = c_int()
+        nColSize  = c_int()
+        nRowSize  = c_int()
+        libKsj.KSJ_CaptureGetSizeEx(i,byref(nColSize), byref(nRowSize),byref(nBitCount))
+
+#        libKsj.KSJ_AESetRegion(i,0,0,g_nWidth,g_nheight)
+
+        AeX = 500
+        AeY = 0
+        AeW = 1280
+        AeH = 280
+        libKsj.KSJ_AESetRegion(i,nColSize.value-AeX,nRowSize.value - AeY- AeH,AeW,AeH)
+
+        libKsj.KSJ_AESetExposureTimeRange.argtypes = (c_int,c_float,c_float)
+        libKsj.KSJ_AESetExposureTimeRange(i,g_aemin,g_aemax)
+        CB_T=CFUNCTYPE(c_void_p,c_bool, c_int,c_void_p)
+        print(dir())
+        lpContext = c_void_p()
+        libKsj.KSJ_AESetCallback(i,CB_T(CamAeCallBack),0);
+        libKsj.KSJ_AEStart.argtypes = (c_int, c_bool, c_int ,c_int);
+
+        libKsj.KSJ_AEStart(i,True,-1,g_aetarget)
+
 
 def CamParmSet(libKsj,num):
 
@@ -51,17 +103,30 @@ def CamParmSet(libKsj,num):
         print(nSerials)
         print(usFirmwareVersion)
         
-
- #       libKsj.KSJ_CaptureSetFieldOfView(i,0,0,g_nWidth,g_nHeight,0,0)
-        
         nColStart = c_int()
         nRowStart = c_int()
         nColSize = c_int()
         nRowSize = c_int()
         ColAddressMode = c_int()
-        RowAddressMode = c_int() 
-#        libKsj.KSJ_CaptureGetDefaultFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))        
-        libKsj.KSJ_CaptureGetFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))        
+        RowAddressMode = c_int()
+#        libKsj.KSJ_CaptureGetDefaultFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))
+        libKsj.KSJ_CaptureGetFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))
+        print(nColStart.value)
+        print(nRowStart.value)
+        print(nColSize.value)
+        print(nRowSize.value)
+        print(ColAddressMode.value)
+        print(RowAddressMode .value)
+#        nret = libKsj.KSJ_CaptureSetFieldOfView(i,g_nStartx,g_nStarty,g_nWidth,g_nHeight,g_skipmode,g_skipmode)
+
+#        nret = libKsj.KSJ_CaptureSetFieldOfView(i,nColStart.value,nRowStart.value,nColSize.value,nRowSize.value,0,0)
+
+#        libKsj.KSJ_EmptyFrameBuffer(i)
+
+
+#        nret = libKsj.KSJ_CaptureSetFieldOfView(i,nColStart.value,nRowStart.value,nColSize.value,nRowSize.value,1,1)
+
+        nret = libKsj.KSJ_CaptureGetFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))
         print(nColStart.value)
         print(nRowStart.value)
         print(nColSize.value)
@@ -69,8 +134,18 @@ def CamParmSet(libKsj,num):
         print(ColAddressMode.value)
         print(RowAddressMode .value)
 
+
+        nBitCount = c_int()
+        libKsj.KSJ_CaptureGetSizeEx(i,byref(nColSize), byref(nRowSize),byref(nBitCount))
         nWidthArray[i] = nColSize.value
         nHeightArray[i] = nRowSize.value
+        print("KSJ_CaptureSetFieldOfView nret = %d"%(nret))
+
+
+
+ #       libKsj.KSJ_CaptureSetFieldOfView(i,0,0,g_nWidth,g_nHeight,0,0)
+        
+
 
         '''
         for set ,mirror ,do not change the 2nd parm, ,3rd parm is gain value     
@@ -94,19 +169,23 @@ def CamParmSet(libKsj,num):
 
         if mono.value == 0:
             g_mono = 0;
-            libKsj.KSJ_BayerSetMode(i, 5);
+            bayermode = c_int();
+            libKsj.KSJ_BayerGetMode(i, byref(bayermode));
+#            libKsj.KSJ_BayerSetMode(i, bayermode.value+4);
+
             '''
             for set whitbalance mode 7 stand for auto continus
             '''
 
             libKsj.KSJ_WhiteBalanceSet(i,7);
-            libKsj.KSJ_WhiteBalancePresettingSet(i,2)
+#            libKsj.KSJ_WhiteBalanceSet(i,5);
+#            libKsj.KSJ_WhiteBalancePresettingSet(i,0)
 
             '''
             for set color correction 3 is hardware present
             '''
             libKsj.KSJ_ColorCorrectionSet(i,3)
-            libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
+#            libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
         else:
             g_mono = 1;
 
@@ -115,11 +194,10 @@ def CamParmSet(libKsj,num):
 
 #        fexpTime.value = 100.0              
         libKsj.KSJ_ExposureTimeSet.argtypes = (c_int,c_float)
-        libKsj.KSJ_ExposureTimeSet(i,3.00);
+        libKsj.KSJ_ExposureTimeSet(i,g_exptime);
         fexpTime = c_float()
         libKsj.KSJ_ExposureTimeGet(i,byref(fexpTime));
-        print(fexpTime)
-        print(fexpTime.value)
+        print("fexpTime = %d"%(fexpTime.value))
 
 
 
@@ -127,12 +205,20 @@ def CamParmSet(libKsj,num):
         for set the sensitivity  1 stand for high
       
         '''  
-        libKsj.KSJ_SensitivitySetMode(i,2)
+        libKsj.KSJ_SensitivitySetMode(i,g_sensitity)
+        libKsj.KSJ_LutSetEnable(i,g_lut)
 
+def check_buf_data(buf):
+#    print(type(buf))
+#    print(dir(buf))
+    for bytesindex in range(0,len(buf)):
+        if int.from_bytes(buf[bytesindex],byteorder='little') <127:
+            buf[bytesindex]=0
+            print(bytesindex)
+            break
 
-        libKsj.KSJ_ColorCorrectionSet(i, 3)
+#    import pdb;pdb.set_trace()
 
-        
 
 
 def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum): 
@@ -142,6 +228,13 @@ def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum):
         retValue = libKsj.KSJ_CaptureRgbData(nIndex,cBuf)
     if retValue != 0:
         print("capture error code %d"%(retValue))
+#    check_buf_data(cBuf)
+
+
+#    exptime = c_float()
+#    libKsj.KSJ_ExposureTimeGet(nIndex,byref(exptime))
+
+#    print("exptime = %f"%(exptime.value))
   
     nparr = np.fromstring(cBuf,np.uint8).reshape(nHeight,nWidth,nChannelNum );     
     return nparr
@@ -149,7 +242,7 @@ def CapturData(nIndex,cBuf,nHeight,nWidth,nChannelNum):
  
  
 def QuitAll():
-    global nThreadFlag
+    global nThreadFlagd
     print("exit")
     nThreadFlag=0;
     
@@ -200,9 +293,11 @@ def CapturDataLoop(nIndex,pDataBuf,nWidth,nHeight):
     while nThreadFlag > 0:
        
         image =  CapturData(nIndex,pDataBuf,nHeight,nWidth,int(channelnum))
-        
-        cv2.imshow("test",image)
-        cv2.waitKey(1)
+        if g_show == 1:
+            if nWidth > 1920:
+                image=cv2.resize(image,(int(nWidth/2),int(nHeight/2) ))
+            cv2.imshow("test",image)
+            cv2.waitKey(1)
 
         if nFrameCount == 0:
             nTimeStart = datetime.datetime.now() 
@@ -234,10 +329,12 @@ if __name__ == '__main__':
         print(libKsj)
         print(camNub)
         CamParmSet(libKsj,camNub)
+        if g_ae == 1:
+            CamSetAe(libKsj,camNub)
 
         bufList=CreateBuf(libKsj,camNub)
         threadlist=[]
-        import pdb;pdb.set_trace()
+#        import pdb;pdb.set_trace()
         for i in range(0,camNub):   
             threadlist.append(threading.Thread(target=CapturDataLoop,args=(i,bufList[i],nWidthArray[i],nHeightArray[i])))                 
             threadlist[i].setDaemon(True)

@@ -53,6 +53,7 @@ class KSJDemoQT_Matrix : public QDialog
 public:
     explicit KSJDemoQT_Matrix(QWidget *parent = 0);
     ~KSJDemoQT_Matrix();
+    void CreatSampleImage(unsigned char * pBuf,int nWidth,int nHeight,int nBitCounts);
 
 
 private slots:
