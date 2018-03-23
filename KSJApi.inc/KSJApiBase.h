@@ -139,7 +139,7 @@ extern "C"{
 	// Capture 8, 24, 32 Format Image Data.( Note: When Set 16bits, Buffer Should double )
 	KSJ_API  KSJ_CaptureRgbDataEx(int nIndex, unsigned char *pRgbData, int *pnWidth, int *pnHeight, int *pnBitCount);
 	// Save to Bmp Format
-	KSJ_API   KSJ_HelperSaveToBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, const TCHAR *pszFileName);
+	KSJ_API  KSJ_HelperSaveToBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, const TCHAR *pszFileName);
 	// Save to Jpg Format
 	KSJ_API  KSJ_HelperSaveToJpg(unsigned char *pData, int nWidth, int nHeight, int nBitCount, int nQulity, const TCHAR *pszFileName);
 
