@@ -73,6 +73,26 @@ extern "C"{
 
 	KSJ_API  KSJ_LoadFlatFieldCorrection(int nIndex, TCHAR *pszFilePath);
 
+	// 预览时是否使能
+	KSJ_API  KSJ_PreviewSetCalibration(int nIndex, bool bEnable);
+
+	KSJ_API  KSJ_PreviewGetCalibration(int nIndex, bool *pbEnable);
+	// 采集时是否使能
+	KSJ_API  KSJ_CaptureSetCalibration(int nIndex, bool bEnable);
+
+	KSJ_API  KSJ_CaptureGetCalibration(int nIndex, bool *pbEnable);
+
+	KSJ_API  KSJ_LoadCalibrationMapFile(int nIndex, const TCHAR *pszFilePath);
+
+	enum KSJ_MAPMODE
+	{
+		KSJ_MM_NEARESTNEIGHBOR,
+		KSJ_MM_BILINEAR
+	};
+
+	KSJ_API  KSJ_SetCalibrationMapMode(int nIndex, KSJ_MAPMODE MapMode);
+	KSJ_API  KSJ_GetCalibrationMapMode(int nIndex, KSJ_MAPMODE *pMapMode);
+
 #ifdef linux
 	KSJ_API   KSJ_SoftStartCapture(int nIndex);
 	KSJ_API   KSJ_ReadRawDataAfterStart(int nIndex, unsigned char *pRawData);

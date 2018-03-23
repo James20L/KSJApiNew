@@ -147,7 +147,7 @@ extern "C"{
     KSJ_API KSJ_CheckTimePassedMilSec(int *nTimeMilSec);
 
 	// Save to Bmp Format
-	KSJ_API   KSJ_HelperSaveToBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, const TCHAR *pszFileName);
+	KSJ_API  KSJ_HelperSaveToBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, const TCHAR *pszFileName);
 	// Save to Jpg Format
 	KSJ_API  KSJ_HelperSaveToJpg(unsigned char *pData, int nWidth, int nHeight, int nBitCount, int nQulity, const TCHAR *pszFileName);
 
