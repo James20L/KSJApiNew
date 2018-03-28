@@ -24,6 +24,7 @@ int RGBFLAG = 0;
 int SHOWFLAG = 0;
 int PICNUM = 0;
 int CAPTURETWOSTEPFLAG = 0;
+int MAP = 0;
 
 
 
@@ -335,6 +336,28 @@ int KSJ_SetCamsParam(int camcount)
         printf(" %s %s %d      FOVS[%d].nHeight %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nHeight);
 
 
+    if(MAP == 1){
+
+        int nRet = KSJ_CaptureSetCalibration(nIndex,true);
+        bool bCali = false;
+        nRet = KSJ_CaptureGetCalibration(nIndex,&bCali);
+        printf(" %s %s %d   bCali =   %d    KSJ_CaptureGetCalibration  \n",__FILE__,__FUNCTION__,__LINE__,bCali);
+
+        nRet = KSJ_LoadCalibrationMapFile(nIndex,"Map.cmf");
+        printf(" %s %s %d   nRet =   %d    KSJ_LoadCalibrationMapFile  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+
+
+        nRet = KSJ_SetCalibrationMapMode(nIndex,KSJ_MM_NEARESTNEIGHBOR);
+
+        printf(" %s %s %d   nRet =   %d    KSJ_SetCalibrationMapMode  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+
+
+        }
+
+
+
+
+
 #if 0
         KSJ_CCM_MODE ccs_mode;
         CHECK_RET(KSJ_ColorCorrectionSet(0,KSJ_HCCM_PRESETTINGS));
@@ -393,11 +416,11 @@ void CreatSampleImage(unsigned char * pBuf,int nWidth,int nHeight,int nBitCounts
             for(int bytesindx = 0; bytesindx <nByteCounts; bytesindx++)
             {
                 if(bytesindx==0)
-                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
+                    *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
                 if(bytesindx==1)
-                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
+                    *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= 0;
                 if(bytesindx==2)
-                *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= colindex%255*(rowindex/255);;
+                    *(pBuf+rowindex*nWidth*nByteCounts+colindex*nByteCounts+bytesindx)= colindex%255*(rowindex/255);;
 
 
             }
@@ -520,7 +543,7 @@ void *KSJ_CaptureLoop(void * loopargs)
             nCount++;
 
 
-//            CreatSampleImage(buf,width,height,bitscount);
+            //            CreatSampleImage(buf,width,height,bitscount);
 
 #ifdef USING_OPENCV
 
@@ -531,7 +554,12 @@ void *KSJ_CaptureLoop(void * loopargs)
 
             if(SHOWFLAG)
             {
-                imshow(windowname,mtx0);
+                Size dsize =Size(mtx0.cols*0.25,mtx0.rows*0.25);
+
+                Mat mtx1;
+                resize(mtx0,mtx1,dsize);
+
+                imshow(windowname,mtx1);
                 waitKey(1);
             }
 #endif
@@ -592,7 +620,7 @@ int main(int argc,void ** argv)
 #if 1
     int ch;
 
-    while((ch = getopt(argc, (char *const *)argv, "c:g:t:m:h")) != -1){
+    while((ch = getopt(argc, (char *const *)argv, "c:g:t:m:h:p:l")) != -1){
         printf("ch = 0x%x\n",ch );
         printf("optind = %d, optopt = %d\n", optind, optopt);
 
@@ -658,6 +686,23 @@ int main(int argc,void ** argv)
             }
 
             break;
+
+        case 'p':
+            printf("选项是%c, 选项内容: %s\n", ch, optarg);
+            if(atoi(optarg)>0)
+            {
+                MAP = atoi(optarg);
+                printf("test MAP = %d  \n",MAP);
+            }
+            else
+            {
+
+                printf("test picnum  = 0 \n");
+            }
+
+            break;
+
+
         case 'h':
             printf("选项是%c\n", ch);
             printf("-c 1 or 0 RGB or RAW\n");

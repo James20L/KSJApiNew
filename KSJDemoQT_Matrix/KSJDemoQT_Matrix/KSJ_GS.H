@@ -1,6 +1,7 @@
 #ifndef  __KSJ_GLOBAL_STRING_H__
 #define  __KSJ_GLOBAL_STRING_H__
-#ifdef _WIN32
+
+#ifndef linux
 #ifdef KSJAPI_EXPORTS
 #include <Windows.h>
 #include <tchar.h>
@@ -8,10 +9,10 @@
 #include <SDKDDKVer.h>
 #include <afxwin.h>         // MFC core and standard components
 #endif
+
 #else
 
-#define  TCHAR char
-
+#include "../../../git.KSJWinInLinux/windef_linux.h"
 
 #endif
 
@@ -76,8 +77,16 @@ extern const int     g_nGpioDirection;
 extern const TCHAR   *g_szGpioStatus[];
 extern const int     g_nGpioStatus;
 
-extern const TCHAR *g_szAEStatus[];
-#ifndef _WIN32
-#undef  TCHAR
-#endif
+extern const TCHAR   *g_szAEStatus[];
+
+extern const TCHAR  *g_szBayerFilter[];
+extern const int     g_nBayerFilter;
+
+
+extern const TCHAR  *g_szBayerMode1[];
+extern const int     g_nBayerMode1;
+
+extern const TCHAR  *g_szMapMode[];
+extern const int     g_nMapMode;
+
 #endif
