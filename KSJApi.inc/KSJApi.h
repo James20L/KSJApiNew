@@ -9,6 +9,7 @@
 #include "KSJApiDeviceType.h"
 #include "KSJApiRetCode.H"
 #include "KSJApiBase.h"
+#include "KSJApiCallback.h"
 #include "KSJApiBayer.h"
 #include "KSJApiTriggerMode.h"
 #include "KSJApiFunction.h"
