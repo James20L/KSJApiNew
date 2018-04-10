@@ -23,5 +23,6 @@
 #include "KSJApiProgram.h"
 #include "KSJApiIo.h"
 #include "KSJApiWaterMark.h"
+#include "KSJApi16Bits.h"
 
 #endif
