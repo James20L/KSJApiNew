@@ -52,7 +52,7 @@ typedef unsigned *PBEGINTHREADEX_ID;
 #ifdef _DEBUG
 #pragma comment( lib, "..\\KSJApi.Lib\\win32\\KSJApid.lib" )
 #else
-#pragma comment( lib, "..\\KSJApi.Lib\\KSJApi.lib" )
+#pragma comment( lib, "..\\KSJApi.Lib\\win32\\KSJApi.lib" )
 #endif
 #endif
 

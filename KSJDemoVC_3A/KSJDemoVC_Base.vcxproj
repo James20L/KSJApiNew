@@ -209,18 +209,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\KSJ_GS.H" />
-    <ClInclude Include="..\KSJApi.inc\KSJApi.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApi3A.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiBase.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiBayer.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiCustom.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiDeviceType.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiFunction.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiInternal.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiMatrix.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiRetCode.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiTriggerMode.h" />
-    <ClInclude Include="..\KSJApi.inc\KSJApiUserZone.h" />
     <ClInclude Include="..\KSJApi.inc\KSJType.h" />
     <ClInclude Include="..\KSJApi.inc\win_linux.h" />
     <ClInclude Include="KSJDemoVC.h" />
