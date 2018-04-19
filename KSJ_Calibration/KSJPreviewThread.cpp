@@ -17,7 +17,7 @@ CKSJPreviewThread::CKSJPreviewThread(QMutex *bufmutex)
     m_nMapHeight=0;
     m_nFracPrecision=0;
 
-    KSJ_ReadMapfromFile("Map12",m_nMapWidth,m_nMapHeight,m_nFracPrecision,m_pMapX,m_pMapY);
+    KSJ_ReadMapfromFile("KSJMapCali.kmc",m_nMapWidth,m_nMapHeight,m_nFracPrecision,m_pMapX,m_pMapY);
     nRet = KSJ_CaptureGetSizeEx(0,&m_nWidth,&m_nHeight,&m_nBitCount);
 
     if(m_nMapWidth!=m_nWidth || m_nMapHeight!=m_nHeight)
@@ -27,8 +27,6 @@ CKSJPreviewThread::CKSJPreviewThread(QMutex *bufmutex)
         m_pMapX=0;
         m_pMapY=0;
     }
-
-    qDebug("%d %d %d %d",m_nMapWidth,m_nMapHeight,m_pMapX,m_pMapY);
     m_pBuf[0]=(unsigned char *)malloc(m_nWidth*m_nHeight*m_nBitCount/8);
     m_pBuf[1]=(unsigned char *)malloc(m_nWidth*m_nHeight*m_nBitCount/8);
 

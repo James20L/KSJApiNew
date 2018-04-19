@@ -20,5 +20,7 @@
 #include "KSJApiCustom.h"
 #include "KSJApiImage.h"
 #include "KSJApiProgram.h"
+#include "KSJApiIo.h"
+#include "KSJApiWaterMark.h"
 
 #endif

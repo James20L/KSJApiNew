@@ -1,6 +1,6 @@
-#include "../../github.opencv310-in-vs/opencv.inc/opencv.h"
-#include "../../github.opencv310-in-vs/opencv.inc/opencv_link.h"
-#include <vector>
+#include "../../../101/github.opencv310-in-vs/opencv.inc/opencv.h"
+#include "../../../101/github.opencv310-in-vs/opencv.inc/opencv_link.h"
+#include<vector>
 using namespace cv;
 using namespace std;
 
@@ -11,8 +11,8 @@ using namespace std;
 bool KSJ_FindConners(
 	 Mat& imgInput,								//输入图像
 	 Size BoardSize,							//输入棋盘格的尺寸（尺寸为顶点的个数，不要包括最外围的一圈）
-     vector<vector<Point2f> > &vecImagePts,		//保存所有检测到的角点的图像坐标,这是一个输入/输出参数，新检测出来的棋盘点图像坐标序列会pushback到这个向量中
-     vector<vector<Point3f> > &vecWorldPts		//保存所有检测到的角点的世界坐标,这是一个输入/输出参数，新检测出来的棋盘点世界坐标序列会pushback到这个向量中
+     vector< vector<Point2f> > &vecImagePts,		//保存所有检测到的角点的图像坐标,这是一个输入/输出参数，新检测出来的棋盘点图像坐标序列会pushback到这个向量中
+     vector< vector<Point3f> > &vecWorldPts		//保存所有检测到的角点的世界坐标,这是一个输入/输出参数，新检测出来的棋盘点世界坐标序列会pushback到这个向量中
 	 );
 
 //利用上个函数得到的两个坐标vector，计算X,Y方向的映射矩阵
@@ -29,4 +29,15 @@ void KSJ_WriteMaptoFile(
 	const char * strFileName,
 	Mat& MapX,
 	Mat& MapY
+	);
+
+//脱离OpenCV计算Map矩阵原型
+void initUndistortRectifyMap_Self(Mat& cameraMatrix, Mat& distCoeffs, Size size, Mat& map1, Mat& map2);
+
+//利用KSJ_FindConners得到的两个vector,计算相机内建参数和畸变校正参数
+bool KSJ_CalRemapFloat14(
+    vector<vector<Point2f> > &vecImagePts,
+    vector<vector<Point3f> > &vecWorldPts,
+	Size  imgSize,
+	float fCoefficient[14]
 	);

@@ -17,6 +17,8 @@ doc/
 
 obj
 
+*.log
+
 ipch/
 /doc
 /KSJApi/ipch

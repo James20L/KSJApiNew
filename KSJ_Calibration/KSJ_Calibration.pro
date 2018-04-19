@@ -11,11 +11,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = KSJ_Calibration
 TEMPLATE = app
 
-INCLUDEPATH +=../../github.KSJApiNew/KSJApi.inc
-INCLUDEPATH +=../../git.KSJWinInLinux
+INCLUDEPATH +=../../../github.KSJApiNew/KSJApi.inc
+INCLUDEPATH +=../../../git.KSJWinInLinux
 
-LIBS += -L../../git.opencv310-in-vs/opencv.inc
-LIBS += -L../../github.KSJApiNew/KSJApi.bin/linux/x64 \
+LIBS += -L../../../git.opencv310-in-vs/opencv.inc
+LIBS += -L../../../github.KSJApiNew/KSJApi.bin/linux/x64 \
        -Wl,--start-group  \
        -lopencv_core -lopencv_flann -lopencv_calib3d -lopencv_imgproc \
         -lksjlog -lavformat -lavcodec -lavutil -lswresample -lusb-1.0 -lksjapi \

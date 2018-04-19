@@ -107,6 +107,8 @@ void KSJDemoQT_Base::on_PreviewButton_clicked()
 
         m_pKsjpreviewwidget->show();
 
+        //m_pKsjpreviewwidget->m_pPreview_Thread->m_bCalibration=ui->CaliCheckBox->isChecked();
+
     }else
     {
 
@@ -352,17 +354,23 @@ void KSJDemoQT_Base::ShowErrorInfo(int nRet)
 
 void KSJDemoQT_Base::on_CaliCheckBox_clicked(bool bState)
 {
-    if(m_pKsjpreviewwidget)
-    {
-        m_pKsjpreviewwidget->m_pPreview_Thread->m_bCalibration=bState;
-    }
+    /*if(m_pKsjpreviewwidget)
+    {*/
+        //m_pKsjpreviewwidget->m_pPreview_Thread->m_bCalibration=bState;
+    //}
+    int nRet = KSJ_CaptureSetCalibration(m_nDeviceCurSel, bState);
+
+     qDebug("KSJ_CaptureSetCalibration nRet = %d\n",nRet);
+
 }
 
 void KSJDemoQT_Base::on_CreateMapButton_clicked()
 {
+
+
     if(m_pImgForMap[0]==NULL)return;
-    vector<vector<Point2f> > vecImagePts;
-    vector<vector<Point3f> > vecWorldPts;
+    vector< vector<Point2f> > vecImagePts;
+    vector< vector<Point3f> > vecWorldPts;
 
     int nWidth =m_pWidgetForMap[0]->m_nImageW;
     int nHeight= m_pWidgetForMap[0]->m_nImageH;
@@ -379,12 +387,31 @@ void KSJDemoQT_Base::on_CreateMapButton_clicked()
         Mat img(nHeight, nWidth, CV_8UC(nBitCount>>3), m_pImgForMap[i], nWidth*nBitCount>>3);
         KSJ_FindConners(img,BoardSize,vecImagePts,vecWorldPts);
     }
+
     if(vecImagePts.size()==0)
     {
         ui->ERROR_INFO_Label->setText("Can't find chess board");
         return;
     }
+
     Mat mapx, mapy;
     KSJ_CalRemapMat(vecImagePts, vecWorldPts, Size(nWidth,nHeight),mapx,mapy);
-    KSJ_WriteMaptoFile("Map12", mapx, mapy);
+    KSJ_WriteMaptoFile("KSJMapCali.kmc", mapx, mapy);
+
+    float fCoefficient[14];
+    KSJ_CalRemapFloat14(
+        vecImagePts,
+        vecWorldPts,
+        Size(nWidth,nHeight),
+        fCoefficient
+        );
+
+    int nRet = KSJ_CalibrationProgram(m_nDeviceCurSel, fCoefficient);
+
+    qDebug("KSJ_CalibrationProgram  nRet = %d\n",nRet);
+    for(int i=0;i<14;i++)
+    {
+        qDebug("%f\n",fCoefficient[i]);
+    }
+
 }

@@ -36,7 +36,7 @@ bool KSJ_ReadMapfromFile(
 		file.close();
 		return false;
 	}
-	if (nFileSize - sizeof(CAL_MAP_FILE_HEADER) != FileHeader.uiMapXBytesNum*2+FileHeader.uiMapYBytesNum*2)//文件大小与对应的图像宽高不符
+	if (nFileSize - sizeof(CAL_MAP_FILE_HEADER) != FileHeader.uiMapXBytesNum * 2 + FileHeader.uiMapYBytesNum * 2)//文件大小与对应的图像宽高不符
 	{
 		file.close();
 		return false;
@@ -117,4 +117,79 @@ void KSJ_Remap(
 		++mapFracX;
 		++mapFracY;
 	}
+}
+
+
+bool MakeCalibrationMap(
+	float fCoefficient[14],
+	unsigned int uiWidth,
+	unsigned int uiHeight,
+	unsigned int uiFracPrecision, //小数精度
+	unsigned short *pusMapX,
+	unsigned short *pusMapDeltaX,
+	unsigned short *pusMapY,
+	unsigned short *pusMapDeltaY
+	)
+{
+	//A矩阵表示的是相机的内建参数矩阵
+	double A[3][3] = { fCoefficient[0], fCoefficient[1], fCoefficient[2], fCoefficient[3], fCoefficient[4], fCoefficient[5], fCoefficient[6], fCoefficient[7], fCoefficient[8] };
+	//5个畸变系数
+	//double dist[5] = { fCoefficient[9], fCoefficient[10], fCoefficient[11], fCoefficient[12], fCoefficient[13] };
+
+	//iR表示A的逆。其实是原函数中newCameraMatrix的逆
+	//计算A的行列式
+	double d = A[0][0] * (A[1][1] * A[2][2] - A[2][1] * A[1][2]) -
+		A[0][1] * (A[1][0] * A[2][2] - A[2][0] * A[1][2]) +
+		A[0][2] * (A[1][0] * A[2][1] - A[2][0] * A[1][1]);
+
+	if (d<0.0000001 && d>0.0000001) return false;//行列式为0，求逆失败
+	d = 1 / d;
+	double iR[3][3] = {
+		(A[1][1] * A[2][2] - A[1][2] * A[2][1]) * d,
+		(A[0][2] * A[2][1] - A[0][1] * A[2][2]) * d,
+		(A[0][1] * A[1][2] - A[0][2] * A[1][1]) * d,
+		(A[1][2] * A[2][0] - A[1][0] * A[2][2]) * d,
+		(A[0][0] * A[2][2] - A[0][2] * A[2][0]) * d,
+		(A[0][2] * A[1][0] - A[0][0] * A[1][2]) * d,
+		(A[1][0] * A[2][1] - A[1][1] * A[2][0]) * d,
+		(A[0][1] * A[2][0] - A[0][0] * A[2][1]) * d,
+		(A[0][0] * A[1][1] - A[0][1] * A[1][0]) * d
+	};
+
+	double u0 = A[0][2], v0 = A[1][2];
+	double fx = A[0][0], fy = A[1][1];
+
+	double k1 = fCoefficient[9];//dist[0];
+	double k2 = fCoefficient[10];//dist[1];
+	double p1 = fCoefficient[11];//dist[2];
+	double p2 = fCoefficient[12];//dist[3];
+	double k3 = fCoefficient[13];//dist[4];
+
+	for (int i = 0; i < uiHeight; i++)
+	{
+		double _x = i*iR[0][1] + iR[0][2], _y = i*iR[1][1] + iR[1][2], _w = i*iR[2][1] + iR[2][2];
+
+		for (int j = 0; j < uiWidth; j++, _x += iR[0][0], _y += iR[1][0], _w += iR[2][0])
+		{
+			double w = 1. / _w, x = _x*w, y = _y*w;
+			double x2 = x*x, y2 = y*y;
+			double r2 = x2 + y2, _2xy = 2 * x*y;
+			double kr = 1 + ((k3*r2 + k2)*r2 + k1)*r2;
+			double xd = x*kr + p1*_2xy + p2*(r2 + 2 * x2);
+			double yd = y*kr + p1*(r2 + 2 * y2) + p2*_2xy;
+			double u = fx * xd + u0;
+			double v = fy * yd + v0;
+
+			*pusMapX = (unsigned short)u;
+			*pusMapDeltaX = (unsigned short)((u - (int)u)*(1 << uiFracPrecision));
+			*pusMapY = (unsigned short)v;
+			*pusMapDeltaY = (unsigned short)((v - (int)v)*(1 << uiFracPrecision));
+
+			++pusMapX;
+			++pusMapDeltaX;
+			++pusMapY;
+			++pusMapDeltaY;
+		}
+	}
+	return true;
 }

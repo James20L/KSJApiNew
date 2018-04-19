@@ -80,7 +80,7 @@ int KSJ_CaptureDataTwoStep(int index,unsigned char*buf)
 typedef struct Thread_Param
 {
     int index;
-    char serial;
+    unsigned char serial;
     unsigned char* buf;
     int *stopflag;
 
@@ -164,7 +164,7 @@ int KSJ_SetCamsParam_jd(int CAMERA_NUMBER)
         //        KSJ_SetParam(nIndex,KSJ_EXPOSURE_LINES,1000);
         //        KSJ_GetParam(nIndex,KSJ_EXPOSURE_LINES,&nlines);
         float nExposureTime = .0;
-        nExposureTime = 20.0;
+        nExposureTime = 0.1;
         printf(" %s %s %d       nExposureTime = %f \n ",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
         KSJ_ExposureTimeSet(nIndex,nExposureTime);
         KSJ_WB_MODE wbmode;
@@ -184,6 +184,7 @@ int KSJ_SetCamsParam_jd(int CAMERA_NUMBER)
 
         KSJ_ColorCorrectionPresettingSet(0, KSJ_CT_5000K);
 
+        KSJ_WaterMarkSetMode(nIndex,KSJ_WMM_TIMESTAMP);
 
     }
     return 0;
@@ -206,7 +207,7 @@ int KSJ_SetCamsParam(int camcount)
 
     for(int nIndex = 0;nIndex<camcount;nIndex++)
     {
-
+        sleep(1);
         unsigned short pusDeviceType;
         int pnSerials;
         unsigned short pusFirmwareVersion;
@@ -299,10 +300,11 @@ int KSJ_SetCamsParam(int camcount)
         KSJ_ExposureTimeSet(nIndex,nExposureTime);
 
 
-        KSJ_ExposureTimeGet(nIndex,&nExposureTime);
+        CHECK_RET(KSJ_ExposureTimeGet(nIndex,&nExposureTime));
 
         printf(" %s %s %d       nExposureTime = %f \n",__FILE__,__FUNCTION__,__LINE__,nExposureTime);
 
+        KSJ_FlashEnableSet(nIndex,true);
 
 
 
@@ -336,39 +338,84 @@ int KSJ_SetCamsParam(int camcount)
         printf(" %s %s %d      FOVS[%d].nHeight %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nHeight);
 
 
-    if(MAP == 1){
-
-        int nRet = KSJ_CaptureSetCalibration(nIndex,true);
-        bool bCali = false;
-        nRet = KSJ_CaptureGetCalibration(nIndex,&bCali);
-        printf(" %s %s %d   bCali =   %d    KSJ_CaptureGetCalibration  \n",__FILE__,__FUNCTION__,__LINE__,bCali);
-
-        nRet = KSJ_LoadCalibrationMapFile(nIndex,"Map.cmf");
-        printf(" %s %s %d   nRet =   %d    KSJ_LoadCalibrationMapFile  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+        float fCoefficient[14] = {0.001};
 
 
-        nRet = KSJ_SetCalibrationMapMode(nIndex,KSJ_MM_NEARESTNEIGHBOR);
-
-        printf(" %s %s %d   nRet =   %d    KSJ_SetCalibrationMapMode  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
 
 
+
+        nRet =  KSJ_CalibrationReadout(nIndex,fCoefficient);
+
+        for(int i=0;i<14;i++)
+        {
+            printf("read out %f\n",fCoefficient[i]);
         }
 
 
+        printf("KSJ_CalibrationReadout nRet = %d \n",nRet);
 
+#if 0
+        for(int i=0;i<14;i++)
+        {
+
+	    fCoefficient[i]=i*111+i*0.01;	
+            printf("calc out %f\n",fCoefficient[i]);
+        }
+        
+        nRet = KSJ_CalibrationProgram(nIndex, fCoefficient);
+
+        printf("KSJ_CalibrationProgram nRet = %d \n",nRet);
+#endif
+        if(MAP == 1){
+
+            int nRet = KSJ_CaptureSetCalibration(nIndex,true);
+            bool bCali = false;
+            nRet = KSJ_CaptureGetCalibration(nIndex,&bCali);
+            printf(" %s %s %d   bCali =   %d    KSJ_CaptureGetCalibration  \n",__FILE__,__FUNCTION__,__LINE__,bCali);
+
+            nRet = KSJ_LoadCalibrationMapFile(nIndex,"Map.cmf");
+            printf(" %s %s %d   nRet =   %d    KSJ_LoadCalibrationMapFile  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+
+
+            nRet = KSJ_SetCalibrationMapMode(nIndex,KSJ_MM_NEARESTNEIGHBOR);
+
+            printf(" %s %s %d   nRet =   %d    KSJ_SetCalibrationMapMode  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+
+
+        }
+        //    if(WMARK == 1)
+        if(1)
+        {
+
+            KSJ_WaterMarkSetMode(nIndex,KSJ_WMM_TIMESTAMP);
+
+            KSJ_WaterMarkSetEnable(nIndex, true);
+        }
 
 
 #if 0
         KSJ_CCM_MODE ccs_mode;
         CHECK_RET(KSJ_ColorCorrectionSet(0,KSJ_HCCM_PRESETTINGS));
         CHECK_RET(KSJ_ColorCorrectionGet(0,&ccs_mode));
+#endif
+#if 0
 
-        KSJ_TRIGGERMODE mode = KSJ_TRIGGER_SOFTWARE;
+        nRet = KSJ_CaptureSetTimeOut(nIndex, 0xFFFFFFFF);
 
-        printf(" %s %s %d     %d   KSJ_SetTriggerMode  KSJ_TRIGGER_SOFTWARE  \n",__FILE__,__FUNCTION__,__LINE__,mode);
-        CHECK_RET(KSJ_TriggerModeSet(0,mode));
+        nRet = KSJ_TriggerMethodSet(nIndex, KSJ_TRIGGER_RISINGEDGE);
 
-        printf(" %s %s %d     %d   KSJ_SetTriggerMode \n",__FILE__,__FUNCTION__,__LINE__,CHKRET);
+        KSJ_TRIGGERMODE mode = KSJ_TRIGGER_EXTERNAL;
+
+        printf(" %s %s %d    KSJ_SetTriggerMode  KSJ_TRIGGER_EXTERNAL =%d  \n",__FILE__,__FUNCTION__,__LINE__,mode);
+        CHECK_RET(KSJ_TriggerModeSet(nIndex,mode));
+
+        printf(" %s %s %d    KSJ_TriggerModeSet mode = %d ret = %d \n",__FILE__,__FUNCTION__,__LINE__,mode,CHKRET);
+
+        CHECK_RET(KSJ_TriggerModeGet(0,&mode));
+
+        printf(" %s %s %d     KSJ_GetTriggerMode  mode =  %d  ret = %d \n",__FILE__,__FUNCTION__,__LINE__,mode,CHKRET);
+#endif
+#if 0
         nRet = KSJ_TriggerModeGet(0,&mode);
 
         printf(" %s %s %d     %d   KSJ_GetTriggerMode nRet  \n",__FILE__,__FUNCTION__,__LINE__,nRet);
@@ -431,11 +478,11 @@ void CreatSampleImage(unsigned char * pBuf,int nWidth,int nHeight,int nBitCounts
 
 
 
-struct timeval start,stop,diff;
 void *KSJ_CaptureLoop(void * loopargs)
 {
     bool lutflag = false;
 
+    struct timeval start,stop,diff;
 
     memset(&start,0,sizeof(struct timeval));
 
@@ -450,7 +497,7 @@ void *KSJ_CaptureLoop(void * loopargs)
 
     int index=param->index ;
     unsigned char* buf = param->buf;
-    int serialinloop = param->serial;
+    unsigned int serialinloop = param->serial;
     int * stopflag =param->stopflag;
 
     //    printf("KSJ_CaptureLoop param->index =  %d  serialinloop = %d  \n",param->index,serialinloop);
@@ -491,7 +538,7 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 
 
-    img0=cvCreateImage(cvSize(g_fov[0].nWidth,g_fov[0].nHeight),IPL_DEPTH_8U,channelnum);
+    img0=cvCreateImage(cvSize(g_fov[index].nWidth,g_fov[index].nHeight),IPL_DEPTH_8U,channelnum);
     img0->imageData = (char*) buf;
     Mat mtx0 = cv::cvarrToMat(img0) ;
 
@@ -538,6 +585,19 @@ void *KSJ_CaptureLoop(void * loopargs)
 
 
         }
+
+#if 0 
+        unsigned short pwid = 0;
+        unsigned long  TimestampLowPart = 0;
+        unsigned long  TimestampHighPart = 0;
+
+        KSJ_WaterMarkGetInfo(index, &pwid, &TimestampLowPart, &TimestampHighPart);
+
+        printf("index = %d KSJ_WaterMarkGetInfo = %d KSJ_WaterMarkGetInfo = %ld KSJ_WaterMarkGetInfo = %ld \n",index,pwid,TimestampLowPart,TimestampHighPart);
+
+#endif
+
+
         if(nRet==0)
         {
             nCount++;
@@ -566,8 +626,9 @@ void *KSJ_CaptureLoop(void * loopargs)
 
         }else
         {
-            printf("nRet = %d  serial inloop = %d \n",nRet,serialinloop);
 
+            printf("nRet = %d  serial inloop = %d \n",nRet,serialinloop);
+            sleep(1);
         }
 
 
@@ -596,9 +657,10 @@ void *KSJ_CaptureLoop(void * loopargs)
 
         }
 
-        if(  nCount>10000 )  *stopflag=0;
+        //        if(  nCount>10000 )  *stopflag=0; // naver stop
 
 
+        usleep(100);
     }
 
     //  printf("tid = %lu   exited  \n",pthread_self());
@@ -733,6 +795,7 @@ HEAD:
     //    printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
 
     nCamCount = KSJ_DeviceGetCount();
+    //nCamCount = 1;
 
 
     if(nCamCount<=0)
@@ -751,7 +814,8 @@ HEAD:
 
 
 
-#if 1
+
+#if 0
     T_Thread_Param param;
     param.buf = g_buf[0];
     param.index = 0;
@@ -772,6 +836,7 @@ HEAD:
 
     for(int nThreadNum = 0; nThreadNum <nCamCount;nThreadNum++)
     {
+        sleep(2);
         nRet = KSJ_DeviceGetInformation(nThreadNum,&devtype,&serial,&fwversion);
 
         if(nRet !=RET_SUCCESS)
@@ -882,6 +947,7 @@ waitKey(1);
 
 
 #endif
+#if 0
 int    TimeSubstract(struct timeval *result, struct timeval *begin,struct timeval *end);
 
 int StartTimeCounter()
@@ -912,6 +978,7 @@ int CheckTimePassedMilSec()
     return (diff.tv_sec*1000+(int)(diff.tv_usec/1000));
 }
 
+#endif
 int TimeSubstract(struct timeval *result, struct timeval *begin,struct timeval *end)
 
 {
@@ -936,5 +1003,4 @@ int TimeSubstract(struct timeval *result, struct timeval *begin,struct timeval *
 
     return 0;
 }
-
 

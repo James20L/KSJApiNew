@@ -70,11 +70,13 @@ void CKSJPreviewWidget:: paintEvent(QPaintEvent *event)
     case 0:
     {
         pImg = new QImage(m_pBuf,m_nImageW,m_nImageH,QImage::Format_RGB888);
+        painter.drawImage(0, 0, pImg->rgbSwapped().scaled(this->width(),this->height()), 0, 0, -1, -1,Qt::AutoColor);
     }
         break;
     case 1:
     {
         pImg = new QImage(m_pBuf,m_nImageW,m_nImageH,QImage::Format_Grayscale8);
+        painter.drawImage(0, 0, pImg->scaled(this->width(),this->height()), 0, 0, -1, -1,Qt::AutoColor);
     }
         break;
     case 2:
@@ -86,7 +88,7 @@ void CKSJPreviewWidget:: paintEvent(QPaintEvent *event)
         break;
     }
 
-    painter.drawImage(0, 0, pImg->scaled(this->width(),this->height()), 0, 0, -1, -1,Qt::AutoColor);
+
     m_mMutex.unlock();
     if(pImg!=NULL)
         delete pImg;

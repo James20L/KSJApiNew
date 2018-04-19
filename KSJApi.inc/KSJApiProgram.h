@@ -79,6 +79,8 @@ extern "C"{
 	KSJ_API  KSJ_GammaLutDataProgram(int nIndex, unsigned short *pData, int nWords);
 	KSJ_API  KSJ_GammaLutDataReadout(int nIndex, unsigned short *pData, int *pnWords);
 
+	KSJ_API  KSJ_CalibrationProgram(int nIndex, float fCoefficient[14]);
+	KSJ_API  KSJ_CalibrationReadout(int nIndex, float fCoefficient[14]);
 
 #ifdef __cplusplus
 }

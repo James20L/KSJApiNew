@@ -20,3 +20,15 @@ void KSJ_Remap(
 	void*          pMapX,          //从文件中读取的X矩阵
 	void*          pMapY           //从文件中读取的X矩阵
 	);
+
+//利用14个float计算4个重映射矩阵
+bool MakeCalibrationMap(
+	float fCoefficient[14], 
+	unsigned int uiWidth, 
+	unsigned int uiHeight,
+	unsigned int uiFracPrecision, //小数精度
+	unsigned short *pusMapX, 
+	unsigned short *pusMapDeltaX,
+	unsigned short *pusMapY, 
+	unsigned short *pusMapDeltaY
+	);

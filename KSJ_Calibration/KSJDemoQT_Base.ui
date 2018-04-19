@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>KSJDemoQT</string>
+   <string>KSJCalibration</string>
   </property>
   <widget class="QWidget" name="PREVIEWWND_Widget" native="true">
    <property name="geometry">
@@ -487,7 +487,7 @@
     </rect>
    </property>
    <property name="minimum">
-    <number>3</number>
+    <number>4</number>
    </property>
   </widget>
   <widget class="QSpinBox" name="ChessHeightSpinBox">
@@ -500,7 +500,7 @@
     </rect>
    </property>
    <property name="minimum">
-    <number>3</number>
+    <number>4</number>
    </property>
   </widget>
   <widget class="QLabel" name="ERROR_INFO_Label_2">

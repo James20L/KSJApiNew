@@ -27,8 +27,8 @@ g_nStartx = 0
 g_nStarty = 0
 
 g_skipmode  = 0
-g_exptime = 20
-g_gain = 100
+g_exptime = 5.0
+g_gain = 20
 g_sensitity = 2
 g_lut = 1
 g_aemin = 0.1
@@ -90,11 +90,126 @@ def CamSetClib(libKsj,num):
     for i in range(0,num):
         nret = libKsj.KSJ_CaptureSetCalibration(i,1);
         print("KSJ_CaptureSetCalibration  %d"%(nret))
-        filename = "Map.cmf"
+        filename = "KSJMapCali.kmc"
+#        filename = "Map.cmf"
         nret = libKsj.KSJ_LoadCalibrationMapFile(i,filename.encode());
         print("KSJ_LoadCalibrationMapFile  %d"%(nret))
-        nret = libKsj.KSJ_SetCalibrationMapMode(i,0);
-        print("KSJ_SetCalibrationMapMode  %d"%(nret))
+#        nret = libKsj.KSJ_SetCalibrationMapMode(i,0);
+#        print("KSJ_SetCalibrationMapMode  %d"%(nret))
+
+
+
+def tuling_230_cam_parm_set(libKsj, num):
+    WIDTH = 1936
+    HEIGHT = 1216
+
+    global g_mono
+    for i in range(0, num):
+        print(i)
+        usDeviceType = c_int()
+        nSerials = c_int()
+        usFirmwareVersion = c_int()
+        libKsj.KSJ_DeviceGetInformation(i, byref(usDeviceType), byref(nSerials), byref(usFirmwareVersion))
+        '''
+        nSerials for distinguish camera
+        '''
+        print(usDeviceType)
+        print(nSerials)
+        print(usFirmwareVersion)
+        libKsj.KSJ_CaptureSetFieldOfView(i, 0, 0, WIDTH, HEIGHT, 0, 0)
+        nColStart = c_int()
+        nRowStart = c_int()
+        nColSize = c_int()
+        nRowSize = c_int()
+        ColAddressMode = c_int()
+        RowAddressMode = c_int()
+#        libKsj.KSJ_CaptureGetDefaultFieldOfView(i,byref(nColStart),byref(nRowStart),byref(nColSize),byref(nRowSize),byref(ColAddressMode),byref(RowAddressMode))
+        libKsj.KSJ_CaptureGetFieldOfView(i, byref(nColStart), byref(nRowStart), byref(nColSize), byref(nRowSize), byref(ColAddressMode), byref(RowAddressMode))
+        print(nColStart.value)
+        print(nRowStart.value)
+        print(nColSize.value)
+        print(nRowSize.value)
+        print(ColAddressMode.value)
+        print(RowAddressMode .value)
+        '''
+        for set bayer mode ,this is relative to the filp do not change
+        '''
+        libKsj.KSJ_BayerSetMode(i, 2);
+        '''
+        for set whitbalance mode 7 stand for auto continus
+        '''
+        libKsj.KSJ_WhiteBalanceSet(i, 7);
+   #     nRet = libKsj.KSJ_WhiteBalanceSet(i, 5);
+        print("libKsj.KSJ_WhiteBalanceSet");
+       # print(nRet);
+
+    #    nRet = libKsj.KSJ_WhiteBalancePresettingSet(i, 0)
+        print("libKsj.KSJ_WhiteBalancePresettingSet");
+       # print(nRet);
+        fexpTime = c_float()
+        fexpTime = 1.8
+        libKsj.KSJ_ExposureTimeSet.argtypes = (c_int, c_float)
+        libKsj.KSJ_ExposureTimeSet(i, fexpTime);
+        '''
+        for set gain ,do not change the 2nd parm, 3rd parm is gain value
+        for 120w set RGB
+        for 230w set 1,xxx
+        '''
+        libKsj.KSJ_SetParam(i, 1, 100);
+        libKsj.KSJ_SetParam(i, 2, 100);
+        libKsj.KSJ_SetParam(i, 3, 100);
+        '''
+        for set the sensitivity 2 stand for high
+        move 2 bits
+        '''
+        libKsj.KSJ_SensitivitySetMode(i, 2)
+        '''
+        for set color correction 3 is hardware present
+        after set bayer, do color enhancement
+        '''
+        libKsj.KSJ_ColorCorrectionSet(i, 3)
+        #libKsj.KSJ_AESetRegion(i, 320, 240, 640, 480)
+        #libKsj.KSJ_AESetExposureTimeRange.argtypes = (c_int, c_float, c_float)
+        #libKsj.KSJ_AESetExposureTimeRange(i, 0.1, 3.00)
+        #libKsj.KSJ_AEStart.argtypes = (c_int, c_bool, c_int ,c_int);
+
+        #libKsj.KSJ_AEStart(i, True, -1, 180)
+
+
+        nBitCount = c_int()
+        libKsj.KSJ_CaptureGetSizeEx(i,byref(nColSize), byref(nRowSize),byref(nBitCount))
+#        import pdb;pdb.set_trace()
+        nWidthArray.append(nColSize.value)
+        nHeightArray.append(nRowSize.value)
+
+        mono = c_int()
+
+        libKsj.KSJ_QueryFunction(i, 0, byref(mono));
+
+        if mono.value == 0:
+            g_mono.append(0);
+            bayermode = c_int();
+            libKsj.KSJ_BayerGetMode(i, byref(bayermode));
+            libKsj.KSJ_BayerSetMode(i, bayermode.value+4);
+
+            '''
+            for set whitbalance mode 7 stand for auto continus
+            '''
+
+            libKsj.KSJ_WhiteBalanceSet(i,7);
+#            libKsj.KSJ_WhiteBalanceSet(i,5);
+#            libKsj.KSJ_WhiteBalancePresettingSet(i,0)
+
+            '''
+            for set color correction 3 is hardware present
+            '''
+            libKsj.KSJ_ColorCorrectionSet(i,3)
+#            libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
+        else:
+            g_mono.append(1);
+
+        print("g_mono is ")
+        print(g_mono)
 
 
 def CamParmSet(libKsj,num):
@@ -147,10 +262,16 @@ def CamParmSet(libKsj,num):
 
         nBitCount = c_int()
         libKsj.KSJ_CaptureGetSizeEx(i,byref(nColSize), byref(nRowSize),byref(nBitCount))
-#        import pdb;pdb.set_trace()
         nWidthArray.append(nColSize.value)
         nHeightArray.append(nRowSize.value)
         print("KSJ_CaptureSetFieldOfView nret = %d"%(nret))
+
+#        KSJ_TriggerModeSet
+
+#        KSJ_SetFixedFrameRateEx()
+
+
+
         mono = c_int()
 
         libKsj.KSJ_QueryFunction(i, 0, byref(mono));
@@ -182,40 +303,22 @@ def CamParmSet(libKsj,num):
 
 
 
-#    if g_map == 1 :
-#
-#
-#        nret = libKsj.KSJ_CaptureSetCalibration(i,1);
-#        print("KSJ_CaptureSetCalibration  %d"%(nret))
-#
+    if g_map == 1 :
+
+
+        nret = libKsj.KSJ_CaptureSetCalibration(i,1);
+        print("KSJ_CaptureSetCalibration  %d"%(nret))
+
 #        filename = "Map.cmf"
-#
 #        nret = libKsj.KSJ_LoadCalibrationMapFile(i,filename.encode());
-#
+
 #        print("KSJ_LoadCalibrationMapFile  %d"%(nret))
+
 #        nret = libKsj.KSJ_SetCalibrationMapMode(i,0);
 #        print("KSJ_SetCalibrationMapMode  %d"%(nret))
 
  #       libKsj.KSJ_CaptureSetFieldOfView(i,0,0,g_nWidth,g_nHeight,0,0)
         
-
-
-        '''
-        for set ,mirror ,do not change the 2nd parm, ,3rd parm is gain value     
-        '''
-#        libKsj.KSJ_SetParam(i,13,1);
-        
-        '''
-        for set flip ,do not change the 2nd parm, ,3rd parm is gain value     
-        '''
- #       libKsj.KSJ_SetParam(i,11,1);
-
-        '''
-        for set bayer mode ,this is relative to the filp do not change
-        231 set to 3
-        120 set to 1        
-        '''
-
 
 
 #        fexpTime.value = 100.0              
@@ -324,7 +427,9 @@ def CapturDataLoop(nIndex,pDataBuf,nWidth,nHeight):
         if g_show == 1:
             if nWidth > 1920:
                 image=cv2.resize(image,(int(nWidth/2),int(nHeight/2) ))
+#            image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
             cv2.imshow("test"+str(nIndex),image)
+ #           cv2.imwrite(str(nFrameCount)+str(nIndex)+".bmp",image)
             cv2.waitKey(1)
 
         if nFrameCount == 0:
@@ -357,6 +462,8 @@ if __name__ == '__main__':
         print(libKsj)
         print(camNub)
         CamParmSet(libKsj,camNub)
+    #    cam_parm_set(libKsj,camNub)
+
         if g_ae == 1:
             CamSetAe(libKsj,camNub)
         if g_map == 1:          
