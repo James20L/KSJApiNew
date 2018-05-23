@@ -30,6 +30,11 @@ KSJCAM_89.lib/
 KSJCAM_88.lib/
 KSJCAM_3.lib/
 KSJCAM/
-KSJDemoVC_Base.Lib/
-KSJDemoVC_TriggerMode.Lib/
-KSJDemoVC_3A.Lib/
+#KSJDemoVC_Base.Lib/
+#KSJDemoVC_TriggerMode.Lib/
+#KSJDemoVC_3A.Lib/
+#KSJDemoCPP_Multiple_OPENCL_home
+#KSJDemoCPP_Multiple_OPENCL
+#KSJDemoCPP_Multiple_Guangzhou
+#KSJDemoAndroid_Base
+#KSJDemoCPP_Araviss

@@ -19,3 +19,24 @@ KSJTest_Android_Apk
 
 
 
+arm32_exclude
+arm64_exclude
+dirlist
+KSJApi.lib
+KSJDemoAndroid_Base
+KSJDemoAndroid_Full
+KSJDemoCPP_Aravis
+KSJDemoCPP_Araviss
+KSJDemoCPP_Multiple_Guangzhou
+KSJDemoCPP_Multiple_OPENCL
+KSJDemoCPP_Multiple_OPENCL_home
+KSJDemoVC_3A
+KSJDemoVC_Base
+KSJDemoVC_Matrix
+KSJDemoVC_TriggerMode
+KSJTest_Android_Apk
+raspberrypi_readme
+README.md
+Release.sh
+UpdateAll.sh
+x64_exclude

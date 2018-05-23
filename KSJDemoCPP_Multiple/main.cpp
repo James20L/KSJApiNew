@@ -29,6 +29,8 @@ int MAP = 0;
 
 
 
+
+
 int KSJ_Check_Ret_Warn(int nRet)
 {
     if(nRet!=RET_SUCCESS)
@@ -365,7 +367,33 @@ int KSJ_SetCamsParam(int camcount)
         nRet = KSJ_CalibrationProgram(nIndex, fCoefficient);
 
         printf("KSJ_CalibrationProgram nRet = %d \n",nRet);
+
+	unsigned char cDesc[16];
+
+
+	nRet = KSJ_SerialsDescReadout(nIndex,cDesc);
+
+
+        printf("KSJ_SerialsDescReadout  nRet = %d \n",nRet);
+        for(int i=0;i<16;i++)
+        {
+            printf("cDesc out %d\n",cDesc[i]);
+        }
+        
+        for(int i=0;i<16;i++)
+        {
+
+	    cDesc[i]=i;	
+            printf("cDesc out %d\n",cDesc[i]);
+        }
+
+        nRet = KSJ_SerialsDescProgram(nIndex, cDesc);
+
+        printf("KSJ_SerialsDescProgram  nRet = %d \n",nRet);
+
 #endif
+
+
         if(MAP == 1){
 
             int nRet = KSJ_CaptureSetCalibration(nIndex,true);
@@ -789,10 +817,20 @@ HEAD:
 
     nRet = KSJ_Init();
 
+        printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+    if(nRet != 0 )
+	{
+
+
+        printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+
+	return 0;
+
+	}
+
     //    KSJ_LogSet(1,"zhanwei");
 
 
-    //    printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
 
     nCamCount = KSJ_DeviceGetCount();
     //nCamCount = 1;
