@@ -1,7 +1,7 @@
 #pragma once
 #pragma execution_character_set("utf-8")
 
-#ifndef	__KSJ_API_DEVICE_TYPE_H__
+#ifndef __KSJ_API_DEVICE_TYPE_H__
 #define __KSJ_API_DEVICE_TYPE_H__
 
 // 这个文件不影响编译，只是为了兼容之前的版本，提供给用户参考。每次添加设备时，可以直接添加，无需编译。
@@ -25,8 +25,8 @@ enum KSJ_DEVICETYPE
 	KSJ_UC1000C_MRNN,    // Not Support
 	KSJ_UC900C_MRYN,     // Not Support
 	KSJ_UC1000C_MRYN,    // Not Support
-	KSJ_UC130C_MRYY,     // Elanus2
-	KSJ_UC130M_MRYY,     // Elanus2 
+		KSJ_MUC120C_MRYYO,     // 17 Jelly2 V6.0.121.16
+		KSJ_MUC120M_MRYYO,     // 18 Jelly2 V6.0.121.16
 	KSJ_UD140C_SGNN,     // Not Support
 	KSJ_UD140M_SGNN,     // 20 Not Support
 	KSJ_UC36C_MGNN,      // Not Support
@@ -87,8 +87,8 @@ enum KSJ_DEVICETYPE
 	KSJ_MUC131M_MRYN,    // OEM Device
 	KSJ_MU3C501C_MRYYO,
 	KSJ_MU3C501M_MRYYO,
-	KSJ_MU3C121C_MGYYO,
-	KSJ_MU3C121M_MGYYO,
+		KSJ_MUC120C_MGYYO,     // 79 Jelly2
+		KSJ_MUC120M_MGYYO,     // 80 Jelly2
 	KSJ_MU3E131C_EGYYO,
 	KSJ_MU3E131M_EGYYO,
 	KSJ_MU3E201C_EGYYO,
@@ -119,8 +119,17 @@ enum KSJ_DEVICETYPE
 	KSJ_MU3HS230M_SGYYO,
 	KSJ_MU3HI400C_IGYYO,
 	KSJ_MU3HI400M_IGYYO,
-
-	KSJ_TEST_CAMERA
+		KSJ_TEST_CAMERA,       // 110
+		KSJ_MU3HI401C_IGYYO, 
+		KSJ_MU3HI401M_IGYYO,
+		KSJ_MU3S40C_SGYYO, 
+		KSJ_MU3S40M_SGYYO,     // 114
+		KSJ_MU3S210C_SRYYO,    // 115
+		KSJ_MU3S210M_SRYYO,    // 116
+		KSJ_MU3I130C_IGYYO,    // 117
+		KSJ_MU3I130M_IGYYO,    // 118
+		KSJ_MU3S321C_SGYYO,    // 119
+		KSJ_MU3S321M_SGYYO,     // 120
 };
 
 

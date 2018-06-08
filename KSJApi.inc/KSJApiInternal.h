@@ -58,6 +58,31 @@ extern "C"{
 #pragma pack ( 8 )
 
 	KSJ_API   KSJ_VendorCmd(int nIndex, PUSBCMD pUsbCmd, unsigned char *pBuf);
+	
+	// 参考“凯视佳工业相机内部API函数说明书”
+	// 单次读写字节数必须不大于64字节
+	KSJ_API  KSJ_WrSensorReg(int nIndex, unsigned char btRegAddress, unsigned short wValue);
+	KSJ_API  KSJ_RdSensorReg(int nIndex, unsigned char btRegAddress, unsigned short *pwValue);
+	KSJ_API  KSJ_WrSensorRegX(int nIndex, unsigned short wRegAdress, unsigned short wValue);
+	KSJ_API  KSJ_RdSensorRegX(int nIndex, unsigned short wRegAdress, unsigned short *pwValue);
+	KSJ_API  KSJ_FrameRestart(int nIndex); 	// 当曝光改变后无法立刻生效时，需调用此函数。
+	KSJ_API  KSJ_WrFpgaReg(int nIndex, unsigned char btRegAddress, unsigned short wValue);
+	KSJ_API  KSJ_RdFpgaReg(int nIndex, unsigned char btRegAddress, unsigned short *pwValue);
+	KSJ_API  KSJ_ResetFpga(int nIndex, bool bReset);
+	KSJ_API  KSJ_WrFx2Sfr(int nIndex, unsigned short uRegAdress, unsigned char btValue);
+	KSJ_API  KSJ_RdFx2Sfr(int nIndex, unsigned short uRegAdress, unsigned char *pbtValue);
+	KSJ_API  KSJ_WrFx2Reg(int nIndex, unsigned short uRegAdress, unsigned char btValue);
+	KSJ_API  KSJ_RdFx2Reg(int nIndex, unsigned short uRegAdress, unsigned char *pbtValue);
+	KSJ_API  KSJ_ResetFx2(int nIndex, bool bReset);
+	KSJ_API  KSJ_WrAD9923A(int nIndex, unsigned short wRegAddress, unsigned long dwValue);
+	KSJ_API  KSJ_WrTMP101(int nIndex, unsigned char btRegAddress, unsigned short wValue);
+	KSJ_API  KSJ_RdTMP101(int nIndex, unsigned char btRegAddress, unsigned short *pwValue);
+
+	KSJ_API  KSJ_ResetDevice(int nIndex);
+	KSJ_API  KSJ_ReconnectDevice(int nIndex);
+	KSJ_API  KSJ_ResetHost(int nIndex);
+	KSJ_API  KSJ_SendPktEnd(int nIndex);
+	KSJ_API  KSJ_CancelIo(int nIndex);
 
 	// nIndex is the index of DeviceList in KSJApi internally, not driver symbol name index. It will open first device which not opened as DeviceList[nIndex]
 	KSJ_API   KSJ_Open(int nIndex);
