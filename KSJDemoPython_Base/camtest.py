@@ -28,9 +28,9 @@ g_nStartx = 0
 g_nStarty = 0
 
 g_skipmode = 0
-g_exptime = 1.8
+g_exptime = 2.5
 g_gain = 32
-g_sensitity = 0
+g_sensitity = 1
 g_lut = 0
 g_aemin = 0.1
 g_aemax = 30
@@ -41,8 +41,8 @@ g_map = 1
 g_setserial = 0
 
 
-g_trigmodeflag = 0
-g_trigermode = 3
+g_trigmodeflag = 1
+g_trigermode = 0
 
 
 
@@ -53,12 +53,13 @@ g_force_opencv_bayer = [0, 0, 0, 0];
 nWidthArray = []
 nHeightArray = []
 g_mono = [];
+
+g_recordflag = 0;
+g_savebmpflag = 0
+
+
+
 nThreadFlag = 1;
-g_recordflag = 1;
-
-
-
-
 
 def KsjInit():
     libKsj = cdll.LoadLibrary('libksjapi.so')
@@ -185,13 +186,21 @@ def CamParmSet(libKsj, num):
         nHeightArray.append(nRowSize.value)
         print("KSJ_CaptureSetFieldOfView nret = %d" % (nret))
 
-        libKsj.KSJ_SetParam(i, 1, g_gain);
-        libKsj.KSJ_SetParam(i, 2, g_gain);
-        libKsj.KSJ_SetParam(i, 3, g_gain);
+        # libKsj.KSJ_SetParam(i, 1, g_gain);
+        # libKsj.KSJ_SetParam(i, 2, g_gain);
+        # libKsj.KSJ_SetParam(i, 3, g_gain);
 
         if g_trigmodeflag == 1:
 
-            ret = libKsj.KSJ_TriggerModeSet(i, g_trigermode)
+            # ret = libKsj.KSJ_TriggerModeSet(i, g_trigermode)
+
+            trigermode = c_int();
+            ret = libKsj.KSJ_TriggerModeGet(i, byref(trigermode))
+            print("trigermode =  {0}".format(trigermode.value))
+
+            # ret = libKsj.KSJ_TriggerModeSet(i, g_trigermode)
+
+
             if ret != 0:
                 print("error KSJ_TriggerModeSet %d" % (ret))
 
@@ -211,7 +220,9 @@ def CamParmSet(libKsj, num):
             g_mono.append(0);
             bayermode = c_int();
             libKsj.KSJ_BayerGetMode(i, byref(bayermode));
-            libKsj.KSJ_BayerSetMode(i, bayermode.value + 4);
+            # libKsj.KSJ_BayerSetMode(i, bayermode.value + 4);
+            libKsj.KSJ_BayerSetMode(i, bayermode.value);
+
 
             '''
             for set whitbalance mode 7 stand for auto continus
@@ -245,6 +256,7 @@ def CamParmSet(libKsj, num):
         '''
         libKsj.KSJ_SensitivitySetMode(i, g_sensitity)
         libKsj.KSJ_LutSetEnable(i, g_lut)
+
 
 
 def check_buf_data(buf):
@@ -311,9 +323,12 @@ def CreateBuf(libKsj, num):
 
 
 def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
-    print("cam loop nIndex = %d" % (nIndex))
+
+
+    global g_recordflag
     global nThreadFlag
     global g_mono
+    print("cam loop nIndex = %d" % (nIndex))
     print("nThreadFlag = %d" % (nThreadFlag))
     nFrameCount = 0
     nTimeStart = datetime.datetime.now()
@@ -328,6 +343,7 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
     nSerials = c_int()
     usFirmwareVersion = c_int()
 
+
     libKsj.KSJ_DeviceGetInformation(nIndex, byref(usDeviceType), byref(nSerials), byref(usFirmwareVersion))
     '''
     nSerials for distinguish camera
@@ -335,15 +351,15 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
     print(usDeviceType)
     print(nSerials)
     print(usFirmwareVersion)
+    libKsj.KSJ_SetParam(0, 13, 1);
+
 
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
     avi_path = './avi/'
-    # vwriter = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
     vwriter = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
-
-
     vwriter1 = cv2.VideoWriter(avi_path + st + '.avi', vwriter, 10.0, (1280, 720))
+
 
     if g_mono[nIndex] == 1:
         channelnum = 1;
@@ -359,6 +375,7 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
     print(g_mono)
 
     imagecolor = np.zeros((nHeight, nWidth, 3), dtype=np.uint8)
+
 
     while nThreadFlag > 0:
 
@@ -383,9 +400,8 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
         if g_recordflag == 1:
             vwriter1.write(image)
 
-
-
-        #cv2.imwrite(str(nFrameCount)+str(nIndex)+".bmp",image)
+        if g_savebmpflag == 1:
+            cv2.imwrite(str(nFrameCount)+str(nIndex)+".bmp",image)
 
 
 
@@ -396,8 +412,9 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
         if nFrameCount == 99:
             nTimeStop = datetime.datetime.now()
             deltt= (nTimeStop - nTimeStart)
+
             print("cam   %d  type %d  nSerials %d  fps  %f" % (nIndex, usDeviceType.value, nSerials.value, 100/(deltt.total_seconds())))
-            global  g_recordflag
+
             g_recordflag = 0
             vwriter1.release()
 
@@ -436,6 +453,7 @@ if __name__ == '__main__':
             CamSetClib(libKsj, camNub)
         if g_setserial == 1 :
             WriteSerial(libKsj, camNub, 5)
+
 
         bufList = CreateBuf(libKsj, camNub)
         threadlist = []
