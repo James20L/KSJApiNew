@@ -193,6 +193,19 @@ int KSJ_SetCamsParam_jd(int CAMERA_NUMBER)
 }
 
 
+int KSJ_GetFov(int camcount)
+{
+    for(int nIndex = 0;nIndex<camcount;nIndex++)
+    {
+        CHECK_RET(KSJ_CaptureGetSize(nIndex,&g_fov[nIndex].nWidth,&g_fov[nIndex].nHeight));
+        printf(" %s %s %d      FOVS[%d].nWidth %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nWidth);
+        printf(" %s %s %d      FOVS[%d].nHeight %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nHeight);
+    }
+
+}
+
+
+
 int KSJ_SetCamsParam(int camcount)
 {
 
@@ -209,7 +222,6 @@ int KSJ_SetCamsParam(int camcount)
 
     for(int nIndex = 0;nIndex<camcount;nIndex++)
     {
-        sleep(1);
         unsigned short pusDeviceType;
         int pnSerials;
         unsigned short pusFirmwareVersion;
@@ -228,11 +240,6 @@ int KSJ_SetCamsParam(int camcount)
         int fpgamin= pusFpgaVersion&0x00ff;
 
         printf(" =====================%s %s %d       pusFpgaVersion  fpgamaj = %d    fpgamin = %d \n",__FILE__,__FUNCTION__,__LINE__,fpgamaj,fpgamin);
-
-
-
-
-
 
 
         CHECK_RET(KSJ_CaptureGetDefaultFieldOfView(nIndex,(int*)&nColStart,(int*)&nRowStart,(int *)&nColSize,(int *)&nRowSize,&ColAddressMode,&RowAddressMode));
@@ -335,16 +342,9 @@ int KSJ_SetCamsParam(int camcount)
 
 #endif
 
-        CHECK_RET(KSJ_CaptureGetSize(nIndex,&g_fov[nIndex].nWidth,&g_fov[nIndex].nHeight));
-        printf(" %s %s %d      FOVS[%d].nWidth %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nWidth);
-        printf(" %s %s %d      FOVS[%d].nHeight %d\n",__FILE__,__FUNCTION__,__LINE__,nIndex,g_fov[nIndex].nHeight);
-
+#if 0
 
         float fCoefficient[14] = {0.001};
-
-
-
-
 
         nRet =  KSJ_CalibrationReadout(nIndex,fCoefficient);
 
@@ -355,12 +355,13 @@ int KSJ_SetCamsParam(int camcount)
 
 
         printf("KSJ_CalibrationReadout nRet = %d \n",nRet);
+#endif
 
 #if 0
         for(int i=0;i<14;i++)
         {
 
-	    fCoefficient[i]=i*111+i*0.01;	
+            fCoefficient[i]=i*111+i*0.01;
             printf("calc out %f\n",fCoefficient[i]);
         }
         
@@ -368,10 +369,10 @@ int KSJ_SetCamsParam(int camcount)
 
         printf("KSJ_CalibrationProgram nRet = %d \n",nRet);
 
-	unsigned char cDesc[16];
+        unsigned char cDesc[16];
 
 
-	nRet = KSJ_SerialsDescReadout(nIndex,cDesc);
+        nRet = KSJ_SerialsDescReadout(nIndex,cDesc);
 
 
         printf("KSJ_SerialsDescReadout  nRet = %d \n",nRet);
@@ -383,7 +384,7 @@ int KSJ_SetCamsParam(int camcount)
         for(int i=0;i<16;i++)
         {
 
-	    cDesc[i]=i;	
+            cDesc[i]=i;
             printf("cDesc out %d\n",cDesc[i]);
         }
 
@@ -733,7 +734,7 @@ int main(int argc,void ** argv)
             printf("选项是%c, 选项内容: %s\n", ch, optarg);
             if(1==atoi(optarg))
             {
-                SHOWFLAG = 1;
+               SHOWFLAG = 1;
                 printf("has gui \n");
             }
             else
@@ -817,16 +818,16 @@ HEAD:
 
     nRet = KSJ_Init();
 
-        printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
+    printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
     if(nRet != 0 )
-	{
+    {
 
 
         printf(" %s %s %d     %d   initdone \n",__FILE__,__FUNCTION__,__LINE__,nRet);
 
-	return 0;
+        return 0;
 
-	}
+    }
 
     //    KSJ_LogSet(1,"zhanwei");
 
@@ -842,8 +843,22 @@ HEAD:
         exit(1);
     }
 
-    KSJ_SetCamsParam(nCamCount);
+    KSJ_GetFov(nCamCount);
 
+//    KSJ_SetParam(0, KSJ_RED, 60);
+    int gain = 0;
+    KSJ_GetParam(0, KSJ_RED, &gain);
+    printf("1 gain  = %d \n",gain);
+    KSJ_GetParam(0, KSJ_GREEN, &gain);
+    printf("2 gain  = %d \n",gain);
+    KSJ_GetParam(0, KSJ_BLUE, &gain);
+    printf("3 gain  = %d \n",gain);
+    //    KSJ_SetCamsParam(nCamCount);
+
+
+        nRet = KSJ_ParamProgram(0);
+
+        printf("KSJ_ParamProgram = %d \n",nRet);
 
     KSJ_CreatBufs(nCamCount,g_fov);
 

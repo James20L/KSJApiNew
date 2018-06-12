@@ -30,7 +30,7 @@ g_nStarty = 0
 g_skipmode = 0
 g_exptime = 2.5
 g_gain = 32
-g_sensitity = 1
+g_sensitity = 0
 g_lut = 0
 g_aemin = 0.1
 g_aemax = 30
@@ -42,7 +42,7 @@ g_setserial = 0
 
 
 g_trigmodeflag = 1
-g_trigermode = 0
+g_trigermode = 2
 
 
 
@@ -131,6 +131,43 @@ def CamSetClib(libKsj, num):
 #        nret = libKsj.KSJ_SetCalibrationMapMode(i,0);
 #        print("KSJ_SetCalibrationMapMode  %d"%(nret))
 
+def CamSizeArray(libKsj, num):
+    nColStart = c_int()
+    nRowStart = c_int()
+    nColSize = c_int()
+    nRowSize = c_int()
+    ColAddressMode = c_int()
+    RowAddressMode = c_int()
+    for i in range(0, num):
+        nret = libKsj.KSJ_CaptureGetFieldOfView(i, byref(nColStart), byref(nRowStart), byref(nColSize), byref(nRowSize),byref(ColAddressMode), byref(RowAddressMode))
+        print(nColStart.value)
+        print(nRowStart.value)
+        print(nColSize.value)
+        print(nRowSize.value)
+        print(ColAddressMode.value)
+        print(RowAddressMode.value)
+
+        nBitCount = c_int()
+        libKsj.KSJ_CaptureGetSizeEx(i, byref(nColSize), byref(nRowSize), byref(nBitCount))
+        nWidthArray.append(nColSize.value)
+        nHeightArray.append(nRowSize.value)
+        print("KSJ_CaptureSetFieldOfView nret = %d" % (nret))
+
+
+
+def CamMono(libKsj, num):
+
+    mono = c_int()
+    for i in range(0, num):
+        libKsj.KSJ_QueryFunction(i, 0, byref(mono));
+        if mono.value == 0:
+            g_mono.append(0);
+        else:
+            g_mono.append(1);
+
+    print("g_mono is ")
+    print(g_mono)
+
 
 def CamParmSet(libKsj, num):
     global g_mono
@@ -180,25 +217,23 @@ def CamParmSet(libKsj, num):
         print(ColAddressMode.value)
         print(RowAddressMode.value)
 
-        nBitCount = c_int()
-        libKsj.KSJ_CaptureGetSizeEx(i, byref(nColSize), byref(nRowSize), byref(nBitCount))
-        nWidthArray.append(nColSize.value)
-        nHeightArray.append(nRowSize.value)
-        print("KSJ_CaptureSetFieldOfView nret = %d" % (nret))
 
-        # libKsj.KSJ_SetParam(i, 1, g_gain);
-        # libKsj.KSJ_SetParam(i, 2, g_gain);
-        # libKsj.KSJ_SetParam(i, 3, g_gain);
+        libKsj.KSJ_SetParam(i, 1, g_gain);
+        libKsj.KSJ_SetParam(i, 2, g_gain);
+        libKsj.KSJ_SetParam(i, 3, g_gain);
+
+
+
 
         if g_trigmodeflag == 1:
 
-            # ret = libKsj.KSJ_TriggerModeSet(i, g_trigermode)
+            ret = libKsj.KSJ_TriggerModeSet(i, g_trigermode)
 
             trigermode = c_int();
             ret = libKsj.KSJ_TriggerModeGet(i, byref(trigermode))
             print("trigermode =  {0}".format(trigermode.value))
 
-            # ret = libKsj.KSJ_TriggerModeSet(i, g_trigermode)
+            ret = libKsj.KSJ_TriggerModeSet(i, g_trigermode)
 
 
             if ret != 0:
@@ -212,12 +247,11 @@ def CamParmSet(libKsj, num):
                 print("error KSJ_SetFixedFrameRateEx %d" % (ret))
 
 
+
+
         mono = c_int()
-
         libKsj.KSJ_QueryFunction(i, 0, byref(mono));
-
         if mono.value == 0:
-            g_mono.append(0);
             bayermode = c_int();
             libKsj.KSJ_BayerGetMode(i, byref(bayermode));
             # libKsj.KSJ_BayerSetMode(i, bayermode.value + 4);
@@ -237,11 +271,8 @@ def CamParmSet(libKsj, num):
             '''
             libKsj.KSJ_ColorCorrectionSet(i, 3)
         #            libKsj.KSJ_ColorCorrectionPresettingSet(i,0)
-        else:
-            g_mono.append(1);
 
-        print("g_mono is ")
-        print(g_mono)
+
 
         #        fexpTime.value = 100.0
         libKsj.KSJ_ExposureTimeSet.argtypes = (c_int, c_float)
@@ -445,7 +476,24 @@ if __name__ == '__main__':
         print(libKsj)
         print(camNub)
         CamParmSet(libKsj, camNub)
-        #    cam_parm_set(libKsj,camNub)
+
+        gain = c_int()
+        libKsj.KSJ_GetParam(0, 1, byref(gain))
+        print("1  gain = {0}".format(gain.value))
+        libKsj.KSJ_GetParam(0, 2, byref(gain))
+        print("2  gain = {0}".format(gain.value))
+        libKsj.KSJ_GetParam(0, 3, byref(gain))
+        print("3  gain = {0}".format(gain.value))
+
+        CamSizeArray(libKsj, camNub)
+        CamMono(libKsj, camNub)
+
+        ret = libKsj.KSJ_ParamProgram(0)
+
+        print("ret = {0}".format(ret))
+
+        # import pdb
+        # pdb.set_trace()
 
         if g_ae == 1:
             CamSetAe(libKsj, camNub)

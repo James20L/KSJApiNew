@@ -43,6 +43,8 @@ if __name__ == '__main__':
         # # dir(frame)
         # frame = cv.fromarray(image)
 
+
+
         if True:
             # frame = cv2.flip(frame,0)
             # 写入帧
