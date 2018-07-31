@@ -69,7 +69,7 @@ extern "C"{
 	};
 
 	// Auto Exposure Ex Callback, Call when AE Doing, Success, Fail.
-	typedef void(__stdcall *KSJ_AECALLBACKEX)(KSJ_AE_STATUS Status, int nExpsoureTimeMs, void *lpContext);
+    typedef void(__stdcall *KSJ_AECALLBACKEX)(KSJ_AE_STATUS Status, float nExpsoureTimeMs, void *lpContext);
 	KSJ_API  KSJ_AESetCallbackEx(int nIndex, KSJ_AECALLBACKEX pfAECallbackEx, void *lpContext);
 
 	KSJ_API  KSJ_AESetMaxCount(int nIndex, int nMaxCount);

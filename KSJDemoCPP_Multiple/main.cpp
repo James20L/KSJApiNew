@@ -856,7 +856,9 @@ HEAD:
     //    KSJ_SetCamsParam(nCamCount);
 
 
-        nRet = KSJ_ParamProgram(0);
+//        nRet = KSJ_ParamProgram(0);
+
+        nRet = KSJ_ParamErase(0);
 
         printf("KSJ_ParamProgram = %d \n",nRet);
 

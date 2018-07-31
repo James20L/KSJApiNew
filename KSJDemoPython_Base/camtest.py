@@ -12,15 +12,17 @@ import time
 import numpy as np
 import cv2
 from ctypes import *
+import os
+
+#import matplotlib.pyplot as plt
+
+#from PIL import Image
 
 """
 200w 1936 1216 
 120w 1280 960
 """
-# g_nWidth = 2400
-# g_nHeight = 2000
-# g_nStartx = 348
-# g_nStarty = 40
+
 
 g_nWidth = 800
 g_nHeight = 200
@@ -28,25 +30,40 @@ g_nStartx = 0
 g_nStarty = 0
 
 g_skipmode = 0
-g_exptime = 2.5
-g_gain = 32
+g_exptime = 20
+g_gain = 48
 g_sensitity = 0
 g_lut = 0
-g_aemin = 0.1
+g_aemin = 0.03
 g_aemax = 30
-g_aetarget = 120
+g_aetarget = 50
 g_show = 1;
 g_ae = 0
+#left top is 0,0
+#rect
+AeX = 200
+AeY = 200
+AeW = 400
+AeH = 200
+"x,y,w,h"
+aeRectArry = [
+    [200,200,400,200],
+    [400,400,400,200],
+    [],
+    [],
+    []]
+
+
 g_map = 1
 g_setserial = 0
 
 
 g_trigmodeflag = 1
-g_trigermode = 2
+g_trigermode = 3
 
 
 
-g_force_opencv_bayer = [0, 0, 0, 0];
+g_force_opencv_bayer = [0, 0, 0, 0,0,0,0,0,0,0,0,0,0];
 
 
 
@@ -57,11 +74,28 @@ g_mono = [];
 g_recordflag = 0;
 g_savebmpflag = 0
 
+g_mirrorflag = 0
+
 
 
 nThreadFlag = 1;
 
+
+resetshellname = "../KSJApi.bin/linux/x64/resetusb_byhub.sh"
+
+g_resetbyhub = 0
+
+
+time_start = [0,0,0,0,0]
+
+difftime_insec = 10
+
 def KsjInit():
+    if g_resetbyhub :
+        os.system(resetshellname)
+
+    time.sleep(5)
+
     libKsj = cdll.LoadLibrary('libksjapi.so')
     libKsj.KSJ_Init()
     camCount = libKsj.KSJ_DeviceGetCount()
@@ -101,15 +135,18 @@ def CamSetAe(libKsj, num):
 
         #        libKsj.KSJ_AESetRegion(i,0,0,g_nWidth,g_nheight)
 
-        AeX = 500
-        AeY = 0
-        AeW = 1280
-        AeH = 280
-        libKsj.KSJ_AESetRegion(i, nColSize.value - AeX, nRowSize.value - AeY - AeH, AeW, AeH)
+        AeX = aeRectArry[i][0]
+        AeY = aeRectArry[i][1]
+        AeW = aeRectArry[i][2]
+        AeH = aeRectArry[i][3]
+
+        # libKsj.KSJ_AESetRegion(i, nColSize.value - AeX, nRowSize.value - AeY - AeH, AeW, AeH)
+
+        libKsj.KSJ_AESetRegion(i, AeX, nRowSize.value - AeY - AeH, AeW, AeH)
 
         libKsj.KSJ_AESetExposureTimeRange.argtypes = (c_int, c_float, c_float)
         libKsj.KSJ_AESetExposureTimeRange(i, g_aemin, g_aemax)
-        CB_T = CFUNCTYPE(c_void_p, c_bool, c_int, c_void_p)
+        CB_T = CFUNCTYPE(c_void_p, c_bool, c_float, c_void_p)
         print(dir())
         lpContext = c_void_p()
         libKsj.KSJ_AESetCallback(i, CB_T(CamAeCallBack), 0);
@@ -254,8 +291,8 @@ def CamParmSet(libKsj, num):
         if mono.value == 0:
             bayermode = c_int();
             libKsj.KSJ_BayerGetMode(i, byref(bayermode));
-            # libKsj.KSJ_BayerSetMode(i, bayermode.value + 4);
-            libKsj.KSJ_BayerSetMode(i, bayermode.value);
+            libKsj.KSJ_BayerSetMode(i, bayermode.value + 4);
+            # libKsj.KSJ_BayerSetMode(i, bayermode.value);
 
 
             '''
@@ -287,6 +324,11 @@ def CamParmSet(libKsj, num):
         '''
         libKsj.KSJ_SensitivitySetMode(i, g_sensitity)
         libKsj.KSJ_LutSetEnable(i, g_lut)
+
+        if g_mirrorflag == 1 :
+            libKsj.KSJ_SetParam(i, 13, 1);
+
+
 
 
 
@@ -354,7 +396,8 @@ def CreateBuf(libKsj, num):
 
 
 def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
-
+    global  time_start
+    global difftime_insec
 
     global g_recordflag
     global nThreadFlag
@@ -382,14 +425,15 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
     print(usDeviceType)
     print(nSerials)
     print(usFirmwareVersion)
-    libKsj.KSJ_SetParam(0, 13, 1);
+
 
 
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
-    avi_path = './avi/'
-    vwriter = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
-    vwriter1 = cv2.VideoWriter(avi_path + st + '.avi', vwriter, 10.0, (1280, 720))
+    if g_recordflag == 1:
+        avi_path = './avi/'
+        vwriter = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
+        vwriter1 = cv2.VideoWriter(avi_path + st + '.avi', vwriter, 10.0, (1280, 720))
 
 
     if g_mono[nIndex] == 1:
@@ -406,13 +450,22 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
     print(g_mono)
 
     imagecolor = np.zeros((nHeight, nWidth, 3), dtype=np.uint8)
-
+    if g_show == 1:
+        cv2.namedWindow("test" + str(nIndex), cv2.WINDOW_AUTOSIZE)
 
     while nThreadFlag > 0:
 
         image = CapturData(nIndex, pDataBuf, nHeight, nWidth, int(channelnum))
         if g_show == 1:
-            if nWidth > 1920:
+
+            AeX = aeRectArry[nIndex][0]
+            AeY = aeRectArry[nIndex][1]
+            AeW = aeRectArry[nIndex][2]
+            AeH = aeRectArry[nIndex][3]
+
+            cv2.rectangle(image,(AeX,AeY),(AeX+AeW,AeY+AeH),(0,255,0));
+
+            if nWidth > 1000:
                 image = cv2.resize(image, (int(nWidth / 2), int(nHeight / 2)))
                 imagecolor = cv2.resize(imagecolor, (int(nWidth / 2), int(nHeight / 2)))
             #            image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
@@ -423,16 +476,27 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
                 cv2.namedWindow("test raw" + str(nIndex), cv2.WINDOW_AUTOSIZE)
                 cv2.imshow("test raw" + str(nIndex), imagecolor)
             else:
-                cv2.namedWindow("test" + str(nIndex), cv2.WINDOW_AUTOSIZE)
+                # pilimg = Image.fromarray(np.uint8(image))
+                #
+                # pilimg.show()
+                #
+                # plt.imshow(image)
+                # plt.axis('off')
+                # plt.show()
                 cv2.imshow("test" + str(nIndex), image)
 
-            cv2.waitKey(1)
+            cv2.waitKey(nIndex+1)
 
         if g_recordflag == 1:
             vwriter1.write(image)
 
         if g_savebmpflag == 1:
-            cv2.imwrite(str(nFrameCount)+str(nIndex)+".bmp",image)
+            time_now = time.time()
+
+            timediif = time_now - time_start[nIndex]
+            if timediif > difftime_insec :
+                cv2.imwrite(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))+"_"+str(nIndex)+".bmp",image)
+                time_start[nIndex] = time_start[nIndex] + timediif
 
 
 
@@ -445,12 +509,12 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
             deltt= (nTimeStop - nTimeStart)
 
             print("cam   %d  type %d  nSerials %d  fps  %f" % (nIndex, usDeviceType.value, nSerials.value, 100/(deltt.total_seconds())))
-
-            g_recordflag = 0
-            vwriter1.release()
-
             nFrameCount = -1
 
+        if g_recordflag == 1:
+            g_recordflag = 0
+            vwriter1.release()
+           
         nFrameCount = nFrameCount + 1
         time.sleep(0.001)
     print("thread quit")
@@ -462,7 +526,9 @@ def CapturDataLoop(nIndex, pDataBuf, nWidth, nHeight):
 # eye_cascade = cv2.CascadeClassifier('/home/terry/work/opencv/opencv-3.2.0/data/haarcascades/haarcascade_eye.xml')
 
 
+
 if __name__ == '__main__':
+    # global time_start
 
     try:
         signal.signal(signal.SIGINT, QuitAll)
@@ -470,6 +536,8 @@ if __name__ == '__main__':
         initRes = KsjInit()
         libKsj = initRes[0]
         camNub = initRes[1]
+
+        time_start = [int(time.time()),int(time.time()),int(time.time()),int(time.time()),int(time.time())]
 
 
 
@@ -488,9 +556,10 @@ if __name__ == '__main__':
         CamSizeArray(libKsj, camNub)
         CamMono(libKsj, camNub)
 
-        ret = libKsj.KSJ_ParamProgram(0)
+        # ret = libKsj.KSJ_ParamProgram(0)
 
-        print("ret = {0}".format(ret))
+        # print("ret = {0}".format(ret))
+        # libKsj.KSJ_ParamErase(0)
 
         # import pdb
         # pdb.set_trace()
@@ -502,10 +571,12 @@ if __name__ == '__main__':
         if g_setserial == 1 :
             WriteSerial(libKsj, camNub, 5)
 
-
+        # import pdb;
+        #
+        # pdb.set_trace()
         bufList = CreateBuf(libKsj, camNub)
         threadlist = []
-        #        import pdb;pdb.set_trace()
+
         for i in range(0, camNub):
             threadlist.append(
                 threading.Thread(target=CapturDataLoop, args=(i, bufList[i], nWidthArray[i], nHeightArray[i])))
