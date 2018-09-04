@@ -24,5 +24,7 @@
 #include "KSJApiIo.h"
 #include "KSJApiWaterMark.h"
 #include "KSJApi16Bits.h"
+#include "KSJApiAwaiba.h"
+#include "KSJApiMultiFrames.h"
 
 #endif
