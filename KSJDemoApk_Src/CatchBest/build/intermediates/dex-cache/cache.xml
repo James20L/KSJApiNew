@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="E:\AndroidProject\android_demo\CatchBest\app\libs\fastjson-1.1.39.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.2"
+        sha1="4d002c8b49ff59d6272a8d0a0057d1548d3895ac">
+        <dex dex="E:\AndroidProject\android_demo\CatchBest\app\build\intermediates\pre-dexed\release\fastjson-1.1.39_cf0a8f1f9800075de452bd8ee14e53641cfb4f15.jar" />
+    </item>
+
+</items>
