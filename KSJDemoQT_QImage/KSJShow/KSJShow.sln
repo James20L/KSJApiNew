@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KSJShow", "KSJShow.vcxproj", "{5480D297-19EC-3BF5-8B18-CC9748B314A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		MD|Win32 = MD|Win32
+		MDd(Old)|Win32 = MDd(Old)|Win32
+		MDd|Win32 = MDd|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5480D297-19EC-3BF5-8B18-CC9748B314A2}.MD|Win32.ActiveCfg = MD|Win32
+		{5480D297-19EC-3BF5-8B18-CC9748B314A2}.MD|Win32.Build.0 = MD|Win32
+		{5480D297-19EC-3BF5-8B18-CC9748B314A2}.MDd(Old)|Win32.ActiveCfg = MDd(Old)|Win32
+		{5480D297-19EC-3BF5-8B18-CC9748B314A2}.MDd(Old)|Win32.Build.0 = MDd(Old)|Win32
+		{5480D297-19EC-3BF5-8B18-CC9748B314A2}.MDd|Win32.ActiveCfg = MDd|Win32
+		{5480D297-19EC-3BF5-8B18-CC9748B314A2}.MDd|Win32.Build.0 = MDd|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
