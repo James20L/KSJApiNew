@@ -31,7 +31,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>248</width>
+     <width>222</width>
      <height>28</height>
     </rect>
    </property>
@@ -54,7 +54,7 @@
     <rect>
      <x>10</x>
      <y>84</y>
-     <width>248</width>
+     <width>222</width>
      <height>28</height>
     </rect>
    </property>
@@ -103,7 +103,7 @@
     <rect>
      <x>10</x>
      <y>402</y>
-     <width>248</width>
+     <width>222</width>
      <height>85</height>
     </rect>
    </property>
@@ -129,7 +129,7 @@
     <rect>
      <x>10</x>
      <y>186</y>
-     <width>248</width>
+     <width>222</width>
      <height>117</height>
     </rect>
    </property>
@@ -139,7 +139,7 @@
    <widget class="QSpinBox" name="ColStartSpinBox">
     <property name="geometry">
      <rect>
-      <x>24</x>
+      <x>14</x>
       <y>20</y>
       <width>59</width>
       <height>22</height>
@@ -152,7 +152,7 @@
    <widget class="QSpinBox" name="RowStartSpinBox">
     <property name="geometry">
      <rect>
-      <x>24</x>
+      <x>14</x>
       <y>52</y>
       <width>59</width>
       <height>22</height>
@@ -165,7 +165,7 @@
    <widget class="QSpinBox" name="ColSizeSpinBox">
     <property name="geometry">
      <rect>
-      <x>106</x>
+      <x>88</x>
       <y>20</y>
       <width>59</width>
       <height>22</height>
@@ -178,7 +178,7 @@
    <widget class="QSpinBox" name="RowSizeSpinBox">
     <property name="geometry">
      <rect>
-      <x>106</x>
+      <x>88</x>
       <y>52</y>
       <width>59</width>
       <height>22</height>
@@ -191,7 +191,7 @@
    <widget class="QPushButton" name="SetFovPushButton">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>156</x>
       <y>28</y>
       <width>55</width>
       <height>36</height>

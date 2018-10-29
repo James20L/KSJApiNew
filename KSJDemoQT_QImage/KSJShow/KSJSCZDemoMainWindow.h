@@ -29,7 +29,7 @@ protected slots:
 	void OnCapture();
 	void OnRefreshDevice();
 	void OnSaveImagePushButton();
-	void SetFovPushButton();
+	void OnSetFovPushButton();
 
 	void OnSelectDevice(int);
 	void OnTrigetModeChanged(int);

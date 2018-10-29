@@ -36,9 +36,6 @@
 
 #endif
 
-#define  DEFAULT_WND_WIDTH  960
-#define  DEFAULT_WND_HEIGHT 720
-
 #ifdef _WIN32
 unsigned int __stdcall CKSJSCZDemoMainWindow::ThreadForCaptureData(LPVOID arg)
 #else
@@ -203,7 +200,7 @@ void CKSJSCZDemoMainWindow::paintEvent(QPaintEvent *)
 	{
 		QPainter painter(this);
 
-		int w = size().width() - 200;
+		int w = size().width() - 248;
 		int h = size().height();
 
 		int iw = m_pImage->width();
@@ -216,7 +213,7 @@ void CKSJSCZDemoMainWindow::paintEvent(QPaintEvent *)
 		int dw = (int)(f*iw);
 		int dh = (int)(f*ih);
 
-		painter.drawImage(QRect(200 + (w - dw) / 2, (h - dh) / 2, dw, dh), *m_pImage, QRect(0, 0, iw, ih));
+		painter.drawImage(QRect(232 + 8 + (w - dw) / 2, (h - dh) / 2, dw, dh), *m_pImage, QRect(0, 0, iw, ih));
 	}
 }
 
@@ -349,7 +346,7 @@ void CKSJSCZDemoMainWindow::OnFixFrameRateDoubleSpinBoxChanged(double value)
 	if (bIsCapturing) OnCapture();
 }
 
-void CKSJSCZDemoMainWindow::SetFovPushButton()
+void CKSJSCZDemoMainWindow::OnSetFovPushButton()
 {
 	bool bIsCapturing = m_bIsCapturing;
 	if (m_bIsCapturing) OnCapture();
