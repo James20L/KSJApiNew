@@ -159,6 +159,7 @@ void* CKSJSCZDemoMainWindow::ThreadForCaptureData(void *arg)
 #endif
 }
 
+#include <QTextStream>
 
 CKSJSCZDemoMainWindow::CKSJSCZDemoMainWindow(QWidget *parent) :
 QDialog(parent)
@@ -214,6 +215,26 @@ QDialog(parent)
 
 	StartCaptureThread();
 
+	//QFile file("c:\\s0.txt");
+	//
+	//if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+	//{
+	//	QTextStream out(&file);
+
+	//	for (int i = 0; i < 1280*3; ++i)
+	//	{
+	//		QString txt;
+
+	//		if (i % 3 == 0) txt = QString("devmem 0x3000%1 32 0x00FF0000\n").arg(4 * i, 4, 16, QLatin1Char('0'));
+	//		if (i % 3 == 1) txt = QString("devmem 0x3000%1 32 0x0000FF00\n").arg(4 * i, 4, 16, QLatin1Char('0'));
+	//		if (i % 3 == 2) txt = QString("devmem 0x3000%1 32 0xFF0000FF\n").arg(4 * i, 4, 16, QLatin1Char('0'));
+
+	//		out << txt;
+	//	}
+	//	file.close();
+	//}
+
+	//int kk = 0;
 }
 
 CKSJSCZDemoMainWindow::~CKSJSCZDemoMainWindow()

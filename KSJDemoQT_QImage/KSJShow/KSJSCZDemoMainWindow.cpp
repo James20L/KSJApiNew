@@ -385,6 +385,10 @@ void CKSJSCZDemoMainWindow::OnSetFovPushButton()
 
 }
 
+
+#define KSJ_MSB(x)     ((x&0xff00) >> 8)
+#define KSJ_LSB(x)     (x & 0x00ff)
+
 void CKSJSCZDemoMainWindow::RefreshDevice()
 {
 	m_nCamareIndex = -1;
@@ -433,7 +437,7 @@ void CKSJSCZDemoMainWindow::RefreshDevice()
 		}
 		else
 		{
-            strCamare = QString("Camare%1: Serial(%2)-DeviceType(%3)-FW(%4)-PL(%5)").arg(i).arg(pnSerials).arg(pusDeviceType).arg(pusFirmwareVersion).arg(pusFpgaVersion);
+			strCamare = QString("Camare%1: Serial(%2)-DeviceType(%3)-FW(%4.%5)-PL(%6.%7)").arg(i).arg(pnSerials).arg(pusDeviceType).arg(KSJ_MSB(pusFirmwareVersion)).arg(KSJ_LSB(pusFirmwareVersion)).arg(KSJ_MSB(pusFpgaVersion)).arg(KSJ_LSB(pusFpgaVersion));
 		}
 
         ui->DevicesComboBox->addItem(strCamare);

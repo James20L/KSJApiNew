@@ -128,8 +128,7 @@
       <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) ..\..\KSJApi.bin\win32\$(TargetName)$(TargetExt)</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -175,8 +174,7 @@
       <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) ..\..\KSJApi.bin\win32\$(TargetName)$(TargetExt)</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>

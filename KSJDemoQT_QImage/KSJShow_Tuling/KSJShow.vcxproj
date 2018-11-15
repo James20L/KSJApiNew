@@ -231,8 +231,13 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GeneratedFiles\MDd(Old)\moc_KSJSCZDemoMainWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\MDd\moc_KSJSCZDemoMainWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\MD\moc_KSJSCZDemoMainWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">true</ExcludedFromBuild>
@@ -240,22 +245,6 @@
     </ClCompile>
     <ClCompile Include="KSJSCZDemoMainWindow.cpp" />
     <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="KSJSCZDemoMainWindow.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">Moc%27ing KSJSCZDemoMainWindow.h...</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">Moc%27ing KSJSCZDemoMainWindow.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DWIN32 -DKSJAPI_EXPORTS -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_DLL -D_MBCS "-I$(ConfigurationName)\." "-I." "-I.\GeneratedFiles" "-I.\AutoExposure" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(NOINHERIT)\."</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DOLD_KSJAPI -D_WINDOWS -DWIN32 -DKSJAPI_EXPORTS -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_DLL -D_MBCS  "-I$(ConfigurationName)\." "-I." "-I.\GeneratedFiles" "-I.\AutoExposure" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(NOINHERIT)\."</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">Moc%27ing KSJSCZDemoMainWindow.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DWIN32 -DKSJAPI_EXPORTS -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL -D_MBCS "-I$(ConfigurationName)\." "-I." "-I.\GeneratedFiles" "-I.\AutoExposure" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(NOINHERIT)\."</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="KSJSCZDemoMainWindow.ui">
@@ -275,6 +264,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_KSJSCZDemoMainWindow.h" />
+    <CustomBuild Include="KSJSCZDemoMainWindow.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">Moc%27ing KSJSCZDemoMainWindow.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DOLD_KSJAPI -D_WINDOWS -DWIN32 -DKSJAPI_EXPORTS -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_DLL -D_MBCS "-I$(ConfigurationName)\." "-I." "-I.\GeneratedFiles" "-I.\AutoExposure" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(NOINHERIT)\."</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">Moc%27ing KSJSCZDemoMainWindow.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DWIN32 -DKSJAPI_EXPORTS -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_DLL -D_MBCS "-I$(ConfigurationName)\." "-I." "-I.\GeneratedFiles" "-I.\AutoExposure" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(NOINHERIT)\."</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">Moc%27ing KSJSCZDemoMainWindow.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MD|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DWIN32 -DKSJAPI_EXPORTS -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DNDEBUG -DQT_DLL -D_MBCS "-I$(ConfigurationName)\." "-I." "-I.\GeneratedFiles" "-I.\AutoExposure" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(NOINHERIT)\."</Command>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
