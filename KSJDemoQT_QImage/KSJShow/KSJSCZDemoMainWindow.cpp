@@ -19,20 +19,11 @@
 #ifdef _WIN32
 #include <process.h>
 
-#ifdef _DEBUG
 #pragma comment( lib, "KSJApid.lib" )
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Widgetsd.lib")
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Guid.lib")
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Cored.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Cored.lib")
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/qtmaind.lib")
-#else
-#pragma comment( lib, "KSJApi.lib" )
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Widgets.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Gui.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Core.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/qtmain.lib")
-#endif
 
 #endif
 

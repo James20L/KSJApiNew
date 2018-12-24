@@ -11,6 +11,8 @@ doc/
 *.suo
 *.user
 *.opensdf
+*ilk
+*.pdb
 
 *.o
 *.o.*
@@ -30,6 +32,13 @@ KSJCAM_89.lib/
 KSJCAM_88.lib/
 KSJCAM_3.lib/
 KSJCAM/
+KSJDemoQT_QImage/KSJShow/MD
+KSJDemoQT_QImage/KSJShow/MDd
+KSJDemoQT_QImage/KSJShow/GeneratedFiles
+KSJDemoQT_QImage/KSJShow_Tuling/MD
+KSJDemoQT_QImage/KSJShow_Tuling/MDd
+KSJDemoQT_QImage/KSJShow_Tuling/GeneratedFiles
+
 #KSJDemoVC_Base.Lib/
 #KSJDemoVC_TriggerMode.Lib/
 #KSJDemoVC_3A.Lib/

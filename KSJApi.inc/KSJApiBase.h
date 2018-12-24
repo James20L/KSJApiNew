@@ -111,6 +111,9 @@ extern "C"{
 	// Get Exposure Time (ms) for float format.
 	KSJ_API   KSJ_ExposureTimeGet(int nIndex,  float *pfExpTimeMs);
 
+	KSJ_API   KSJ_GlobalResetShutterSet(int nIndex, bool bGlobalReset);
+	KSJ_API   KSJ_GlobalResetShutterGet(int nIndex, bool* pbGlobalReset);
+
     // Skip Mode (Address Mode)
 	enum KSJ_ADDRESSMODE
 	{
