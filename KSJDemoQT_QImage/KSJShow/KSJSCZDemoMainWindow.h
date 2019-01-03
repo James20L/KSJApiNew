@@ -25,19 +25,70 @@ public:
 private:
 	Ui::KSJSCZDemoMainWindow *ui;
 
+signals:                                     //自定义信号
+	void explains();            //假如要自定义槽和信号, explains信号是必须的
+	void sigWBADone(float, float, float);
+
 protected slots:
-	void OnCapture();
-	void OnRefreshDevice();
-	void OnSaveImagePushButton();
-	void OnSetFovPushButton();
 
-	void OnSelectDevice(int);
-	void OnTrigetModeChanged(int);
+	void on_PreViewPushButton_clicked();
+	void on_RefreshPushButton_clicked();
+	void on_SnapImagePushButton_clicked();
 
-	void OnMirrorChkBoxStateChanged(int);
-	void OnFlipChkBoxStateChanged(int);
+	void on_DevicesComboBox_currentIndexChanged(int);
 
-	void OnFixFrameRateDoubleSpinBoxChanged(double);
+	void on_TrigetModeComboBox_currentIndexChanged(int);
+	void on_TrigetMethodComboBox_currentIndexChanged(int);
+
+	void on_FixFrameRateDoubleSpinBox_valueChanged(double);
+	void on_CaptureTimeoutSpinBox_valueChanged(int);
+
+	void on_SkipComboBox_currentIndexChanged(int);
+
+	void on_ApplyFovPushButton_clicked();
+
+	void on_ExpoureLineSpinBox_valueChanged(int);
+	void on_ExposureTimeSpinBox_valueChanged(double);
+
+	void on_MirrorCheckBox_stateChanged(int);
+	void on_FlipCheckBox_stateChanged(int);
+
+	void on_SensitivityComboBox_currentIndexChanged(int);
+
+	void on_GainRedSpinBox_valueChanged(int);
+	void on_GainGreenSpinBox_valueChanged(int);
+	void on_GainBlueSpinBox_valueChanged(int);
+
+	void on_ProgramLutPushButton_clicked();
+
+	void on_WBModeComboBox_currentIndexChanged(int);
+	void on_WBPresettingComboBox_currentIndexChanged(int);
+	void on_WBPHiSpinBox_valueChanged(int);
+	void on_WBRedSpinBox_valueChanged(double);
+	void on_WBGreenSpinBox_valueChanged(double);
+	void on_WBBlueSpinBox_valueChanged(double);
+
+	void on_ProgramWBMatrixPushButton_clicked();
+
+	void OnWBADone(float, float, float);
+
+	void on_CCMModeComboBox_currentIndexChanged(int);
+	void on_CCMPresettingComboBox_currentIndexChanged(int);
+
+	void on_CCM00SpinBox_valueChanged(double);
+	void on_CCM01SpinBox_valueChanged(double);
+	void on_CCM02SpinBox_valueChanged(double);
+	void on_CCM10SpinBox_valueChanged(double);
+	void on_CCM11SpinBox_valueChanged(double);
+	void on_CCM12SpinBox_valueChanged(double);
+	void on_CCM20SpinBox_valueChanged(double);
+	void on_CCM21SpinBox_valueChanged(double);
+	void on_CCM22SpinBox_valueChanged(double);
+
+	void on_ProgramCCMMatrixPushButton_clicked();
+
+	void on_PragramSettingsPushButton_clicked();
+	void on_ClearSettingsPushButton_clicked();
 
 protected:
 	virtual void paintEvent(QPaintEvent *);
@@ -53,7 +104,21 @@ protected:
 
 	void RefreshDevice();
 	void SelectDevice(int nIndex);
+
+	void InitCnotrol();
 	void UpdateDeviceInfo();
+
+	void UpdateWhiteBalanceMatrix();
+	void EnableWhiteBalanceMatrixControls(bool bEnable);
+
+	void UpdateColorCorrectionMatrix();
+	void EnableColorCorrectionMatrixControls(bool bEnable);
+
+	bool StopPreview();
+	bool StartPreview();
+
+public:
+	void WBACallback(float fMatrix[3]);
 
 protected:
 	int  m_nCamareIndex;
@@ -62,7 +127,7 @@ protected:
 	bool m_bCapturingThreadIsWorking;
 
 	bool m_bSaveImage;
-	int  m_nSaveIndex;
+	int  m_nSnapCount;
 	QString m_strImagePath;
 	QString m_strImagePreFix;
 

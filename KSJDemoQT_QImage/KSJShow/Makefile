@@ -335,6 +335,7 @@ KSJSCZDemoMainWindow.o: KSJSCZDemoMainWindow.cpp KSJSCZDemoMainWindow.h \
 		../../KSJApi.inc/KSJApiDeviceType.h \
 		../../KSJApi.inc/KSJApiRetCode.h \
 		../../KSJApi.inc/KSJApiBase.h \
+		../../KSJApi.inc/KSJApiCallback.h \
 		../../KSJApi.inc/KSJApiBayer.h \
 		../../KSJApi.inc/KSJApiTriggerMode.h \
 		../../KSJApi.inc/KSJApiFunction.h \
@@ -347,7 +348,10 @@ KSJSCZDemoMainWindow.o: KSJSCZDemoMainWindow.cpp KSJSCZDemoMainWindow.h \
 		../../KSJApi.inc/KSJApiImage.h \
 		../../KSJApi.inc/KSJApiProgram.h \
 		../../KSJApi.inc/KSJApiIo.h \
-		../../KSJApi.inc/KSJApiWaterMark.h
+		../../KSJApi.inc/KSJApiWaterMark.h \
+		../../KSJApi.inc/KSJApi16Bits.h \
+		../../KSJApi.inc/KSJApiAwaiba.h \
+		../../KSJApi.inc/KSJApiMultiFrames.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o KSJSCZDemoMainWindow.o KSJSCZDemoMainWindow.cpp
 
 moc_KSJSCZDemoMainWindow.o: moc_KSJSCZDemoMainWindow.cpp 

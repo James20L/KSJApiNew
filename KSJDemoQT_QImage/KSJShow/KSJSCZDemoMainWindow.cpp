@@ -5,6 +5,8 @@
 #include <QScrollBar>
 #include <QSettings>
 #include <QDateTime>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "KSJSCZDemoMainWindow.h"
 #include "ui_KSJSCZDemoMainWindow.h"
@@ -122,7 +124,7 @@ QDialog(parent)
 , m_pImage(NULL)
 , m_nCamareIndex(0)
 , m_bSaveImage(false)
-, m_nSaveIndex(0)
+, m_nSnapCount(0)
 , m_bIsCapturing(false)
 , m_bStopCaptureThread(false)
 , m_bCapturingThreadIsWorking(false)
@@ -136,28 +138,11 @@ QDialog(parent)
     ui->setupUi(this);
 	setMouseTracking(true);
 
-	ui->TrigetComboBox->addItem("Internal");
-	ui->TrigetComboBox->addItem("External");
-	ui->TrigetComboBox->addItem("Software");
-	ui->TrigetComboBox->addItem("Fixed Frame Rate");
+	InitCnotrol();
 
-	// 建立信号和槽的关联
-	connect(ui->CapturePushButton, SIGNAL(clicked()), this, SLOT(OnCapture()));
-	connect(ui->RefreshPushButton, SIGNAL(clicked()), this, SLOT(OnRefreshDevice()));
-	connect(ui->SaveImagePushButton, SIGNAL(clicked()), this, SLOT(OnSaveImagePushButton()));
-	connect(ui->SetFovPushButton, SIGNAL(clicked()), this, SLOT(OnSetFovPushButton()));
+	connect(ui->ExitAppPushButton, SIGNAL(clicked()), qApp, SLOT(quit()));
 
-	connect(ui->ExitPushButton, SIGNAL(clicked()), qApp, SLOT(quit()));
-
-	connect(ui->DevicesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnSelectDevice(int)));
-	connect(ui->TrigetComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnTrigetModeChanged(int)));
-
-	connect(ui->MirrorCheckBox, SIGNAL(stateChanged(int)), this, SLOT(OnMirrorChkBoxStateChanged(int)));
-	connect(ui->FlipCheckBox, SIGNAL(stateChanged(int)), this, SLOT(OnFlipChkBoxStateChanged(int)));
-
-	connect(ui->FixFrameRateDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(OnFixFrameRateDoubleSpinBoxChanged(double)));
-
-	ui->CapturePushButton->setText(m_bIsCapturing ? "Stop" : "Start");
+	connect(this, SIGNAL(sigWBADone(float, float, float)), this, SLOT(OnWBADone(float, float, float)));
 
 	// 初始化
 	RefreshDevice();
@@ -191,7 +176,7 @@ void CKSJSCZDemoMainWindow::paintEvent(QPaintEvent *)
 	{
 		QPainter painter(this);
 
-		int w = size().width() - 248;
+		int w = size().width() - 320;
 		int h = size().height();
 
 		int iw = m_pImage->width();
@@ -204,7 +189,7 @@ void CKSJSCZDemoMainWindow::paintEvent(QPaintEvent *)
 		int dw = (int)(f*iw);
 		int dh = (int)(f*ih);
 
-		painter.drawImage(QRect(232 + 8 + (w - dw) / 2, (h - dh) / 2, dw, dh), *m_pImage, QRect(0, 0, iw, ih));
+		painter.drawImage(QRect(320 + (w - dw) / 2, (h - dh) / 2, dw, dh), *m_pImage, QRect(0, 0, iw, ih));
 	}
 }
 
@@ -254,128 +239,29 @@ bool CKSJSCZDemoMainWindow::KillCaptureThread()
 	return true;
 }
 
-void CKSJSCZDemoMainWindow::OnCapture()
+void CKSJSCZDemoMainWindow::on_PreViewPushButton_clicked()
 {
-	printf("===== %d =====\r\n", m_nCamareIndex);
-
 	if (m_nCamareIndex >= 0)
 	{
-		// 开始采集
-		m_bIsCapturing = !m_bIsCapturing;
-
-		ui->CapturePushButton->setText(m_bIsCapturing ? "Stop" : "Start");
+		if (m_bIsCapturing) this->StopPreview();
+		else                this->StartPreview();
 	}
 }
 
-void CKSJSCZDemoMainWindow::OnRefreshDevice()
+void CKSJSCZDemoMainWindow::on_RefreshPushButton_clicked()
 {
-	bool bIsCapturing = m_bIsCapturing;
-	if (m_bIsCapturing) OnCapture();
+	bool bIsCapturing = this->StopPreview();
 
 	RefreshDevice();
 
-	if (bIsCapturing) OnCapture();
+	if (bIsCapturing) this->StartPreview();
 }
 
-void CKSJSCZDemoMainWindow::OnSaveImagePushButton()
+void CKSJSCZDemoMainWindow::on_SnapImagePushButton_clicked()
 {
-	++m_nSaveIndex;
-	m_strImagePath = m_strImagePreFix + QString("%1.bmp").arg(m_nSaveIndex, 3, 10, QChar('0'));
+	m_strImagePath = m_strImagePreFix + QString("%1.bmp").arg(m_nSnapCount, 3, 10, QChar('0'));
 	m_bSaveImage = true;
 }
-
-void CKSJSCZDemoMainWindow::OnSelectDevice(int nIndex)
-{
-	SelectDevice(nIndex);
-}
-
-void CKSJSCZDemoMainWindow::OnTrigetModeChanged(int nIndex)
-{
-	bool bIsCapturing = m_bIsCapturing;
-	if (m_bIsCapturing) OnCapture();
-
-    KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGERMODE(nIndex));	// 需要先切换到内触发模式，否则检测线程的Capture退不出来
-
-	ui->FixFrameRateDoubleSpinBox->setEnabled((KSJ_TRIGGERMODE(nIndex)) == KSJ_TRIGGER_FIXFRAMERATE);
-
-	if (bIsCapturing) OnCapture();
-}
-
-void CKSJSCZDemoMainWindow::OnMirrorChkBoxStateChanged(int value)
-{
-	bool bIsCapturing = m_bIsCapturing;
-	if (m_bIsCapturing) OnCapture();
-
-	int nMirror = (value == Qt::Checked) ? 1 : 0;
-
-	printf("===== camare%d set mirror: %d =====\r\n", m_nCamareIndex, nMirror);
-	KSJ_SetParam(m_nCamareIndex, KSJ_MIRROR, nMirror);
-
-	if (bIsCapturing) OnCapture();
-}
-
-void CKSJSCZDemoMainWindow::OnFlipChkBoxStateChanged(int value)
-{
-	bool bIsCapturing = m_bIsCapturing;
-	if (m_bIsCapturing) OnCapture();
-
-	int nFlip = (value == Qt::Checked) ? 1 : 0;
-
-	printf("===== camare%d set flip: %d =====\r\n", m_nCamareIndex, nFlip);
-	KSJ_SetParam(m_nCamareIndex, KSJ_FLIP, nFlip);
-
-	if (bIsCapturing) OnCapture();
-}
-
-void CKSJSCZDemoMainWindow::OnFixFrameRateDoubleSpinBoxChanged(double value)
-{
-	bool bIsCapturing = m_bIsCapturing;
-	if (m_bIsCapturing) OnCapture();
-
-	KSJ_SetFixedFrameRateEx(m_nCamareIndex, value);
-
-	if (bIsCapturing) OnCapture();
-}
-
-void CKSJSCZDemoMainWindow::OnSetFovPushButton()
-{
-	bool bIsCapturing = m_bIsCapturing;
-	if (m_bIsCapturing) OnCapture();
-
-	int nRet;
-	int nColStart;
-	int nRowStart;
-	int nColSize;
-	int nRowSize;
-	unsigned short nsMultiFrameNum;
-	KSJ_ADDRESSMODE AmCol;
-	KSJ_ADDRESSMODE AmRow;
-
-	nRet = KSJ_CaptureGetFieldOfViewEx(m_nCamareIndex, &nColStart, &nRowStart, &nColSize, &nRowSize, &AmCol, &AmRow, &nsMultiFrameNum);
-	
-	if (nRet == RET_SUCCESS)
-	{
-		nColStart = ui->ColStartSpinBox->value();
-		nRowStart = ui->ColSizeSpinBox->value();
-		nColSize = ui->RowStartSpinBox->value();
-		nRowSize = ui->RowSizeSpinBox->value();
-		nsMultiFrameNum = ui->MultiFrameNumberSpinBox->value();
-
-		KSJ_CaptureSetFieldOfViewEx(m_nCamareIndex, nColStart, nRowStart, nColSize, nRowSize, AmCol, AmRow, nsMultiFrameNum);
-
-		KSJ_CaptureGetFieldOfViewEx(m_nCamareIndex, &nColStart, &nRowStart, &nColSize, &nRowSize, &AmCol, &AmRow, &nsMultiFrameNum);
-
-		ui->ColStartSpinBox->setValue(nColStart);
-		ui->ColSizeSpinBox->setValue(nRowStart);
-		ui->RowStartSpinBox->setValue(nColSize);
-		ui->RowSizeSpinBox->setValue(nRowSize);
-		ui->MultiFrameNumberSpinBox->setValue(nsMultiFrameNum);
-	}
-
-	if (bIsCapturing) OnCapture();
-
-}
-
 
 #define KSJ_MSB(x)     ((x&0xff00) >> 8)
 #define KSJ_LSB(x)     (x & 0x00ff)
@@ -439,50 +325,378 @@ void CKSJSCZDemoMainWindow::RefreshDevice()
 
 void CKSJSCZDemoMainWindow::SelectDevice(int nIndex)
 {
-	if (m_bIsCapturing) OnCapture();
+	bool bIsCapturing = this->StopPreview();
 
 	m_nCamareIndex = -1;
 
 	if (ui->DevicesComboBox->count() <= 0) return;
 
 	if (nIndex <= 0) m_nCamareIndex = 0;
-	else m_nCamareIndex = nIndex;
+	else             m_nCamareIndex = nIndex;
 
 	ui->DevicesComboBox->setCurrentIndex(m_nCamareIndex);
-
 	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_DevicesComboBox_currentIndexChanged(int nIndex)
+{
+	if (ui->DevicesComboBox->count() <= 0) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	SelectDevice(nIndex);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_TrigetModeComboBox_currentIndexChanged(int nIndex)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGERMODE(nIndex));
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_TrigetMethodComboBox_currentIndexChanged(int nIndex)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_TriggerMethodSet(m_nCamareIndex, KSJ_TRIGGERMETHOD(nIndex));
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_FixFrameRateDoubleSpinBox_valueChanged(double value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SetFixedFrameRateEx(m_nCamareIndex, value);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_CaptureTimeoutSpinBox_valueChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_CaptureSetTimeOut(m_nCamareIndex, value);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_SkipComboBox_currentIndexChanged(int index)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	int nRet;
+	int nColStart;
+	int nRowStart;
+	int nColSize;
+	int nRowSize;
+	unsigned short nsMultiFrameNum;
+	KSJ_ADDRESSMODE AmCol;
+	KSJ_ADDRESSMODE AmRow;
+
+	nRet = KSJ_CaptureGetFieldOfViewEx(m_nCamareIndex, &nColStart, &nRowStart, &nColSize, &nRowSize, &AmCol, &AmRow, &nsMultiFrameNum);
+
+	if (nRet == RET_SUCCESS)
+	{
+		AmCol = (KSJ_ADDRESSMODE)index;
+		AmRow = (KSJ_ADDRESSMODE)index;
+
+		KSJ_CaptureSetFieldOfViewEx(m_nCamareIndex, nColStart, nRowStart, nColSize, nRowSize, AmCol, AmRow, nsMultiFrameNum);
+	}
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_ApplyFovPushButton_clicked()
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	int nRet;
+	int nColStart;
+	int nRowStart;
+	int nColSize;
+	int nRowSize;
+	unsigned short nsMultiFrameNum;
+	KSJ_ADDRESSMODE AmCol;
+	KSJ_ADDRESSMODE AmRow;
+
+	nRet = KSJ_CaptureGetFieldOfViewEx(m_nCamareIndex, &nColStart, &nRowStart, &nColSize, &nRowSize, &AmCol, &AmRow, &nsMultiFrameNum);
+
+	if (nRet == RET_SUCCESS)
+	{
+		nColStart = ui->ColStartSpinBox->value();
+		nRowStart = ui->ColSizeSpinBox->value();
+		nColSize = ui->RowStartSpinBox->value();
+		nRowSize = ui->RowSizeSpinBox->value();
+		nsMultiFrameNum = ui->MultiFrameNumberSpinBox->value();
+
+		KSJ_CaptureSetFieldOfViewEx(m_nCamareIndex, nColStart, nRowStart, nColSize, nRowSize, AmCol, AmRow, nsMultiFrameNum);
+	}
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_ExpoureLineSpinBox_valueChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SetParam(m_nCamareIndex, KSJ_EXPOSURE_LINES, value);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_ExposureTimeSpinBox_valueChanged(double value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_ExposureTimeSet(m_nCamareIndex, value);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_MirrorCheckBox_stateChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SetParam(m_nCamareIndex, KSJ_MIRROR, (value == Qt::Checked) ? 1 : 0);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_FlipCheckBox_stateChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SetParam(m_nCamareIndex, KSJ_FLIP, (value == Qt::Checked) ? 1 : 0);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_SensitivityComboBox_currentIndexChanged(int index)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SensitivitySetMode(m_nCamareIndex, (KSJ_SENSITIVITYMODE)index);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+
+}
+
+void CKSJSCZDemoMainWindow::on_GainRedSpinBox_valueChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SetParam(m_nCamareIndex, KSJ_RED, value);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_GainGreenSpinBox_valueChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SetParam(m_nCamareIndex, KSJ_GREEN, value);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_GainBlueSpinBox_valueChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_SetParam(m_nCamareIndex, KSJ_BLUE, value);
+	UpdateDeviceInfo();
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_ProgramLutPushButton_clicked()
+{
+	if (m_nCamareIndex < 0) return;
+
+	QString strFilePath = QFileDialog::getOpenFileName(this, "Select lut data file", "", "ktb File(*.ktb)|*.ktb|All Files(*.*)|*.*||");
+
+	if (!strFilePath.isEmpty())
+	{
+		int nRet = KSJ_LutFileDownload(m_nCamareIndex, strFilePath.toStdString().c_str());
+
+        TCHAR szErrorInfo[512] = { '\0' };
+		KSJ_GetErrorInfo(nRet, szErrorInfo);
+		QMessageBox::about(this, "CatchBEST", szErrorInfo);
+	}
+}
+
+bool CKSJSCZDemoMainWindow::StopPreview()
+{
+	if (m_nCamareIndex >= 0)
+	{
+		if (m_bIsCapturing)
+		{
+			m_bIsCapturing = false;
+			ui->PreViewPushButton->setText(m_bIsCapturing ? "Stop" : "Start");
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CKSJSCZDemoMainWindow::StartPreview()
+{
+	if (m_nCamareIndex >= 0)
+	{
+		if (!m_bIsCapturing)
+		{
+			m_bIsCapturing = true;
+			ui->PreViewPushButton->setText(m_bIsCapturing ? "Stop" : "Start");
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void CKSJSCZDemoMainWindow::InitCnotrol()
+{
+	ui->TrigetModeComboBox->blockSignals(true);
+	ui->TrigetModeComboBox->addItem("Internal");
+	ui->TrigetModeComboBox->addItem("External");
+	ui->TrigetModeComboBox->addItem("Software");
+	ui->TrigetModeComboBox->addItem("Fixed Frame Rate");
+	ui->TrigetModeComboBox->blockSignals(false);
+
+	ui->TrigetMethodComboBox->blockSignals(true);
+	ui->TrigetMethodComboBox->addItem("Falling Edge");
+	ui->TrigetMethodComboBox->addItem("Rising Edge");
+	ui->TrigetMethodComboBox->addItem("High Level");
+	ui->TrigetMethodComboBox->addItem("Low Level");
+	ui->TrigetMethodComboBox->blockSignals(false);
+
+	ui->SkipComboBox->blockSignals(true);
+	ui->SkipComboBox->addItem("Normal");
+	ui->SkipComboBox->addItem("2 x 2 Skip");
+	ui->SkipComboBox->addItem("3 x 3 Skip");
+	ui->SkipComboBox->addItem("4 x 4 Skip");
+	ui->SkipComboBox->addItem("8 x 8 Skip");
+	ui->SkipComboBox->blockSignals(false);
+
+	ui->SensitivityComboBox->blockSignals(true);
+	ui->SensitivityComboBox->addItem("Low");
+	ui->SensitivityComboBox->addItem("Mid");
+	ui->SensitivityComboBox->addItem("High");
+	ui->SensitivityComboBox->addItem("Higher");
+	ui->SensitivityComboBox->addItem("Highest");
+	ui->SensitivityComboBox->blockSignals(false); 
+
+	ui->WBModeComboBox->blockSignals(true);
+	ui->WBModeComboBox->addItem("Disable");
+	ui->WBModeComboBox->addItem("Software Presettings");
+	ui->WBModeComboBox->addItem("Software Auto Once");
+	ui->WBModeComboBox->addItem("Software Auto Continuous");
+	ui->WBModeComboBox->addItem("Software Manual");
+	ui->WBModeComboBox->addItem("Hardware Presettings");
+	ui->WBModeComboBox->addItem("Hardware Auto Once");
+	ui->WBModeComboBox->addItem("Hardware Auto Continuous");
+	ui->WBModeComboBox->addItem("Hardware Manual");
+	ui->WBModeComboBox->blockSignals(false);
+
+	ui->WBPresettingComboBox->blockSignals(true);
+	ui->WBPresettingComboBox->addItem("Color Temperature 5000K");
+	ui->WBPresettingComboBox->addItem("Color Temperature 6500K");
+	ui->WBPresettingComboBox->addItem("Color Temperature 2800K");
+	ui->WBPresettingComboBox->blockSignals(false);
+
+	ui->CCMModeComboBox->blockSignals(true);
+	ui->CCMModeComboBox->addItem("Disable");
+	ui->CCMModeComboBox->addItem("Software Presettings");
+	ui->CCMModeComboBox->addItem("Software Manual");
+	ui->CCMModeComboBox->addItem("Hardware Presettings");
+	ui->CCMModeComboBox->addItem("Hardware Manual");
+	ui->CCMModeComboBox->blockSignals(false);
+
+	ui->CCMPresettingComboBox->blockSignals(true);
+	ui->CCMPresettingComboBox->addItem("Color Temperature 5000K");
+	ui->CCMPresettingComboBox->addItem("Color Temperature 6500K");
+	ui->CCMPresettingComboBox->addItem("Color Temperature 2800K");
+	ui->CCMPresettingComboBox->blockSignals(false);
 }
 
 void CKSJSCZDemoMainWindow::UpdateDeviceInfo()
 {
-    if (m_nCamareIndex < 0) return;
-    if (m_bIsCapturing) OnCapture();
+	if (m_nCamareIndex == -1) return;
 
 	int nRet;
 
-	int nTriggerModeIndex;
-
+	int nTriggerModeIndex = 0;
 	nRet = KSJ_TriggerModeGet(m_nCamareIndex, (KSJ_TRIGGERMODE*)&nTriggerModeIndex);
-	if (nRet != RET_SUCCESS) return;
-	ui->TrigetComboBox->blockSignals(true);
-	ui->TrigetComboBox->setCurrentIndex(nTriggerModeIndex);
-	ui->TrigetComboBox->blockSignals(false);
+	ui->TrigetModeComboBox->blockSignals(true);
+	ui->TrigetModeComboBox->setCurrentIndex(nTriggerModeIndex);
+	ui->TrigetModeComboBox->blockSignals(false);
+
+	int nTriggerMethodIndex = 0;
+	nRet = KSJ_TriggerMethodGet(m_nCamareIndex, (KSJ_TRIGGERMETHOD*)&nTriggerMethodIndex);
+	ui->TrigetMethodComboBox->blockSignals(true);
+	ui->TrigetMethodComboBox->setCurrentIndex(nTriggerModeIndex);
+	ui->TrigetMethodComboBox->blockSignals(false);
+
+
+	float fFrameRate = 0;
+	nRet = KSJ_GetFixedFrameRateEx(m_nCamareIndex, &fFrameRate);
+	ui->FixFrameRateDoubleSpinBox->setValue(fFrameRate);
 
 	ui->FixFrameRateDoubleSpinBox->setEnabled((KSJ_TRIGGERMODE(nTriggerModeIndex)) == KSJ_TRIGGER_FIXFRAMERATE);
 
-	int nMirror = 0;
-	KSJ_GetParam(m_nCamareIndex, KSJ_MIRROR, &nMirror);
-	if (nRet != RET_SUCCESS) return;
-	ui->MirrorCheckBox->blockSignals(true);
-	ui->MirrorCheckBox->setChecked(nMirror!=0);
-	ui->MirrorCheckBox->blockSignals(false);
-
-	int nFlip = 0;
-	nRet = KSJ_GetParam(m_nCamareIndex, KSJ_FLIP, &nFlip);
-	if (nRet != RET_SUCCESS) return;
-	ui->FlipCheckBox->blockSignals(true);
-	ui->FlipCheckBox->setChecked(nFlip != 0);
-	ui->FlipCheckBox->blockSignals(false);
+	unsigned int nCaptureTimeout = 0;
+	nRet = KSJ_CaptureGetTimeOut(m_nCamareIndex, &nCaptureTimeout);
+	ui->CaptureTimeoutSpinBox->setValue(nCaptureTimeout);
 
 	int nColStart;
 	int nRowStart;
@@ -493,20 +707,617 @@ void CKSJSCZDemoMainWindow::UpdateDeviceInfo()
 	KSJ_ADDRESSMODE AmRow;
 
 	nRet = KSJ_CaptureGetFieldOfViewEx(m_nCamareIndex, &nColStart, &nRowStart, &nColSize, &nRowSize, &AmCol, &AmRow, &nsMultiFrameNum);
-	if (nRet != RET_SUCCESS) return;
+
+	ui->ColStartSpinBox->blockSignals(true);
 	ui->ColStartSpinBox->setValue(nColStart);
+	ui->ColStartSpinBox->blockSignals(false);
+
+	ui->ColSizeSpinBox->blockSignals(true);
 	ui->ColSizeSpinBox->setValue(nRowStart);
+	ui->ColSizeSpinBox->blockSignals(false);
+
+	ui->RowStartSpinBox->blockSignals(true);
 	ui->RowStartSpinBox->setValue(nColSize);
+	ui->RowStartSpinBox->blockSignals(false);
+
+	ui->RowSizeSpinBox->blockSignals(true);
 	ui->RowSizeSpinBox->setValue(nRowSize);
+	ui->RowSizeSpinBox->blockSignals(false);
+
+	ui->MultiFrameNumberSpinBox->blockSignals(true);
 	ui->MultiFrameNumberSpinBox->setValue(nsMultiFrameNum);
+	ui->MultiFrameNumberSpinBox->blockSignals(false);
 
-	float fFrameRate = 0;
-	nRet = KSJ_GetFixedFrameRateEx(m_nCamareIndex, &fFrameRate);
-	if (nRet != RET_SUCCESS) return;
-	ui->FixFrameRateDoubleSpinBox->blockSignals(true);
-	ui->FixFrameRateDoubleSpinBox->setValue(nColStart);
-	ui->FixFrameRateDoubleSpinBox->blockSignals(false);
+	ui->SkipComboBox->blockSignals(true);
+	ui->SkipComboBox->setCurrentIndex((int)AmCol);
+	ui->SkipComboBox->blockSignals(false);
 
+	int nExposureLines = 0;
+	nRet = KSJ_GetParam(m_nCamareIndex, KSJ_EXPOSURE_LINES, &nExposureLines);
+
+	ui->ExpoureLineSpinBox->blockSignals(true);
+	ui->ExpoureLineSpinBox->setValue(nExposureLines);
+	ui->ExpoureLineSpinBox->blockSignals(false);
+
+	float fExposureTime = 0;
+	nRet = KSJ_ExposureTimeGet(m_nCamareIndex, &fExposureTime);
+	ui->ExposureTimeSpinBox->blockSignals(true);
+	ui->ExposureTimeSpinBox->setValue(fExposureTime);
+	ui->ExposureTimeSpinBox->blockSignals(false);
+
+	int nMirror = 0;
+	KSJ_GetParam(m_nCamareIndex, KSJ_MIRROR, &nMirror);
+
+	ui->MirrorCheckBox->blockSignals(true);
+	ui->MirrorCheckBox->setChecked(nMirror!=0);
+	ui->MirrorCheckBox->blockSignals(false);
+
+	int nFlip = 0;
+	nRet = KSJ_GetParam(m_nCamareIndex, KSJ_FLIP, &nFlip);
+
+	ui->FlipCheckBox->blockSignals(true);
+	ui->FlipCheckBox->setChecked(nFlip != 0);
+	ui->FlipCheckBox->blockSignals(false);
+
+	KSJ_SENSITIVITYMODE SensitivityMode = KSJ_LOW;
+	nRet = KSJ_SensitivityGetMode(m_nCamareIndex, &SensitivityMode);
+
+	ui->SensitivityComboBox->blockSignals(true);
+	ui->SensitivityComboBox->setCurrentIndex((int)SensitivityMode);
+	ui->SensitivityComboBox->blockSignals(false);
+
+	int nValue = 0;
+	nRet = KSJ_GetParam(m_nCamareIndex, KSJ_RED, &nValue);
+
+	ui->GainRedSpinBox->blockSignals(true);
+	ui->GainRedSpinBox->setValue((int)nValue);
+	ui->GainRedSpinBox->blockSignals(false);
+
+	nRet = KSJ_GetParam(m_nCamareIndex, KSJ_GREEN, &nValue);
+
+	ui->GainGreenSpinBox->blockSignals(true);
+	ui->GainGreenSpinBox->setValue((int)nValue);
+	ui->GainGreenSpinBox->blockSignals(false);
+
+	nRet = KSJ_GetParam(m_nCamareIndex, KSJ_BLUE, &nValue);
+
+	ui->GainBlueSpinBox->blockSignals(true);
+	ui->GainBlueSpinBox->setValue((int)nValue);
+	ui->GainBlueSpinBox->blockSignals(false);
+
+	nRet = KSJ_WhiteBalanceGet(m_nCamareIndex, (KSJ_WB_MODE*)&nValue);
+	ui->WBModeComboBox->blockSignals(true);
+	ui->WBModeComboBox->setCurrentIndex(nValue);
+	ui->WBModeComboBox->blockSignals(false);
+
+	KSJ_WhiteBalancePresettingGet(m_nCamareIndex, (KSJ_COLOR_TEMPRATURE*)&nValue);
+	ui->WBPresettingComboBox->blockSignals(true);
+	ui->WBPresettingComboBox->setCurrentIndex(nValue);
+	ui->WBPresettingComboBox->blockSignals(false);
+
+	UpdateWhiteBalanceMatrix();
+
+	KSJ_ColorCorrectionGet(m_nCamareIndex, (KSJ_CCM_MODE*)&nValue);
+	ui->CCMModeComboBox->blockSignals(true);
+	ui->CCMModeComboBox->setCurrentIndex(nValue);
+	ui->CCMModeComboBox->blockSignals(false);
+
+	KSJ_ColorCorrectionPresettingGet(m_nCamareIndex, (KSJ_COLOR_TEMPRATURE*)&nValue);
+	ui->CCMPresettingComboBox->blockSignals(true);
+	ui->CCMPresettingComboBox->setCurrentIndex(nValue);
+	ui->CCMPresettingComboBox->blockSignals(false);
+
+	UpdateColorCorrectionMatrix();
+}
+
+void __stdcall WBACALLBACK(float fMatrix[3], void *lpContext)
+{
+	((CKSJSCZDemoMainWindow *)lpContext)->WBACallback(fMatrix);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////自动白平衡
+void CKSJSCZDemoMainWindow::WBACallback(float fMatrix[3])
+{
+	emit sigWBADone(fMatrix[0], fMatrix[1], fMatrix[2]);
+}
+
+
+void CKSJSCZDemoMainWindow::on_WBModeComboBox_currentIndexChanged(int index)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_WhiteBalanceAutoSetCallBack(m_nCamareIndex, WBACALLBACK, this);
+
+	KSJ_WhiteBalanceSet(m_nCamareIndex, (KSJ_WB_MODE)index);
+
+	int nValue;
+	KSJ_WhiteBalanceGet(m_nCamareIndex, (KSJ_WB_MODE*)&nValue);
+	ui->WBModeComboBox->blockSignals(true);
+	ui->WBModeComboBox->setCurrentIndex(nValue);
+	ui->WBModeComboBox->blockSignals(false);
+
+	UpdateWhiteBalanceMatrix();
+}
+
+void CKSJSCZDemoMainWindow::on_WBPresettingComboBox_currentIndexChanged(int index)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_WhiteBalancePresettingSet(m_nCamareIndex, (KSJ_COLOR_TEMPRATURE)index);
+
+	int nValue;
+	KSJ_WhiteBalancePresettingGet(m_nCamareIndex, (KSJ_COLOR_TEMPRATURE*)&nValue);
+	ui->WBPresettingComboBox->blockSignals(true);
+	ui->WBPresettingComboBox->setCurrentIndex(nValue);
+	ui->WBPresettingComboBox->blockSignals(false);
+
+	UpdateWhiteBalanceMatrix();
+}
+
+void CKSJSCZDemoMainWindow::on_WBPHiSpinBox_valueChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_WhiteBalanceAutoSet(m_nCamareIndex, value);
+}
+
+void CKSJSCZDemoMainWindow::on_WBRedSpinBox_valueChanged(double value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3];
+
+	fMatrix[0] = ui->WBRedSpinBox->value();
+	fMatrix[1] = ui->WBGreenSpinBox->value();
+	fMatrix[2] = ui->WBBlueSpinBox->value();
+
+	KSJ_WhiteBalanceMatrixSet(m_nCamareIndex, fMatrix);
+
+}
+
+void CKSJSCZDemoMainWindow::on_WBGreenSpinBox_valueChanged(double value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3];
+
+	fMatrix[0] = ui->WBRedSpinBox->value();
+	fMatrix[1] = ui->WBGreenSpinBox->value();
+	fMatrix[2] = ui->WBBlueSpinBox->value();
+
+	KSJ_WhiteBalanceMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_WBBlueSpinBox_valueChanged(double value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3];
+
+	fMatrix[0] = ui->WBRedSpinBox->value();
+	fMatrix[1] = ui->WBGreenSpinBox->value();
+	fMatrix[2] = ui->WBBlueSpinBox->value();
+
+	KSJ_WhiteBalanceMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_ProgramWBMatrixPushButton_clicked()
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3];
+
+	fMatrix[0] = ui->WBRedSpinBox->value();
+	fMatrix[1] = ui->WBGreenSpinBox->value();
+	fMatrix[2] = ui->WBBlueSpinBox->value();
+
+	KSJ_HWBMatrixProgram(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::OnWBADone(float r, float g, float b)
+{
+	ui->WBRedSpinBox->blockSignals(true);
+	ui->WBGreenSpinBox->blockSignals(true);
+	ui->WBBlueSpinBox->blockSignals(true);
+	ui->WBRedSpinBox->setValue(r);
+	ui->WBGreenSpinBox->setValue(g);
+	ui->WBBlueSpinBox->setValue(b);
+	ui->WBRedSpinBox->blockSignals(false);
+	ui->WBGreenSpinBox->blockSignals(false);
+	ui->WBBlueSpinBox->blockSignals(false);
+}
+
+void CKSJSCZDemoMainWindow::EnableWhiteBalanceMatrixControls(bool bEnable)
+{
+	ui->WBRedSpinBox->setEnabled(bEnable);
+	ui->WBGreenSpinBox->setEnabled(bEnable);
+	ui->WBBlueSpinBox->setEnabled(bEnable);
+}
+
+void CKSJSCZDemoMainWindow::UpdateWhiteBalanceMatrix()
+{
+	if (m_nCamareIndex == -1) return;
+
+	int nWbMode = ui->WBModeComboBox->currentIndex();
+
+	if (nWbMode == KSJ_WB_DISABLE)                EnableWhiteBalanceMatrixControls(false);
+	else if (nWbMode == KSJ_SWB_AUTO_ONCE)        EnableWhiteBalanceMatrixControls(false);
+	else if (nWbMode == KSJ_SWB_AUTO_CONITNUOUS)  EnableWhiteBalanceMatrixControls(false);
+	else if (nWbMode == KSJ_SWB_PRESETTINGS)      EnableWhiteBalanceMatrixControls(false);
+	else if (nWbMode == KSJ_SWB_MANUAL)           EnableWhiteBalanceMatrixControls(true);
+	else if (nWbMode == KSJ_HWB_AUTO_ONCE)        EnableWhiteBalanceMatrixControls(false);
+	else if (nWbMode == KSJ_HWB_AUTO_CONITNUOUS)  EnableWhiteBalanceMatrixControls(false);
+	else if (nWbMode == KSJ_HWB_PRESETTINGS)      EnableWhiteBalanceMatrixControls(false);
+	else if (nWbMode == KSJ_HWB_MANUAL)           EnableWhiteBalanceMatrixControls(true);
+
+	if (nWbMode == KSJ_WB_DISABLE)                ui->WBPresettingComboBox->setEnabled(false);
+	else if (nWbMode == KSJ_SWB_AUTO_ONCE)        ui->WBPresettingComboBox->setEnabled(false);
+	else if (nWbMode == KSJ_SWB_AUTO_CONITNUOUS)  ui->WBPresettingComboBox->setEnabled(false);
+	else if (nWbMode == KSJ_SWB_PRESETTINGS)      ui->WBPresettingComboBox->setEnabled(true);
+	else if (nWbMode == KSJ_SWB_MANUAL)           ui->WBPresettingComboBox->setEnabled(false);
+	else if (nWbMode == KSJ_HWB_AUTO_ONCE)        ui->WBPresettingComboBox->setEnabled(false);
+	else if (nWbMode == KSJ_HWB_AUTO_CONITNUOUS)  ui->WBPresettingComboBox->setEnabled(false);
+	else if (nWbMode == KSJ_HWB_PRESETTINGS)      ui->WBPresettingComboBox->setEnabled(true);
+	else if (nWbMode == KSJ_HWB_MANUAL)           ui->WBPresettingComboBox->setEnabled(false);
+
+	if (nWbMode == KSJ_WB_DISABLE)
+	{
+		ui->WBPHiSpinBox->setEnabled(false);
+	}
+	else if (nWbMode == KSJ_SWB_AUTO_ONCE)
+	{
+		ui->WBPHiSpinBox->setEnabled(true);
+	}
+	else if (nWbMode == KSJ_SWB_AUTO_CONITNUOUS)
+	{
+		ui->WBPHiSpinBox->setEnabled(true);
+	}
+	else if (nWbMode == KSJ_SWB_PRESETTINGS)
+	{
+		ui->WBPHiSpinBox->setEnabled(false);
+	}
+	else if (nWbMode == KSJ_SWB_MANUAL)
+	{
+		ui->WBPHiSpinBox->setEnabled(false);
+	}
+	else if (nWbMode == KSJ_HWB_AUTO_ONCE)
+	{
+		ui->WBPHiSpinBox->setEnabled(false);
+	}
+	else if (nWbMode == KSJ_HWB_AUTO_CONITNUOUS)
+	{
+		ui->WBPHiSpinBox->setEnabled(false);
+	}
+	else if (nWbMode == KSJ_HWB_MANUAL)
+	{
+		ui->WBPHiSpinBox->setEnabled(false);
+	}
+
+	float fWBMatrix[3];
+	KSJ_WhiteBalanceMatrixGet(m_nCamareIndex, fWBMatrix);
+
+	ui->WBRedSpinBox->blockSignals(true);
+	ui->WBGreenSpinBox->blockSignals(true);
+	ui->WBBlueSpinBox->blockSignals(true);
+	ui->WBRedSpinBox->setValue(fWBMatrix[0]);
+	ui->WBGreenSpinBox->setValue(fWBMatrix[1]);
+	ui->WBBlueSpinBox->setValue(fWBMatrix[2]);
+	ui->WBRedSpinBox->blockSignals(false);
+	ui->WBGreenSpinBox->blockSignals(false);
+	ui->WBBlueSpinBox->blockSignals(false);
+}
+
+void CKSJSCZDemoMainWindow::on_CCMModeComboBox_currentIndexChanged(int index)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_ColorCorrectionSet(m_nCamareIndex, (KSJ_CCM_MODE)index);
+
+	int nValue;
+	KSJ_ColorCorrectionGet(m_nCamareIndex, (KSJ_CCM_MODE*)&nValue);
+	ui->CCMModeComboBox->blockSignals(true);
+	ui->CCMModeComboBox->setCurrentIndex(nValue);
+	ui->CCMModeComboBox->blockSignals(false);
+
+	UpdateColorCorrectionMatrix();
+}
+
+void CKSJSCZDemoMainWindow::on_CCMPresettingComboBox_currentIndexChanged(int index)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_ColorCorrectionPresettingSet(m_nCamareIndex, (KSJ_COLOR_TEMPRATURE)index);
+
+	int nValue;
+	KSJ_ColorCorrectionPresettingGet(m_nCamareIndex, (KSJ_COLOR_TEMPRATURE*)&nValue);
+	ui->CCMPresettingComboBox->blockSignals(true);
+	ui->CCMPresettingComboBox->setCurrentIndex(nValue);
+	ui->CCMPresettingComboBox->blockSignals(false);
+
+	UpdateColorCorrectionMatrix();
+}
+
+void CKSJSCZDemoMainWindow::on_CCM00SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM01SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM02SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM10SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM11SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM12SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM20SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM21SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_CCM22SpinBox_valueChanged(double)
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_ColorCorrectionMatrixSet(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::on_ProgramCCMMatrixPushButton_clicked()
+{
+	if (m_nCamareIndex == -1) return;
+
+	float fMatrix[3][3];
+
+	fMatrix[0][0] = ui->CCM00SpinBox->value();
+	fMatrix[0][1] = ui->CCM01SpinBox->value();
+	fMatrix[0][2] = ui->CCM02SpinBox->value();
+	fMatrix[1][0] = ui->CCM10SpinBox->value();
+	fMatrix[1][1] = ui->CCM11SpinBox->value();
+	fMatrix[1][2] = ui->CCM12SpinBox->value();
+	fMatrix[2][0] = ui->CCM20SpinBox->value();
+	fMatrix[2][1] = ui->CCM21SpinBox->value();
+	fMatrix[2][2] = ui->CCM22SpinBox->value();
+
+	KSJ_HCCMMatrixProgram(m_nCamareIndex, fMatrix);
+}
+
+void CKSJSCZDemoMainWindow::UpdateColorCorrectionMatrix()
+{
+	if (m_nCamareIndex == -1) return;
+
+	int nCcmMode = ui->CCMModeComboBox->currentIndex();
+
+	if (nCcmMode == KSJ_CCM_DISABLE)           EnableColorCorrectionMatrixControls(false);
+	else if (nCcmMode == KSJ_SCCM_PRESETTINGS) EnableColorCorrectionMatrixControls(false);
+	else if (nCcmMode == KSJ_SCCM_MANUAL)      EnableColorCorrectionMatrixControls(true);
+	else if (nCcmMode == KSJ_HCCM_PRESETTINGS) EnableColorCorrectionMatrixControls(false);
+	else if (nCcmMode == KSJ_HCCM_MANUAL)      EnableColorCorrectionMatrixControls(true);
+
+	if (nCcmMode == KSJ_CCM_DISABLE)           ui->CCMPresettingComboBox->setEnabled(false);
+	else if (nCcmMode == KSJ_SCCM_PRESETTINGS) ui->CCMPresettingComboBox->setEnabled(true);
+	else if (nCcmMode == KSJ_SCCM_MANUAL)      ui->CCMPresettingComboBox->setEnabled(false);
+	else if (nCcmMode == KSJ_HCCM_PRESETTINGS) ui->CCMPresettingComboBox->setEnabled(true);
+	else if (nCcmMode == KSJ_HCCM_MANUAL)      ui->CCMPresettingComboBox->setEnabled(false);
+
+	float fMatrix[3][3];
+	KSJ_ColorCorrectionMatrixGet(m_nCamareIndex, fMatrix);
+
+	ui->CCM00SpinBox->blockSignals(true);
+	ui->CCM01SpinBox->blockSignals(true);
+	ui->CCM02SpinBox->blockSignals(true);
+	ui->CCM10SpinBox->blockSignals(true);
+	ui->CCM11SpinBox->blockSignals(true);
+	ui->CCM12SpinBox->blockSignals(true);
+	ui->CCM20SpinBox->blockSignals(true);
+	ui->CCM21SpinBox->blockSignals(true);
+	ui->CCM22SpinBox->blockSignals(true);
+	ui->CCM00SpinBox->setValue(fMatrix[0][0]);
+	ui->CCM01SpinBox->setValue(fMatrix[0][1]);
+	ui->CCM02SpinBox->setValue(fMatrix[0][2]);
+	ui->CCM10SpinBox->setValue(fMatrix[1][0]);
+	ui->CCM11SpinBox->setValue(fMatrix[1][1]);
+	ui->CCM12SpinBox->setValue(fMatrix[1][2]);
+	ui->CCM20SpinBox->setValue(fMatrix[2][0]);
+	ui->CCM21SpinBox->setValue(fMatrix[2][1]);
+	ui->CCM22SpinBox->setValue(fMatrix[2][2]);
+	ui->CCM00SpinBox->blockSignals(false);
+	ui->CCM01SpinBox->blockSignals(false);
+	ui->CCM02SpinBox->blockSignals(false);
+	ui->CCM10SpinBox->blockSignals(false);
+	ui->CCM11SpinBox->blockSignals(false);
+	ui->CCM12SpinBox->blockSignals(false);
+	ui->CCM20SpinBox->blockSignals(false);
+	ui->CCM21SpinBox->blockSignals(false);
+	ui->CCM22SpinBox->blockSignals(false);
+}
+
+void CKSJSCZDemoMainWindow::EnableColorCorrectionMatrixControls(bool bEnable)
+{
+	ui->CCM00SpinBox->setEnabled(bEnable);
+	ui->CCM01SpinBox->setEnabled(bEnable);
+	ui->CCM02SpinBox->setEnabled(bEnable);
+	ui->CCM10SpinBox->setEnabled(bEnable);
+	ui->CCM11SpinBox->setEnabled(bEnable);
+	ui->CCM12SpinBox->setEnabled(bEnable);
+	ui->CCM20SpinBox->setEnabled(bEnable);
+	ui->CCM21SpinBox->setEnabled(bEnable);
+	ui->CCM22SpinBox->setEnabled(bEnable);
+}
+
+void CKSJSCZDemoMainWindow::on_PragramSettingsPushButton_clicked()
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	int nRet = KSJ_ParamProgram(m_nCamareIndex);
+
+	if (bIsCapturing) this->StartPreview();
+
+    TCHAR szErrorInfo[512] = { '\0' };
+	KSJ_GetErrorInfo(nRet, szErrorInfo);
+	QMessageBox::about(this, "CatchBEST", szErrorInfo);
+}
+
+void CKSJSCZDemoMainWindow::on_ClearSettingsPushButton_clicked()
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	int nRet = KSJ_ParamErase(m_nCamareIndex);
+
+	if (bIsCapturing) this->StartPreview();
+
+    TCHAR szErrorInfo[512] = { '\0' };
+	KSJ_GetErrorInfo(nRet, szErrorInfo);
+	QMessageBox::about(this, "CatchBEST", szErrorInfo);
 }
 
 static QVector<QRgb> grayTable;
@@ -563,13 +1374,7 @@ void CKSJSCZDemoMainWindow::ProcessCaptureData(unsigned char* pImageData, int w,
 	{
 		if (m_pImage->save(m_strImagePath))
 		{
-			ui->MessageInfoLabel->setWordWrap(true);
-			ui->MessageInfoLabel->setText("Save successed: " + m_strImagePath);
-		}
-		else
-		{
-			ui->MessageInfoLabel->setWordWrap(true);
-			ui->MessageInfoLabel->setText("Save failed: " + m_strImagePath);
+			ui->SnapCountLabel->setText(QString::number(++m_nSnapCount));
 		}
 
 		m_bSaveImage = false;
