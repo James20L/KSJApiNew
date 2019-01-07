@@ -90,6 +90,11 @@ protected slots:
 	void on_PragramSettingsPushButton_clicked();
 	void on_ClearSettingsPushButton_clicked();
 
+	void on_EmptyBufferPushButton_clicked();
+	void on_CaptureRGBPushButton_clicked();
+	void on_CaptureRawPushButton_clicked();
+
+
 protected:
 	virtual void paintEvent(QPaintEvent *);
 	virtual void mousePressEvent(QMouseEvent * e);

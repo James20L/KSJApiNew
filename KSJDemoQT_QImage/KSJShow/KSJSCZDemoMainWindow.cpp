@@ -21,11 +21,19 @@
 #ifdef _WIN32
 #include <process.h>
 
+#ifdef _DEBUG
 #pragma comment( lib, "KSJApid.lib" )
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Widgetsd.lib")
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Guid.lib")
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Cored.lib")
 #pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/qtmaind.lib")
+#else
+#pragma comment( lib, "KSJApi.lib" )
+#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Widgets.lib")
+#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Gui.lib")
+#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Core.lib")
+#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/qtmain.lib")
+#endif
 
 #endif
 
@@ -137,6 +145,10 @@ QDialog(parent)
 {
     ui->setupUi(this);
 	setMouseTracking(true);
+
+#ifndef _DEBUG
+	ui->TestingTab->setHidden(true);
+#endif
 
 	InitCnotrol();
 
@@ -684,7 +696,7 @@ void CKSJSCZDemoMainWindow::UpdateDeviceInfo()
 	int nTriggerMethodIndex = 0;
 	nRet = KSJ_TriggerMethodGet(m_nCamareIndex, (KSJ_TRIGGERMETHOD*)&nTriggerMethodIndex);
 	ui->TrigetMethodComboBox->blockSignals(true);
-	ui->TrigetMethodComboBox->setCurrentIndex(nTriggerModeIndex);
+	ui->TrigetMethodComboBox->setCurrentIndex(nTriggerMethodIndex);
 	ui->TrigetMethodComboBox->blockSignals(false);
 
 
@@ -694,7 +706,11 @@ void CKSJSCZDemoMainWindow::UpdateDeviceInfo()
 
 	ui->FixFrameRateDoubleSpinBox->setEnabled((KSJ_TRIGGERMODE(nTriggerModeIndex)) == KSJ_TRIGGER_FIXFRAMERATE);
 
+#ifdef OLD_KSJAPI
+	unsigned long nCaptureTimeout = 0;
+#else
 	unsigned int nCaptureTimeout = 0;
+#endif
 	nRet = KSJ_CaptureGetTimeOut(m_nCamareIndex, &nCaptureTimeout);
 	ui->CaptureTimeoutSpinBox->setValue(nCaptureTimeout);
 
@@ -1408,4 +1424,75 @@ void CKSJSCZDemoMainWindow::mouseDoubleClickEvent(QMouseEvent * e)
 void CKSJSCZDemoMainWindow::wheelEvent(QWheelEvent * event)
 {
 }
+
+void CKSJSCZDemoMainWindow::on_EmptyBufferPushButton_clicked()
+{
+	bool bIsCapturing = this->StopPreview();
+
+	int nRet = KSJ_EmptyFrameBuffer(m_nCamareIndex);
+	//UpdateDeviceInfo();
+
+	//if (bIsCapturing) this->StartPreview();
+
+	QMessageBox::about(this, "CatchBEST", QString("Result = %1").arg(nRet));
+}
+
+void CKSJSCZDemoMainWindow::on_CaptureRGBPushButton_clicked()
+{
+	bool bIsCapturing = this->StopPreview();
+
+	int nRet;
+	int nWidth;
+	int nHeight;
+	int nBitCount;
+	int nBufferSize = 0;
+	unsigned char* pImageBuffer = NULL;
+
+	nRet = KSJ_CaptureGetSizeEx(m_nCamareIndex, &nWidth, &nHeight, &nBitCount);
+
+	if (nRet == RET_SUCCESS)
+	{
+		pImageBuffer = new unsigned char[nWidth*nHeight*nBitCount / 8];
+
+		nRet = KSJ_CaptureRgbData(m_nCamareIndex, pImageBuffer);
+
+		if (nRet == RET_SUCCESS)
+		{
+			// 采集图像以后，将内存数据转换成QImage数据,这样pImageData的数据就被转移到QImage里面，以后可以自己进行算法操作
+			ProcessCaptureData(pImageBuffer, nWidth, nHeight, nBitCount);
+		}
+	}
+
+	QMessageBox::about(this, "CatchBEST", QString("Result = %1").arg(nRet));
+}
+
+void CKSJSCZDemoMainWindow::on_CaptureRawPushButton_clicked()
+{
+	bool bIsCapturing = this->StopPreview();
+
+	int nRet;
+	int nWidth;
+	int nHeight;
+	int nBitCount;
+	int nBufferSize = 0;
+	unsigned char* pImageBuffer = NULL;
+
+	nRet = KSJ_CaptureGetSizeEx(m_nCamareIndex, &nWidth, &nHeight, &nBitCount);
+
+	if (nRet == RET_SUCCESS)
+	{
+		pImageBuffer = new unsigned char[nWidth*nHeight*nBitCount / 8];
+
+		nRet = KSJ_CaptureRawData(m_nCamareIndex, pImageBuffer);
+
+		if (nRet == RET_SUCCESS)
+		{
+			// 采集图像以后，将内存数据转换成QImage数据,这样pImageData的数据就被转移到QImage里面，以后可以自己进行算法操作
+			ProcessCaptureData(pImageBuffer, nWidth, nHeight, nBitCount);
+		}
+	}
+
+	QMessageBox::about(this, "CatchBEST", QString("Result = %1").arg(nRet));
+}
+
 
