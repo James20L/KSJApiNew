@@ -51,14 +51,14 @@ enum KSJ_SNAPBUTTONSTATUS
 // When KSJ_SUPPORT_GPIO_NORMAL is True, KSJ_SUPPORT_SNAP_BUTTON will Enable after Set External Trigger Pin as Normal Input Pin.
 KSJ_API  KSJ_SnapButtonStatus( int nIndex, KSJ_SNAPBUTTONSTATUS *pSnapButtonStatus );
 
-// 设置GPIO引脚的输入输出状态，btDirection位寻址，BIT0对应GPIO0, BIT1对应GPIO1, BIT2对应GPIO2, BIT3对应GPIO3(=1表示此GPIO输出，=0表示此GPIO输入)
+// ����GPIO���ŵ��������״̬��btDirectionλѰַ��BIT0��ӦGPIO0, BIT1��ӦGPIO1, BIT2��ӦGPIO2, BIT3��ӦGPIO3(=1��ʾ��GPIO�����=0��ʾ��GPIO����)
 KSJ_API  KSJ_GpioSetDirection( int nIndex, unsigned char btDirection );
-// 获取GPIO引脚的输入输出状态，pbtDirection位寻址，BIT0对应GPIO0, BIT1对应GPIO1, BIT2对应GPIO2, BIT3对应GPIO3(=1表示此GPIO输出，=0表示此GPIO输入)
+// ��ȡGPIO���ŵ��������״̬��pbtDirectionλѰַ��BIT0��ӦGPIO0, BIT1��ӦGPIO1, BIT2��ӦGPIO2, BIT3��ӦGPIO3(=1��ʾ��GPIO�����=0��ʾ��GPIO����)
 KSJ_API  KSJ_GpioGetDirection( int nIndex, unsigned char *pbtDirection );
 
-// 控制GPIO引脚输出，只有btDirection相应位设置为1的引脚才能通过此函数控制引脚输出。btGpioStatus位寻址，BIT0对应GPIO0, BIT1对应GPIO1, BIT2对应GPIO2, BIT3对应GPIO3(=1表示此GPIO输出TTL高电平，=0表示此GPIO输出TTL低电平)
+// ����GPIO���������ֻ��btDirection��Ӧλ����Ϊ1�����Ų���ͨ���˺����������������btGpioStatusλѰַ��BIT0��ӦGPIO0, BIT1��ӦGPIO1, BIT2��ӦGPIO2, BIT3��ӦGPIO3(=1��ʾ��GPIO���TTL�ߵ�ƽ��=0��ʾ��GPIO���TTL�͵�ƽ)
 KSJ_API  KSJ_GpioSetStatus   ( int nIndex, unsigned char btGpioStatus );
-// 读取GPIO引脚状态，*pbtGpioStatus位寻址，BIT0对应GPIO0, BIT1对应GPIO1, BIT2对应GPIO2, BIT3对应GPIO3(=1表示此GPIO输出TTL高电平，=0表示此GPIO输出TTL低电平)
+// ��ȡGPIO����״̬��*pbtGpioStatusλѰַ��BIT0��ӦGPIO0, BIT1��ӦGPIO1, BIT2��ӦGPIO2, BIT3��ӦGPIO3(=1��ʾ��GPIO���TTL�ߵ�ƽ��=0��ʾ��GPIO���TTL�͵�ƽ)
 KSJ_API  KSJ_GpioGetStatus   ( int nIndex, unsigned char *pbtGpioStatus );
 
 // About Flash. nMode not valid.
@@ -80,10 +80,10 @@ enum KSJ_FLASHMODE
 KSJ_API  KSJ_FlashSetMode(int nIndex, KSJ_FLASHMODE FlashMode);
 KSJ_API  KSJ_FlashGetMode(int nIndex, KSJ_FLASHMODE *pFlashMode);
 
-// 如下函数只适用于YYO型号相机(帧存带光耦)
-// 通过查询功能调用如下函数
-// 注意：在外触发模式下，不可以设置为KSJ_GPIOIN_NORMAL，必须切换到非外触发模式时设置。
-// 在用户调用设置为外触发模式时，自动设置为KSJ_GPIOIN_EXTERNALTRIGGER。
+// ���º���ֻ������YYO�ͺ����(֡�������)
+// ͨ����ѯ���ܵ������º���
+// ע�⣺���ⴥ��ģʽ�£�����������ΪKSJ_GPIOIN_NORMAL�������л������ⴥ��ģʽʱ���á�
+// ���û���������Ϊ�ⴥ��ģʽʱ���Զ�����ΪKSJ_GPIOIN_EXTERNALTRIGGER��
 // KSJ_QueryFunction (KSJ_SUPPORT_GPIO_NORMAL)
 // When call KSJ_GpioSetDirection(, bit0 = 0 ) == KSJ_GpioInModeSet(, KSJ_GPIOIN_NORMAL)
 // When call KSJ_GpioSetDirection(, bit0 = 1 ) == KSJ_GpioInModeSet(, KSJ_GPIOIN_EXTERNALTRIGGER)
@@ -92,14 +92,14 @@ enum KSJ_GPIOIN_MODE
 	KSJ_GPIOIN_EXTERNALTRIGGER, 
 	KSJ_GPIOIN_NORMAL
 };
-// 外触发输入引脚默认为外触发输入，也可以设置为普通IO输入，通过读取函数进行读取。
+// �ⴥ����������Ĭ��Ϊ�ⴥ�����룬Ҳ��������Ϊ��ͨIO���룬ͨ����ȡ�������ж�ȡ��
 KSJ_API  KSJ_GpioInModeSet(int nIndex, KSJ_GPIOIN_MODE GpioInMode);
 KSJ_API  KSJ_GpioInModeGet(int nIndex, KSJ_GPIOIN_MODE *pGpioInMode);
-// 当外触发输入引脚作为普通IO时，可以通过此函数进行读取，BIT0为该引脚电平状态。1为高电平，0为低电平。
-// 注意：只有在设置为KSJ_GPIOIN_NORMAL模式下才可以读取。
+// ���ⴥ������������Ϊ��ͨIOʱ������ͨ���˺������ж�ȡ��BIT0Ϊ�����ŵ�ƽ״̬��1Ϊ�ߵ�ƽ��0Ϊ�͵�ƽ��
+// ע�⣺ֻ��������ΪKSJ_GPIOIN_NORMALģʽ�²ſ��Զ�ȡ��
 KSJ_API  KSJ_GpioInStatusGet(int nIndex, unsigned char *pbtValue);
 
-// 通过查询KSJ_SUPPORT_FLASHOUT_ASIO功能调用如下函数
+// ͨ����ѯKSJ_SUPPORT_FLASHOUT_ASIO���ܵ������º���
 // When call KSJ_GpioSetDirection(, bit1 = 1 ) == KSJ_GpioOutModeSet(, KSJ_GPIOOUT_FLASH)
 // When call KSJ_GpioSetDirection(, bit1 = 0 ) == KSJ_GpioOutModeSet(, KSJ_GPIOOUT_NORMAL)
 // 
@@ -111,10 +111,10 @@ enum KSJ_GPIOOUT_MODE
 KSJ_API  KSJ_GpioOutModeSet(int nIndex, KSJ_GPIOOUT_MODE GpioOutMode);
 KSJ_API  KSJ_GpioOutModeGet(int nIndex, KSJ_GPIOOUT_MODE *pGpioOutMode);
 
-// 注意：只有在KSJ_NORMAL_OUT模式下，才可以设置。
+// ע�⣺ֻ����KSJ_NORMAL_OUTģʽ�£��ſ������á�
 KSJ_API  KSJ_GpioOutStatusSet(int nIndex, unsigned char btValue);
 
-// 设置滤波时间，单位为Us，如果设置为0，则硬件将以200ns进行滤波。
+// �����˲�ʱ�䣬��λΪUs���������Ϊ0����Ӳ������200ns�����˲���
 KSJ_API  KSJ_GpioFilterSet(int nIndex, unsigned short wFilterTimeUs);
 KSJ_API  KSJ_GpioFilterGet(int nIndex, unsigned short *pwFilterTimeUs);
 

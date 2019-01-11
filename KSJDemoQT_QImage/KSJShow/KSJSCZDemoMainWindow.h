@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <QMatrix>
+#include <QMutex>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -94,6 +95,12 @@ protected slots:
 	void on_CaptureRGBPushButton_clicked();
 	void on_CaptureRawPushButton_clicked();
 
+	void on_TestingPushButton_clicked();
+
+	void on_BayerModeComboBox_currentIndexChanged(int);
+	void on_BayerFilterComboBox_currentIndexChanged(int);
+
+	void on_DefaultBayerPushButton_clicked();
 
 protected:
 	virtual void paintEvent(QPaintEvent *);
@@ -127,7 +134,6 @@ public:
 
 protected:
 	int  m_nCamareIndex;
-	bool m_bIsCapturing;
 	bool m_bStopCaptureThread;
 	bool m_bCapturingThreadIsWorking;
 
@@ -153,7 +159,7 @@ protected:
 protected:
 	// 采集到的图像
 	QImage* m_pImage;
-
+	QMutex  m_ImageLocker;
 	// 保留图像显示位置的信息
     QRect  m_rcClient;
 };

@@ -67,7 +67,7 @@ void* CKSJSCZDemoMainWindow::ThreadForCaptureData(void *arg)
 
 	while (!pMainWindow->m_bStopCaptureThread)
 	{
-		if (pMainWindow->m_bIsCapturing && pMainWindow->m_nCamareIndex >= 0)
+		if (pMainWindow->m_nCamareIndex >= 0)
 		{
 			nRet = KSJ_CaptureGetSizeEx(pMainWindow->m_nCamareIndex, &nWidth, &nHeight, &nBitCount);
 
@@ -133,7 +133,6 @@ QDialog(parent)
 , m_nCamareIndex(0)
 , m_bSaveImage(false)
 , m_nSnapCount(0)
-, m_bIsCapturing(false)
 , m_bStopCaptureThread(false)
 , m_bCapturingThreadIsWorking(false)
 #ifdef _WIN32
@@ -159,7 +158,7 @@ QDialog(parent)
 	// 初始化
 	RefreshDevice();
 
-	StartCaptureThread();
+	KSJ_LogSet(true, NULL);
 
 	QDateTime dt = QDateTime::currentDateTime();
 	m_strImagePreFix = QCoreApplication::applicationDirPath() + "/"+ dt.toString("yyyy-MM-ddhhmmss-");
@@ -191,6 +190,8 @@ void CKSJSCZDemoMainWindow::paintEvent(QPaintEvent *)
 		int w = size().width() - 320;
 		int h = size().height();
 
+		m_ImageLocker.lock();
+
 		int iw = m_pImage->width();
 		int ih = m_pImage->height();
 
@@ -202,6 +203,8 @@ void CKSJSCZDemoMainWindow::paintEvent(QPaintEvent *)
 		int dh = (int)(f*ih);
 
 		painter.drawImage(QRect(320 + (w - dw) / 2, (h - dh) / 2, dw, dh), *m_pImage, QRect(0, 0, iw, ih));
+
+		m_ImageLocker.unlock();
 	}
 }
 
@@ -209,6 +212,7 @@ bool CKSJSCZDemoMainWindow::StartCaptureThread()
 {
 	if (m_bCapturingThreadIsWorking) return true;
 
+	m_bStopCaptureThread = false;
 	m_bCapturingThreadIsWorking = true;
 
 #ifdef _WIN32
@@ -216,8 +220,6 @@ bool CKSJSCZDemoMainWindow::StartCaptureThread()
 
 	return (m_hCapturingThread != NULL);
 #else
-	m_bStopCaptureThread = false;
-
 	pthread_attr_t  attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -255,8 +257,8 @@ void CKSJSCZDemoMainWindow::on_PreViewPushButton_clicked()
 {
 	if (m_nCamareIndex >= 0)
 	{
-		if (m_bIsCapturing) this->StopPreview();
-		else                this->StartPreview();
+		if (m_bCapturingThreadIsWorking) this->StopPreview();
+		else                             this->StartPreview();
 	}
 }
 
@@ -588,14 +590,11 @@ void CKSJSCZDemoMainWindow::on_ProgramLutPushButton_clicked()
 
 bool CKSJSCZDemoMainWindow::StopPreview()
 {
-	if (m_nCamareIndex >= 0)
+	if (m_bCapturingThreadIsWorking)
 	{
-		if (m_bIsCapturing)
-		{
-			m_bIsCapturing = false;
-			ui->PreViewPushButton->setText(m_bIsCapturing ? "Stop" : "Start");
-			return true;
-		}
+		KillCaptureThread();
+		ui->PreViewPushButton->setText(m_bCapturingThreadIsWorking ? "Stop" : "Start");
+		return true;
 	}
 
 	return false;
@@ -605,12 +604,9 @@ bool CKSJSCZDemoMainWindow::StartPreview()
 {
 	if (m_nCamareIndex >= 0)
 	{
-		if (!m_bIsCapturing)
-		{
-			m_bIsCapturing = true;
-			ui->PreViewPushButton->setText(m_bIsCapturing ? "Stop" : "Start");
-			return true;
-		}
+		StartCaptureThread();
+		ui->PreViewPushButton->setText(m_bCapturingThreadIsWorking ? "Stop" : "Start");
+		return true;
 	}
 
 	return false;
@@ -679,6 +675,42 @@ void CKSJSCZDemoMainWindow::InitCnotrol()
 	ui->CCMPresettingComboBox->addItem("Color Temperature 6500K");
 	ui->CCMPresettingComboBox->addItem("Color Temperature 2800K");
 	ui->CCMPresettingComboBox->blockSignals(false);
+
+	ui->BayerModeComboBox->blockSignals(true);
+	ui->BayerModeComboBox->addItem("BGGR to BGR24");
+	ui->BayerModeComboBox->addItem("GRBG to BGR24");
+	ui->BayerModeComboBox->addItem("RGGB to BGR24");
+	ui->BayerModeComboBox->addItem("GBRG to BGR24");
+	ui->BayerModeComboBox->addItem("BGGR to BGR24 FLIP");
+	ui->BayerModeComboBox->addItem("GRBG to BGR24 FLIP");
+	ui->BayerModeComboBox->addItem("RGGB to BGR24 FLIP");
+	ui->BayerModeComboBox->addItem("GBRG to BGR24 FLIP");
+	ui->BayerModeComboBox->addItem("BGGR to BGR32");
+	ui->BayerModeComboBox->addItem("GRBG to BGR32");
+	ui->BayerModeComboBox->addItem("RGGB to BGR32");
+	ui->BayerModeComboBox->addItem("GBRG to BGR32");
+	ui->BayerModeComboBox->addItem("BGGR to BGR32 FLIP");
+	ui->BayerModeComboBox->addItem("GRBG to BGR32 FLIP");
+	ui->BayerModeComboBox->addItem("RGGB to BGR32 FLIP");
+	ui->BayerModeComboBox->addItem("GBRG to BGR32 FLIP");
+	ui->BayerModeComboBox->addItem("BGGR to GRAY8");
+	ui->BayerModeComboBox->addItem("GRBG to GRAY8");
+	ui->BayerModeComboBox->addItem("RGGB to GRAY8");
+	ui->BayerModeComboBox->addItem("GBRG to GRAY8");
+	ui->BayerModeComboBox->addItem("BGGR to GRAY8 FLIP");
+	ui->BayerModeComboBox->addItem("GRBG to GRAY8 FLIP");
+	ui->BayerModeComboBox->addItem("RGGB to GRAY8 FLIP");
+	ui->BayerModeComboBox->addItem("GBRG to GRAY8 FLIP");
+	ui->BayerModeComboBox->blockSignals(false);
+
+	ui->BayerFilterComboBox->blockSignals(true);
+	ui->BayerFilterComboBox->addItem("Nearest Neighbor");
+	ui->BayerFilterComboBox->addItem("Bilinear");
+	ui->BayerFilterComboBox->addItem("Smooth Hue");
+	ui->BayerFilterComboBox->addItem("Edge Sensing");
+	ui->BayerFilterComboBox->addItem("Laplacian");
+	ui->BayerFilterComboBox->addItem("Fast Bilinear");
+	ui->BayerFilterComboBox->blockSignals(false);
 }
 
 void CKSJSCZDemoMainWindow::UpdateDeviceInfo()
@@ -822,6 +854,16 @@ void CKSJSCZDemoMainWindow::UpdateDeviceInfo()
 	ui->CCMPresettingComboBox->blockSignals(true);
 	ui->CCMPresettingComboBox->setCurrentIndex(nValue);
 	ui->CCMPresettingComboBox->blockSignals(false);
+	
+	KSJ_BayerGetMode(m_nCamareIndex, (KSJ_BAYERMODE*)&nValue);
+	ui->BayerModeComboBox->blockSignals(true);
+	ui->BayerModeComboBox->setCurrentIndex(nValue);
+	ui->BayerModeComboBox->blockSignals(false);
+
+	KSJ_FilterGetMode(m_nCamareIndex, (KSJ_FILTERMODE*)&nValue);
+	ui->BayerFilterComboBox->blockSignals(true);
+	ui->BayerFilterComboBox->setCurrentIndex(nValue);
+	ui->BayerFilterComboBox->blockSignals(false);
 
 	UpdateColorCorrectionMatrix();
 }
@@ -1340,8 +1382,9 @@ static QVector<QRgb> grayTable;
 
 void CKSJSCZDemoMainWindow::ProcessCaptureData(unsigned char* pImageData, int w, int h, int bc)
 {
-	if (bc != 8 && bc != 24) return;
+	if (bc != 8 && bc != 24 && bc != 32) return;
 
+	m_ImageLocker.lock();
 	// 如果图像大小有改变，把老的m_pImage删除掉
 	if (m_pImage != NULL && (m_pImage->width() != w || m_pImage->height() != h))
 	{
@@ -1351,6 +1394,12 @@ void CKSJSCZDemoMainWindow::ProcessCaptureData(unsigned char* pImageData, int w,
 
 	if (bc == 8)
 	{
+		if (m_pImage != NULL && m_pImage->format() != QImage::Format_Indexed8)
+		{
+			delete m_pImage;
+			m_pImage = NULL;
+		}
+		
 		if (m_pImage == NULL)
 		{
 
@@ -1368,6 +1417,12 @@ void CKSJSCZDemoMainWindow::ProcessCaptureData(unsigned char* pImageData, int w,
 	}
 	else if (bc ==24)
 	{
+		if (m_pImage != NULL && m_pImage->format() != QImage::Format_RGB888)
+		{
+			delete m_pImage;
+			m_pImage = NULL;
+		}
+
 		if (m_pImage == NULL)
 		{
 			m_pImage = new QImage(w, h, QImage::Format_RGB888);
@@ -1379,11 +1434,28 @@ void CKSJSCZDemoMainWindow::ProcessCaptureData(unsigned char* pImageData, int w,
 		{
 			for (int i = 0; i < w; ++i)
 			{
-                pData[(h - j - 1) * 3 * w + 3 * i + 0] = pImageData[j * 3 * w + 3 * i + 2];
-                pData[(h - j - 1) * 3 * w + 3 * i + 1] = pImageData[j * 3 * w + 3 * i + 1];
-                pData[(h - j - 1) * 3 * w + 3 * i + 2] = pImageData[j * 3 * w + 3 * i + 0];
+				pData[(h - j - 1) * 3 * w + 3 * i + 0] = pImageData[j * 3 * w + 3 * i + 2];
+				pData[(h - j - 1) * 3 * w + 3 * i + 1] = pImageData[j * 3 * w + 3 * i + 1];
+				pData[(h - j - 1) * 3 * w + 3 * i + 2] = pImageData[j * 3 * w + 3 * i + 0];
 			}
 		}
+	}
+	else if (bc == 32)
+	{
+		if (m_pImage != NULL && m_pImage->format() != QImage::Format_RGBA8888)
+		{
+			delete m_pImage;
+			m_pImage = NULL;
+		}
+
+		if (m_pImage == NULL)
+		{
+			m_pImage = new QImage(w, h, QImage::Format_RGBA8888);
+		}
+
+		unsigned char* pData = m_pImage->bits();
+
+		memcpy(pData, pImageData, w*h * 4);
 	}
 
 	if (m_bSaveImage)
@@ -1395,6 +1467,8 @@ void CKSJSCZDemoMainWindow::ProcessCaptureData(unsigned char* pImageData, int w,
 
 		m_bSaveImage = false;
 	}
+
+	m_ImageLocker.unlock();
 
 	update();
 }
@@ -1427,6 +1501,8 @@ void CKSJSCZDemoMainWindow::wheelEvent(QWheelEvent * event)
 
 void CKSJSCZDemoMainWindow::on_EmptyBufferPushButton_clicked()
 {
+	if (m_nCamareIndex == -1) return;
+
 	bool bIsCapturing = this->StopPreview();
 
 	int nRet = KSJ_EmptyFrameBuffer(m_nCamareIndex);
@@ -1439,6 +1515,8 @@ void CKSJSCZDemoMainWindow::on_EmptyBufferPushButton_clicked()
 
 void CKSJSCZDemoMainWindow::on_CaptureRGBPushButton_clicked()
 {
+	if (m_nCamareIndex == -1) return;
+
 	bool bIsCapturing = this->StopPreview();
 
 	int nRet;
@@ -1468,6 +1546,8 @@ void CKSJSCZDemoMainWindow::on_CaptureRGBPushButton_clicked()
 
 void CKSJSCZDemoMainWindow::on_CaptureRawPushButton_clicked()
 {
+	if (m_nCamareIndex == -1) return;
+
 	bool bIsCapturing = this->StopPreview();
 
 	int nRet;
@@ -1495,4 +1575,120 @@ void CKSJSCZDemoMainWindow::on_CaptureRawPushButton_clicked()
 	QMessageBox::about(this, "CatchBEST", QString("Result = %1").arg(nRet));
 }
 
+
+void CKSJSCZDemoMainWindow::on_TestingPushButton_clicked()
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	for (int i = 0; i < 3; ++i)
+	{
+		KSJ_AEStartEx(m_nCamareIndex, 0);
+
+		KSJ_AEStartEx(m_nCamareIndex, 1);
+
+		int nRet;
+		int nWidth;
+		int nHeight;
+		int nBitCount;
+		int nBufferSize = 0;
+		unsigned char* pImageBuffer = NULL;
+
+		nRet = KSJ_CaptureGetSizeEx(m_nCamareIndex, &nWidth, &nHeight, &nBitCount);
+
+		if (nRet == RET_SUCCESS)
+		{
+			for (int k = 0; k < 20; ++k)
+			{
+				pImageBuffer = new unsigned char[nWidth*nHeight*nBitCount / 8];
+				
+				nRet = KSJ_CaptureRawData(m_nCamareIndex, pImageBuffer);
+
+				if (nRet == RET_SUCCESS)
+				{
+					// 采集图像以后，将内存数据转换成QImage数据,这样pImageData的数据就被转移到QImage里面，以后可以自己进行算法操作
+					ProcessCaptureData(pImageBuffer, nWidth, nHeight, nBitCount);
+				}
+				else
+				{
+					int kk = 0;
+				}
+
+				//delete[]pImageBuffer;
+				//pImageBuffer = NULL;
+			}
+		}
+
+		nRet = KSJ_CaptureGetSizeEx(m_nCamareIndex, &nWidth, &nHeight, &nBitCount);
+
+		if (nRet == RET_SUCCESS)
+		{
+			KSJ_AEStartEx(m_nCamareIndex, 0);
+			KSJ_CaptureSetFieldOfViewEx(m_nCamareIndex, 0, 0, 4096, 1, (KSJ_ADDRESSMODE)0, (KSJ_ADDRESSMODE)0, 2000);
+			KSJ_SetParam(0, KSJ_EXPOSURE_LINES, 37911);
+
+			pImageBuffer = new unsigned char[nWidth*nHeight*nBitCount / 8];
+
+			nRet = KSJ_CaptureRawData(m_nCamareIndex, pImageBuffer);
+
+			if (nRet == RET_SUCCESS)
+			{
+				// 采集图像以后，将内存数据转换成QImage数据,这样pImageData的数据就被转移到QImage里面，以后可以自己进行算法操作
+				ProcessCaptureData(pImageBuffer, nWidth, nHeight, nBitCount);
+			}
+			else
+			{
+				int kk = 0;
+			}
+
+			//delete[]pImageBuffer;
+			//pImageBuffer = NULL;
+		}
+	}
+
+}
+
+void CKSJSCZDemoMainWindow::on_BayerModeComboBox_currentIndexChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_BayerSetMode(m_nCamareIndex, (KSJ_BAYERMODE)value);
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_BayerFilterComboBox_currentIndexChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	bool bIsCapturing = this->StopPreview();
+
+	KSJ_FilterSetMode(m_nCamareIndex, (KSJ_FILTERMODE)value);
+
+	if (bIsCapturing) this->StartPreview();
+}
+
+void CKSJSCZDemoMainWindow::on_DefaultBayerPushButton_clicked()
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_BAYERMODE BayerMode;
+	KSJ_BayerGetDefaultMode(m_nCamareIndex, &BayerMode);
+
+	if (ui->BayerModeComboBox->currentIndex() != BayerMode)
+	{
+		bool bIsCapturing = this->StopPreview();
+
+		KSJ_BayerSetMode(m_nCamareIndex, BayerMode);
+
+		ui->BayerModeComboBox->blockSignals(true);
+		ui->BayerModeComboBox->setCurrentIndex(BayerMode);
+		ui->BayerModeComboBox->blockSignals(false);
+
+		if (bIsCapturing) this->StartPreview();
+	}
+}
 
