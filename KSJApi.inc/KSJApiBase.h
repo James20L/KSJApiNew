@@ -114,6 +114,19 @@ extern "C"{
 	KSJ_API   KSJ_GlobalResetShutterSet(int nIndex, bool bGlobalReset);
 	KSJ_API   KSJ_GlobalResetShutterGet(int nIndex, bool* pbGlobalReset);
 
+	// Set Pre-Exposure Time (ms) for float format.( more precision )
+	KSJ_API   KSJ_PreExposureRangeGet(int nIndex, int *pnMinValue, int *pnMaxValue);
+
+	// Set Pre-Exposure Time (ms) for float format.( more precision )
+	KSJ_API  KSJ_PreExposureTimeSet(int nIndex, float fPreExpTimeMs);
+	// Get Pre-Exposure Time (ms) for float format.
+	KSJ_API  KSJ_PreExposureTimeGet(int nIndex, float *pfPreExpTimeMs);
+
+	// Set Pre-Exposure Lines
+	KSJ_API  KSJ_PreExposureLinesSet(int nIndex, int nPreExpLines);
+	// Get Pre-Exposure Lines
+	KSJ_API  KSJ_PreExposureLinesGet(int nIndex, int* pnPreExpLines);
+
     // Skip Mode (Address Mode)
 	enum KSJ_ADDRESSMODE
 	{

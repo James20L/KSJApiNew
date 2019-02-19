@@ -9,14 +9,14 @@ import threading
 import time
 import numpy as np
 import cv2
-import ksj.cam
+import ksj.cam as kcam
 
 
 if __name__ == '__main__':
 
     avi_path = './'
 
-    cam =  ksj.cam.Ksjcam()
+    cam =  kcam()
     cam.SetExptime(0,3)
 
     ts = time.time()

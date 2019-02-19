@@ -89,6 +89,7 @@ void* CKSJSCZDemoMainWindow::ThreadForCaptureData(void *arg)
 
 				if (nRet == RET_SUCCESS)
 				{
+					KSJ_HelperSaveToBmp(pImageBuffer, nWidth, nHeight, nBitCount, "C://Result.bmp");
 					// 采集图像以后，将内存数据转换成QImage数据,这样pImageData的数据就被转移到QImage里面，以后可以自己进行算法操作
 					pMainWindow->ProcessCaptureData(pImageBuffer, nWidth, nHeight, nBitCount);
 					// 读取图像以后，一定要KSJSCZ_ReleaseBuffer，这样FPGA就把这个内存清空，可以重新将图像采集到这个内存区
@@ -348,7 +349,33 @@ void CKSJSCZDemoMainWindow::SelectDevice(int nIndex)
 	if (nIndex <= 0) m_nCamareIndex = 0;
 	else             m_nCamareIndex = nIndex;
 
+	KSJ_CaptureSetFieldOfView(m_nCamareIndex, 0, 0, 1792, 1024, KSJ_SKIPNONE, KSJ_SKIPNONE);
+
+	KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGER_SOFTWARE);
+	KSJ_CaptureSetTimeOut(m_nCamareIndex, 8000);
+	KSJ_WhiteBalanceSet(m_nCamareIndex, KSJ_SWB_MANUAL);
+	float fMatrix[3];
+	fMatrix[0] = 2.24; fMatrix[1] = 1.00; fMatrix[2] = 1.59;
+	KSJ_WhiteBalanceMatrixSet(m_nCamareIndex, fMatrix);
+	KSJ_ColorCorrectionSet(m_nCamareIndex, KSJ_CCM_DISABLE);
+	KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGER_EXTERNAL);
+	KSJ_TriggerMethodSet(m_nCamareIndex, KSJ_TRIGGER_LOWLEVEL);
+
+	//KSJ_CaptureSetFieldOfView(m_nCamareIndex, 0, 0, 1280, 960, KSJ_SKIPNONE, KSJ_SKIPNONE);
+
+	//KSJ_BayerSetMode(m_nCamareIndex, KSJ_BGGR_BGR32_FLIP);
+	//KSJ_SetParam(m_nCamareIndex, KSJ_RED, 48);
+	//KSJ_SetParam(m_nCamareIndex, KSJ_GREEN, 48);
+	//KSJ_SetParam(m_nCamareIndex, KSJ_BLUE, 48);
+	//KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGER_INTERNAL);
+	//KSJ_WhiteBalanceSet(m_nCamareIndex, KSJ_SWB_AUTO_ONCE);
+	//KSJ_ExposureTimeSet(m_nCamareIndex, 20);
+	//KSJ_SetParam(m_nCamareIndex, KSJ_MIRROR, false);
+	//KSJ_LutSetEnable(m_nCamareIndex, true);
+	//KSJ_SensitivitySetMode(m_nCamareIndex, KSJ_LOW);
+
 	ui->DevicesComboBox->setCurrentIndex(m_nCamareIndex);
+
 	UpdateDeviceInfo();
 
 	if (bIsCapturing) this->StartPreview();

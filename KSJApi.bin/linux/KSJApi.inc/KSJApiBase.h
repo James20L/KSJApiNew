@@ -111,9 +111,6 @@ extern "C"{
 	// Get Exposure Time (ms) for float format.
 	KSJ_API   KSJ_ExposureTimeGet(int nIndex,  float *pfExpTimeMs);
 
-	KSJ_API   KSJ_GlobalResetShutterSet(int nIndex, bool bGlobalReset);
-	KSJ_API   KSJ_GlobalResetShutterGet(int nIndex, bool* pbGlobalReset);
-
     // Skip Mode (Address Mode)
 	enum KSJ_ADDRESSMODE
 	{
@@ -142,15 +139,12 @@ extern "C"{
 	// Capture 8, 24, 32 Format Image Data.( Note: When Set 16bits, Buffer Should double )
 	KSJ_API  KSJ_CaptureRgbDataEx(int nIndex, unsigned char *pRgbData, int *pnWidth, int *pnHeight, int *pnBitCount);
 
-#ifndef _WIN32
-
     // Start the timer
     KSJ_API KSJ_StartTimeCounter();
     //Stop the timer and get the value Second
     KSJ_API KSJ_CheckTimePassedSec(float *nTimeSec);
     //Stop the timer and get the value MilSecond
     KSJ_API KSJ_CheckTimePassedMilSec(int *nTimeMilSec);
-#endif
 
 	// Save to Bmp Format
 	KSJ_API  KSJ_HelperSaveToBmp(unsigned char *pData, int nWidth, int nHeight, int nBitCount, const TCHAR *pszFileName);
