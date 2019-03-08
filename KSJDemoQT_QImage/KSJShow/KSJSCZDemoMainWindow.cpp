@@ -89,10 +89,14 @@ void* CKSJSCZDemoMainWindow::ThreadForCaptureData(void *arg)
 
 				if (nRet == RET_SUCCESS)
 				{
-					KSJ_HelperSaveToBmp(pImageBuffer, nWidth, nHeight, nBitCount, "C://Result.bmp");
-					// 采集图像以后，将内存数据转换成QImage数据,这样pImageData的数据就被转移到QImage里面，以后可以自己进行算法操作
-					pMainWindow->ProcessCaptureData(pImageBuffer, nWidth, nHeight, nBitCount);
-					// 读取图像以后，一定要KSJSCZ_ReleaseBuffer，这样FPGA就把这个内存清空，可以重新将图像采集到这个内存区
+					++pMainWindow->m_nFramesCount;
+
+					if (pMainWindow->m_bShowImage)
+					{
+						// 采集图像以后，将内存数据转换成QImage数据,这样pImageData的数据就被转移到QImage里面，以后可以自己进行算法操作
+						pMainWindow->ProcessCaptureData(pImageBuffer, nWidth, nHeight, nBitCount);
+						// 读取图像以后，一定要KSJSCZ_ReleaseBuffer，这样FPGA就把这个内存清空，可以重新将图像采集到这个内存区
+					}
 				}
 				else
 				{
@@ -142,6 +146,10 @@ QDialog(parent)
 #else
 , m_nCapturingThreadId(0)
 #endif
+, m_bShowImage(true)
+, m_nFramesCount(0)
+, m_nLastFramesCount(0)
+, m_bIsDoAutoExposure(false)
 {
     ui->setupUi(this);
 	setMouseTracking(true);
@@ -156,6 +164,9 @@ QDialog(parent)
 
 	connect(this, SIGNAL(sigWBADone(float, float, float)), this, SLOT(OnWBADone(float, float, float)));
 
+	connect(this, SIGNAL(sigAEStartMsg(bool)), this, SLOT(OnAEStartMsg(bool)));
+	connect(this, SIGNAL(sigAEFinishMsg(int, float)), this, SLOT(OnAEFinishMsg(int, float)));
+
 	// 初始化
 	RefreshDevice();
 
@@ -164,6 +175,9 @@ QDialog(parent)
 	QDateTime dt = QDateTime::currentDateTime();
 	m_strImagePreFix = QCoreApplication::applicationDirPath() + "/"+ dt.toString("yyyy-MM-ddhhmmss-");
 
+	m_pClcFpsTimer = new QTimer(this);
+	m_pClcFpsTimer->setInterval(1000);
+	connect(m_pClcFpsTimer, SIGNAL(timeout()), this, SLOT(OnClcFpsTimer()));
 }
 
 CKSJSCZDemoMainWindow::~CKSJSCZDemoMainWindow()
@@ -621,6 +635,9 @@ bool CKSJSCZDemoMainWindow::StopPreview()
 	{
 		KillCaptureThread();
 		ui->PreViewPushButton->setText(m_bCapturingThreadIsWorking ? "Stop" : "Start");
+
+		m_pClcFpsTimer->stop();
+
 		return true;
 	}
 
@@ -629,10 +646,16 @@ bool CKSJSCZDemoMainWindow::StopPreview()
 
 bool CKSJSCZDemoMainWindow::StartPreview()
 {
+	m_nFramesCount = 0;
+	m_nLastFramesCount = 0;
+
 	if (m_nCamareIndex >= 0)
 	{
 		StartCaptureThread();
 		ui->PreViewPushButton->setText(m_bCapturingThreadIsWorking ? "Stop" : "Start");
+
+		m_pClcFpsTimer->start();
+
 		return true;
 	}
 
@@ -1719,3 +1742,140 @@ void CKSJSCZDemoMainWindow::on_DefaultBayerPushButton_clicked()
 	}
 }
 
+void CKSJSCZDemoMainWindow::on_OnlyCaptureCheckBox_stateChanged(int value)
+{
+	m_bShowImage = (value == Qt::Checked) ? 0 : 1;
+}
+
+void CKSJSCZDemoMainWindow::OnClcFpsTimer()
+{
+	ui->FPSLabel->setText(QString("%1 fps").arg(m_nFramesCount - m_nLastFramesCount));
+
+	m_nLastFramesCount = m_nFramesCount;
+}
+
+void CKSJSCZDemoMainWindow::on_PeakAveSpinBox_valueChanged(double value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_AESetPeakAveRatio(m_nCamareIndex, value);
+
+	KSJ_AEGetPeakAveRatio(m_nCamareIndex, &m_fAePeakAveRatio);
+
+	ui->PeakAveSpinBox->blockSignals(true);
+	ui->PeakAveSpinBox->setValue(m_fAePeakAveRatio);
+	ui->PeakAveSpinBox->blockSignals(false);
+}
+
+void CKSJSCZDemoMainWindow::on_MaxAEDoubleSpinBox_valueChanged(double value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_AESetExposureTimeRange(m_nCamareIndex, 0, value);
+
+	m_fAEMaxExposureTime = value;
+}
+
+void CKSJSCZDemoMainWindow::on_TargetBrightnessSpinBox_valueChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	KSJ_AESetTarget(m_nCamareIndex, value);
+
+	m_nAETarget = value;
+}
+
+#define  AE_MAX_COUNT_DEF 20
+
+void CKSJSCZDemoMainWindow::on_ContinuousAECheckBox_stateChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	m_nAEMaxCount = (value == Qt::Checked) ? -1 : AE_MAX_COUNT_DEF;
+
+	KSJ_AESetMaxCount(m_nCamareIndex, m_nAEMaxCount);
+}
+
+void CKSJSCZDemoMainWindow::on_ShowAERegionCheckBox_stateChanged(int value)
+{
+	if (m_nCamareIndex == -1) return;
+
+	m_bAEShowRegion = (value == Qt::Checked);
+	
+	KSJ_AEShowRegion(m_nCamareIndex, m_bAEShowRegion);
+}
+
+void CKSJSCZDemoMainWindow::on_AutoExposureCheckBox_stateChanged(int value)
+{
+	m_bIsDoAutoExposure = (value == Qt::Checked);
+
+	AEStart(m_bIsDoAutoExposure);
+}
+
+void __stdcall AECALLBACKEX(KSJ_AE_STATUS AEStatus, float fExpsoureTimeMs, void *lpContext)
+{
+	((CKSJSCZDemoMainWindow *)lpContext)->AeCallbackEx(AEStatus, fExpsoureTimeMs);
+}
+
+void CKSJSCZDemoMainWindow::AeCallbackEx(KSJ_AE_STATUS AEStatus, float fExpsoureTimeMs)
+{
+	emit sigAEFinishMsg(int(AEStatus), fExpsoureTimeMs);
+}
+
+void CKSJSCZDemoMainWindow::AEStart(bool bStart)
+{
+	if (m_nCamareIndex == -1)    return;
+
+	KSJ_AESetCallbackEx(m_nCamareIndex, AECALLBACKEX, this);
+	KSJ_AESetMaxCount(m_nCamareIndex, m_nAEMaxCount);
+	KSJ_AEStartEx(m_nCamareIndex, bStart);
+
+	emit sigAEStartMsg(bStart);
+}
+
+void CKSJSCZDemoMainWindow::OnAEStartMsg(bool bStart)
+{
+	ui->AutoExposureCheckBox->setChecked(bStart);
+}
+
+const char *g_szAEStatus[] =
+{
+	"Once Success",
+	"Once Fail Max Count",
+	"Once Fail Wave",
+	"Once Fail Over Range",
+	"Doing",
+	"Continue Success",
+	"Continue Fail Wave",
+	"Continue Fail Over Range",
+};
+
+void CKSJSCZDemoMainWindow::OnAEFinishMsg(int nAEStatus, float fExpsoureTimeMs)
+{
+	int nExposureLines = 0;
+	
+	if (KSJ_GetParam(m_nCamareIndex, KSJ_EXPOSURE_LINES, &nExposureLines) == RET_SUCCESS)
+	{
+		ui->ExpoureLineSpinBox->blockSignals(true);
+		ui->ExpoureLineSpinBox->setValue(nExposureLines);
+		ui->ExpoureLineSpinBox->blockSignals(false);
+	}
+
+	ui->ExposureTimeSpinBox->blockSignals(true);
+	ui->ExposureTimeSpinBox->setValue(fExpsoureTimeMs);
+	ui->ExposureTimeSpinBox->blockSignals(false);
+
+	ui->AutoExposureStatusLabel->setText(g_szAEStatus[nAEStatus]);
+
+	if (nAEStatus == KSJ_AE_ONCE_SUCCESS ||
+		nAEStatus == KSJ_AE_ONCE_FAIL_MAX_COUNT ||
+		nAEStatus == KSJ_AE_ONCE_FAIL_WAVE ||
+		nAEStatus == KSJ_AE_ONCE_FAIL_OVER_RANGE)
+	{
+		ui->AutoExposureCheckBox->setChecked(false);
+	}
+	else
+	{
+		ui->AutoExposureCheckBox->setChecked(true);
+	}
+}

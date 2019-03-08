@@ -8,6 +8,8 @@
 #include <QMatrix>
 #include <QMutex>
 
+#include "KSJApi.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -29,6 +31,8 @@ private:
 signals:                                     //自定义信号
 	void explains();            //假如要自定义槽和信号, explains信号是必须的
 	void sigWBADone(float, float, float);
+	void sigAEStartMsg(bool);
+	void sigAEFinishMsg(int, float);
 
 protected slots:
 
@@ -102,6 +106,22 @@ protected slots:
 
 	void on_DefaultBayerPushButton_clicked();
 
+	void on_OnlyCaptureCheckBox_stateChanged(int);
+
+	void OnClcFpsTimer();
+
+	void on_PeakAveSpinBox_valueChanged(double);
+	void on_MaxAEDoubleSpinBox_valueChanged(double);
+	void on_TargetBrightnessSpinBox_valueChanged(int);
+
+	void on_ContinuousAECheckBox_stateChanged(int);
+	void on_ShowAERegionCheckBox_stateChanged(int);
+
+	void on_AutoExposureCheckBox_stateChanged(int);
+
+	void OnAEStartMsg(bool);
+	void OnAEFinishMsg(int, float);
+
 protected:
 	virtual void paintEvent(QPaintEvent *);
 	virtual void mousePressEvent(QMouseEvent * e);
@@ -129,8 +149,13 @@ protected:
 	bool StopPreview();
 	bool StartPreview();
 
+	void AEStart(bool bStart);
+
+
 public:
 	void WBACallback(float fMatrix[3]);
+
+	void AeCallbackEx(KSJ_AE_STATUS AEStatus, float fExpsoureTimeMs);
 
 protected:
 	int  m_nCamareIndex;
@@ -158,10 +183,25 @@ protected:
 
 protected:
 	// 采集到的图像
-	QImage* m_pImage;
-	QMutex  m_ImageLocker;
+	QImage*  m_pImage;
+	QMutex   m_ImageLocker;
 	// 保留图像显示位置的信息
-    QRect  m_rcClient;
+    QRect    m_rcClient;
+
+	int     m_nFramesCount;
+	int     m_nLastFramesCount;
+	bool    m_bShowImage;
+
+	QTimer* m_pClcFpsTimer;
+
+	bool    m_bIsDoAutoExposure;
+
+	float   m_fAePeakAveRatio;
+	float   m_fAEMaxExposureTime;
+	int     m_nAETarget;
+	bool    m_bAEShowRegion;
+	int     m_nAEMaxCount;
+
 };
 
 #endif // __KSJSCZDEMO_MAINWINDOWS_H_
