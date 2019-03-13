@@ -43,17 +43,9 @@ typedef unsigned *PBEGINTHREADEX_ID;
 #include "..\Common\KSJ_GS.H"
 
 #ifdef _WIN64
-#ifdef _DEBUG
-#pragma comment( lib, "..\\KSJApi.Lib\\win32\\KSJApi64d.lib" )
-#else
 #pragma comment( lib, "..\\KSJApi.Lib\\win32\\KSJApi64.lib" )
-#endif
-#else
-#ifdef _DEBUG
-#pragma comment( lib, "..\\KSJApi.Lib\\win32\\KSJApid.lib" )
 #else
 #pragma comment( lib, "..\\KSJApi.Lib\\win32\\KSJApi.lib" )
-#endif
 #endif
 
 #ifdef _UNICODE

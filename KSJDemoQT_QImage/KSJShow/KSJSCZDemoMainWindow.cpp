@@ -21,18 +21,18 @@
 #ifdef _WIN32
 #include <process.h>
 
-#ifdef _DEBUG
-#pragma comment( lib, "KSJApid.lib" )
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Widgetsd.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Guid.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Cored.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/qtmaind.lib")
-#else
 #pragma comment( lib, "KSJApi.lib" )
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Widgets.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Gui.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/Qt5Core.lib")
-#pragma comment(lib, "C:/Qt/Qt5.7.0/5.7/msvc2013/lib/qtmain.lib")
+
+#ifdef _DEBUG
+#pragma comment(lib, "Qt5Widgetsd.lib")
+#pragma comment(lib, "Qt5Guid.lib")
+#pragma comment(lib, "Qt5Cored.lib")
+#pragma comment(lib, "qtmaind.lib")
+#else
+#pragma comment(lib, "Qt5Widgets.lib")
+#pragma comment(lib, "Qt5Gui.lib")
+#pragma comment(lib, "Qt5Core.lib")
+#pragma comment(lib, "qtmain.lib")
 #endif
 
 #endif
@@ -363,17 +363,17 @@ void CKSJSCZDemoMainWindow::SelectDevice(int nIndex)
 	if (nIndex <= 0) m_nCamareIndex = 0;
 	else             m_nCamareIndex = nIndex;
 
-	KSJ_CaptureSetFieldOfView(m_nCamareIndex, 0, 0, 1792, 1024, KSJ_SKIPNONE, KSJ_SKIPNONE);
+	//KSJ_CaptureSetFieldOfView(m_nCamareIndex, 0, 0, 1792, 1024, KSJ_SKIPNONE, KSJ_SKIPNONE);
 
-	KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGER_SOFTWARE);
-	KSJ_CaptureSetTimeOut(m_nCamareIndex, 8000);
-	KSJ_WhiteBalanceSet(m_nCamareIndex, KSJ_SWB_MANUAL);
-	float fMatrix[3];
-	fMatrix[0] = 2.24; fMatrix[1] = 1.00; fMatrix[2] = 1.59;
-	KSJ_WhiteBalanceMatrixSet(m_nCamareIndex, fMatrix);
-	KSJ_ColorCorrectionSet(m_nCamareIndex, KSJ_CCM_DISABLE);
-	KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGER_EXTERNAL);
-	KSJ_TriggerMethodSet(m_nCamareIndex, KSJ_TRIGGER_LOWLEVEL);
+	//KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGER_SOFTWARE);
+	//KSJ_CaptureSetTimeOut(m_nCamareIndex, 8000);
+	//KSJ_WhiteBalanceSet(m_nCamareIndex, KSJ_SWB_MANUAL);
+	//float fMatrix[3];
+	//fMatrix[0] = 2.24; fMatrix[1] = 1.00; fMatrix[2] = 1.59;
+	//KSJ_WhiteBalanceMatrixSet(m_nCamareIndex, fMatrix);
+	//KSJ_ColorCorrectionSet(m_nCamareIndex, KSJ_CCM_DISABLE);
+	//KSJ_TriggerModeSet(m_nCamareIndex, KSJ_TRIGGER_EXTERNAL);
+	//KSJ_TriggerMethodSet(m_nCamareIndex, KSJ_TRIGGER_LOWLEVEL);
 
 	//KSJ_CaptureSetFieldOfView(m_nCamareIndex, 0, 0, 1280, 960, KSJ_SKIPNONE, KSJ_SKIPNONE);
 
@@ -620,12 +620,12 @@ void CKSJSCZDemoMainWindow::on_ProgramLutPushButton_clicked()
 	QString strFilePath = QFileDialog::getOpenFileName(this, "Select lut data file", "", "ktb File(*.ktb)|*.ktb|All Files(*.*)|*.*||");
 
 	if (!strFilePath.isEmpty())
-	{
-		int nRet = KSJ_LutFileDownload(m_nCamareIndex, strFilePath.toStdString().c_str());
+    {
+        int nRet = KSJ_LutFileDownload(m_nCamareIndex, strFilePath.toStdString().c_str());
 
         TCHAR szErrorInfo[512] = { '\0' };
 		KSJ_GetErrorInfo(nRet, szErrorInfo);
-		QMessageBox::about(this, "CatchBEST", szErrorInfo);
+        QMessageBox::about(this, "CatchBEST", szErrorInfo);
 	}
 }
 
@@ -634,7 +634,7 @@ bool CKSJSCZDemoMainWindow::StopPreview()
 	if (m_bCapturingThreadIsWorking)
 	{
 		KillCaptureThread();
-		ui->PreViewPushButton->setText(m_bCapturingThreadIsWorking ? "Stop" : "Start");
+        ui->PreViewPushButton->setText(m_bCapturingThreadIsWorking ? "Stop" : "Start");
 
 		m_pClcFpsTimer->stop();
 

@@ -161,7 +161,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MDd|Win32'">
     <ExecutablePath>C:\Qt\Qt5.7.0\5.7\msvc2013\bin;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH)</ExecutablePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Qt\Qt5.7.0\5.7\msvc2013\include;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtCore;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtGui;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtCore;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtWidgets;../../KSJApi.inc</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);../../../101/git.opencv310/opencv.lib;;../../KSJApi.lib/win32</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);../../../101/git.opencv310/opencv.lib;../../KSJApi.lib/win32;C:\Qt\Qt5.7.0\5.7\msvc2013\lib</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MDd|x64'">
@@ -173,7 +173,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MDd(Old)|Win32'">
     <ExecutablePath>C:\Qt\Qt5.7.0\5.7\msvc2013\bin;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH)</ExecutablePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Qt\Qt5.7.0\5.7\msvc2013\include;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtCore;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtGui;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtCore;C:\Qt\Qt5.7.0\5.7\msvc2013\include\QtWidgets;../../../github.ksjapi/KSJApi.Inc</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);../../../101/git.opencv310/opencv.lib;../../../github.ksjapi/KSJApi.lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);../../../101/git.opencv310/opencv.lib;../../../github.ksjapi/KSJApi.lib;C:\Qt\Qt5.7.0\5.7\msvc2013\lib</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>

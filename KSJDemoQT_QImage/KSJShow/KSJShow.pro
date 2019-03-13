@@ -6,10 +6,18 @@
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+DEFINES  -= UNICODE
 
 INCPATH   += ../../KSJApi.inc
 
-LIBS     = -L../../KSJApi.bin/linux/x64 -lksjapi -lksjlog -lksjbayer -lpthread -lusb-1.0 -ludev -ljpeg  -ldl
+win32 {
+   DESTDIR   = ../../KSJApi.bin/win32
+   LIBS      = -L../../KSJApi.lib/win32
+}
+
+unix {
+    LIBS     = -L../../KSJApi.bin/linux/x64 -lksjapi -lksjlog -lksjbayer -lpthread -lusb-1.0 -ludev -ljpeg  -ldl
+}
 
 TARGET   = KSJShow
 TEMPLATE = app
