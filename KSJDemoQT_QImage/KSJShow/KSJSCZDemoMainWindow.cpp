@@ -21,14 +21,16 @@
 #ifdef _WIN32
 #include <process.h>
 
-#pragma comment( lib, "KSJApi.lib" )
-
 #ifdef _DEBUG
+#pragma comment( lib, "KSJApid.lib" )
+
 #pragma comment(lib, "Qt5Widgetsd.lib")
 #pragma comment(lib, "Qt5Guid.lib")
 #pragma comment(lib, "Qt5Cored.lib")
 #pragma comment(lib, "qtmaind.lib")
 #else
+#pragma comment( lib, "KSJApi.lib" )
+
 #pragma comment(lib, "Qt5Widgets.lib")
 #pragma comment(lib, "Qt5Gui.lib")
 #pragma comment(lib, "Qt5Core.lib")
@@ -156,6 +158,10 @@ QDialog(parent)
 
 #ifndef _DEBUG
 	ui->TestingTab->setHidden(true);
+#endif
+
+#ifndef _WIN32
+	system(QString(QCoreApplication::applicationDirPath() + "/evn.sh").toStdString().c_str());
 #endif
 
 	InitCnotrol();
